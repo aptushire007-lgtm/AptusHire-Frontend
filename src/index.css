@@ -1,0 +1,359 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Lexend", "Inter", system-ui, sans-serif;
+
+  /* ---- Type scale --------------------------------------------------------- */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.55;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.65;
+
+  /* ---- Core Official AptusHire Brand Tokens ------------------------------ */
+  --aptus-lime: #7CDE4A;
+  --aptus-lime-bright: #D4F056;
+  --aptus-green: #2FBE62;
+  --aptus-teal: #12B98A;
+  --aptus-forest: #0E3B2E;
+  --aptus-ink: #0C1F1B;
+  --aptus-night: #081210;
+  --aptus-cream: #F3F7F1;
+  --aptus-paper: #FAFCF8;
+  --aptus-white: #FFFFFF;
+  --aptus-cloud: #E3EBE4;
+  --aptus-mist: #C5D2C8;
+  --aptus-slate: #5B6B63;
+  --aptus-body: #24332E;
+
+  /* ---- Brand Scale (Forest to Lime) -------------------------------------- */
+  --color-brand-50: #F4FDE8;
+  --color-brand-100: #E4F8C6;
+  --color-brand-200: #D4F056;
+  --color-brand-300: #B6E84A;
+  --color-brand-400: #7CDE4A;
+  --color-brand-500: #2FBE62;
+  --color-brand-600: #1A9A4F;
+  --color-brand-700: #147A40;
+  --color-brand-800: #0E3B2E;
+  --color-brand-900: #0C1F1B;
+  --color-brand-950: #081210;
+
+  /* ---- Accent Scale (Teal Intelligence) ---------------------------------- */
+  --color-accent-50: #E8FBF5;
+  --color-accent-100: #C7F4E6;
+  --color-accent-200: #8BE8CB;
+  --color-accent-300: #4DD6B0;
+  --color-accent-400: #12B98A;
+  --color-accent-500: #0E9A74;
+  --color-accent-600: #0C7D5F;
+  --color-accent-700: #0A624B;
+  --color-accent-800: #084538;
+  --color-accent-900: #062E26;
+  --color-accent-950: #041F1A;
+
+  /* ---- Green-cast Neutrals (Paper, Cream, Cloud, Mist, Slate, Ink, Night) - */
+  --color-slate-50: #FAFCF8;
+  --color-slate-100: #F3F7F1;
+  --color-slate-200: #E3EBE4;
+  --color-slate-300: #C5D2C8;
+  --color-slate-400: #8FA297;
+  --color-slate-500: #5B6B63;
+  --color-slate-600: #3E4E46;
+  --color-slate-700: #24332E;
+  --color-slate-800: #162420;
+  --color-slate-900: #0C1F1B;
+  --color-slate-950: #081210;
+
+  /* ---- Outcomes / Hiring Semantics --------------------------------------- */
+  --color-verdict-positive: #2FBE62;
+  --color-verdict-positive-tint: #EAF8E4;
+  --color-verdict-pending: #E8A317;
+  --color-verdict-pending-tint: #FFF6E0;
+  --color-verdict-negative: #D4534A;
+  --color-verdict-negative-tint: #FDECEC;
+
+  /* Canvas */
+  --color-canvas: #FAFCF8;
+  --color-canvas-deep: #F3F7F1;
+
+  /* Elevation */
+  --shadow-card: 0 1px 3px rgba(8, 18, 16, 0.05), 0 1px 2px rgba(8, 18, 16, 0.03);
+  --shadow-soft: 0 4px 20px -2px rgba(8, 18, 16, 0.08), 0 2px 6px -1px rgba(8, 18, 16, 0.04);
+  --shadow-lift: 0 12px 30px -4px rgba(8, 18, 16, 0.10), 0 6px 12px -2px rgba(8, 18, 16, 0.04);
+  --shadow-deep: 0 24px 50px -12px rgba(8, 18, 16, 0.16);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* AptusHire premium SaaS design system */
+:root {
+  --green-900: #214740; --green-800: #2E4F48; --green-700: #3B5D52; --green-500: #5A7B71;
+  --lime-400: #C1EBAD; --lime-200: #D2ECC9; --lime-100: #EAF9E1;
+  --background: #ECF3EB; --surface: #FBFBFD; --white: #FFFFFF;
+  --text-primary: #2E2F2D; --text-secondary: #707E79; --text-muted: #8C9790;
+  --border: #DFE5DF; --border-light: #EDF1ED;
+  --font-family: "Inter", sans-serif;
+}
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif; --font-display: "Inter", system-ui, sans-serif;
+  --text-xs: 0.8125rem; --text-xs--line-height: 1.2rem; --text-sm: 0.9375rem; --text-sm--line-height: 1.45rem;
+  --text-base: 1rem; --text-base--line-height: 1.55rem;
+  --color-brand-50: #F7FAF6; --color-brand-100: #EAF9E1; --color-brand-200: #D2ECC9;
+  --color-brand-300: #C1EBAD; --color-brand-400: #5A7B71; --color-brand-500: #4A6B61;
+  --color-brand-600: #3B5D52; --color-brand-700: #2E4F48; --color-brand-800: #214740; --color-brand-900: #193A34;
+  --color-slate-50: #F7F8F8; --color-slate-100: #EDF1ED; --color-slate-200: #DFE5DF;
+  --color-slate-300: #C9D2CC; --color-slate-400: #8C9790; --color-slate-500: #707E79;
+  --color-slate-600: #596660; --color-slate-700: #434B47; --color-slate-800: #353936; --color-slate-900: #2E2F2D;
+  --color-canvas: #ECF3EB; --color-canvas-deep: #E6EEE5;
+  --shadow-card: 0 1px 3px rgba(33, 71, 64, 0.04); --shadow-soft: 0 6px 20px rgba(33, 71, 64, 0.08);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    overflow-x: clip;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-slate-900);
+    @apply antialiased;
+    overflow-x: clip;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    --color-canvas: #081210;
+    --color-canvas-deep: #050D0B;
+  }
+
+  .dark body {
+    background-color: #081210;
+    color: #F3F7F1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    @apply tracking-tight;
+  }
+
+  /* Form controls */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  select,
+  textarea {
+    @apply rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs transition-colors dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply border-brand-800 ring-2 ring-brand-700/20 outline-none dark:border-brand-400 dark:ring-brand-400/20;
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(14, 59, 46, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(14, 59, 46, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .dark .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(124, 222, 74, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(124, 222, 74, 0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .bg-aurora {
+    background-image:
+      radial-gradient(58rem 32rem at 12% -10%, rgba(124, 222, 74, 0.14), transparent 62%),
+      radial-gradient(46rem 28rem at 92% 6%, rgba(18, 185, 138, 0.12), transparent 64%),
+      radial-gradient(52rem 34rem at 50% 108%, rgba(227, 235, 228, 0.5), transparent 66%);
+  }
+
+  .dark .bg-aurora {
+    background-image:
+      radial-gradient(58rem 32rem at 12% -10%, rgba(124, 222, 74, 0.12), transparent 62%),
+      radial-gradient(46rem 28rem at 92% 6%, rgba(18, 185, 138, 0.10), transparent 64%),
+      radial-gradient(52rem 34rem at 50% 108%, rgba(8, 18, 16, 0.9), transparent 66%);
+  }
+
+  .surface-brand {
+    background-image: linear-gradient(160deg, #F4FDE8 0%, #FFFFFF 65%);
+  }
+
+  .dark .surface-brand {
+    background-image: linear-gradient(160deg, #122420 0%, #0C1F1B 100%);
+  }
+
+  .surface-ember {
+    background-image: linear-gradient(160deg, #FFF6E0 0%, #FFFFFF 65%);
+  }
+
+  .dark .surface-ember {
+    background-image: linear-gradient(160deg, #241D12 0%, #0C1F1B 100%);
+  }
+
+  .fill-brand {
+    background-image: linear-gradient(150deg, #0E3B2E 0%, #081210 100%);
+  }
+
+  .fill-ember {
+    background-image: linear-gradient(150deg, #D4F056 0%, #7CDE4A 100%);
+  }
+
+.tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Candidate application typography and controls. Scoped to this long form so
+   its larger reading size does not change the denser dashboard components. */
+.application-form-page {
+  color: #2E2F2D;
+}
+
+.application-form-surface input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.application-form-surface textarea,
+.application-form-surface select {
+  min-height: 46px;
+  border-color: #D5DED7;
+  background: #FFFFFF;
+  color: #2E2F2D;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.application-form-surface input:disabled,
+.application-form-surface textarea:disabled,
+.application-form-surface select:disabled {
+  background: #F3F6F3;
+  color: #596660;
+}
+
+.application-form-surface label {
+  color: #2E2F2D;
+  font-size: 14px;
+  line-height: 1.35rem;
+}
+
+.application-form-surface .text-xs {
+  font-size: 13px;
+  line-height: 1.25rem;
+}
+
+.application-form-surface .text-sm {
+  font-size: 15px;
+  line-height: 1.5rem;
+}
+
+/* Candidate pages always use the approved sage light palette. These explicit
+   surfaces also protect readability when a browser still has an old dark-theme
+   preference cached from an earlier version of the portal. */
+.candidate-side {
+  background: #ECF3EB;
+  color: #214740;
+  color-scheme: light;
+}
+
+.candidate-side header,
+.candidate-side header a,
+.candidate-side header button {
+  color: #214740;
+}
+
+.candidate-side .text-slate-400,
+.candidate-side .text-slate-500 {
+  color: #5A7B71;
+}
+
+.candidate-side input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.candidate-side textarea,
+.candidate-side select {
+  border-color: #D2ECC9 !important;
+  background-color: #FBFBFD !important;
+  color: #214740 !important;
+}
+
+.candidate-side input::placeholder,
+.candidate-side textarea::placeholder {
+  color: #5A7B71 !important;
+  opacity: 1;
+}
+
+.candidate-profile-page {
+  color: #214740;
+}
+
+.candidate-profile-page h2 {
+  color: #214740 !important;
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+}
+
+.candidate-profile-page h3 {
+  font-size: 1.0625rem;
+  line-height: 1.5rem;
+}
+
+.candidate-profile-page p {
+  font-size: 0.875rem;
+  line-height: 1.45rem;
+}
+
+.candidate-profile-page button,
+.candidate-profile-page a {
+  font-size: 0.875rem;
+}
+
+.candidate-personal-tab label {
+  color: #2E4F48 !important;
+  font-size: 0.875rem !important;
+  line-height: 1.35rem !important;
+}
+
+.candidate-personal-tab input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.candidate-personal-tab textarea,
+.candidate-personal-tab select {
+  min-height: 46px;
+  border-color: #D2ECC9 !important;
+  background: #FBFBFD !important;
+  color: #214740 !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.5 !important;
+}
+
+.candidate-personal-tab input:disabled,
+.candidate-personal-tab textarea:disabled,
+.candidate-personal-tab select:disabled {
+  background: #ECF3EB !important;
+  color: #3B5D52 !important;
+  opacity: 1;
+}
+
+.candidate-personal-tab input::placeholder,
+.candidate-personal-tab textarea::placeholder {
+  color: #5A7B71 !important;
+  opacity: 1;
+}

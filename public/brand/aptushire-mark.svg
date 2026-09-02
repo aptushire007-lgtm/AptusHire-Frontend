@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="aptusGradMain" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#D4F056" />
+      <stop offset="38%" stop-color="#7CDE4A" />
+      <stop offset="68%" stop-color="#2FBE62" />
+      <stop offset="100%" stop-color="#12B98A" />
+    </linearGradient>
+    <linearGradient id="aptusFoldShade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E3B2E" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#0E3B2E" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="aptusPersonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#55D858" />
+      <stop offset="100%" stop-color="#1AA368" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer A-Ribbon -->
+  <path d="M 60 14 C 64 14 67.5 16.5 69.5 20.5 L 103 86 C 105.5 91 103 97 97.5 99 C 94 100.2 90 98.8 87.8 95 L 60 41 L 32.2 95 C 30 98.8 26 100.2 22.5 99 C 17 97 14.5 91 17 86 L 50.5 20.5 C 52.5 16.5 56 14 60 14 Z" fill="url(#aptusGradMain)" />
+
+  <!-- Fold effect on top left-to-right apex -->
+  <path d="M 60 14 C 64 14 67.5 16.5 69.5 20.5 L 60 41 L 50.5 20.5 C 52.5 16.5 56 14 60 14 Z" fill="url(#aptusFoldShade)" />
+
+  <!-- Inner Human Icon: Head -->
+  <circle cx="60" cy="61" r="9" fill="url(#aptusPersonGrad)" />
+
+  <!-- Inner Human Icon: Torso / Arch Base -->
+  <path d="M 46 95 C 46 80 52 74 60 74 C 68 74 74 80 74 95 Z" fill="url(#aptusPersonGrad)" />
+</svg>
