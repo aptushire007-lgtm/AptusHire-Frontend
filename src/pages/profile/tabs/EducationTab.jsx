@@ -95,13 +95,24 @@ export default function EducationTab({ profile, onRefresh }) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Degree &amp; Field of Study</label>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Degree</label>
                     <input
                       type="text"
                       required
                       value={item.degree}
                       onChange={(e) => handleChange(idx, "degree", e.target.value)}
                       placeholder="e.g. M.Phil in Clinical Psychology"
+                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Specialization</label>
+                    <input
+                      type="text"
+                      value={item.fieldOfStudy || ""}
+                      onChange={(e) => handleChange(idx, "fieldOfStudy", e.target.value)}
+                      placeholder="e.g. Computer Science"
                       className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
                     />
                   </div>

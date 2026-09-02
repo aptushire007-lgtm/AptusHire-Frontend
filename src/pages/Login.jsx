@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import api from "../api/client.js";
 import { saveAccountAuth } from "../auth/accountAuth.js";
 import { getReturnTo, clearReturnTo } from "../auth/returnTo.js";
@@ -8,6 +8,7 @@ import { Card } from "../components/ui/Card.jsx";
 import { Input, Label, FormGroup } from "../components/ui/Field.jsx";
 import Button from "../components/ui/Button.jsx";
 import BrandLogo from "../components/ui/BrandLogo.jsx";
+import GoogleButton from "../components/auth/GoogleButton.jsx";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ export default function Login() {
   const [needsVerification, setNeedsVerification] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [resendSent, setResendSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -26,7 +29,16 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setValidationError("");
     setNeedsVerification(false);
+    if (!form.email.trim() || !form.password) {
+      setValidationError("Enter your email and password to continue.");
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
+      setValidationError("Enter a valid email address.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await api.post("/auth/login", form);
@@ -54,25 +66,19 @@ export default function Login() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#ECF3EB] px-5 py-12 sm:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-[#ECF3EB] px-5 py-12 sm:px-8">
       <div className="w-full max-w-md">
-        <div className="mb-7 flex flex-col items-center text-center">
-          <div className="mb-5 flex w-full justify-center">
-            <BrandLogo to="/welcome" size="xl" textWeight="font-semibold" theme="light" />
-          </div>
-          <h1 className="text-[24px] leading-[30px] font-bold text-[#2E2F2D]">Welcome back</h1>
-          <p className="mt-2 text-[13px] leading-5 text-[#707E79]">
-            Log in to track your applications and interviews
-          </p>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <BrandLogo to="/welcome" size="lg" textWeight="font-semibold" theme="light" className="uppercase" />
+          <h1 className="mt-7 text-[24px] leading-[30px] font-bold text-[#2E2F2D]">Find the right opportunity.</h1>
         </div>
 
-        <Card
-          padding="none"
-          className="rounded-2xl border border-[#DFE5DF] bg-white p-6 shadow-card sm:p-8"
-        >
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <p className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300">{error}</p>
+        <Card padding="none" className="rounded-2xl border border-[#DFE5DF] bg-white p-6 shadow-card sm:p-8">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            {(error || validationError) && (
+              <p role="alert" className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700">
+                {error || validationError}
+              </p>
             )}
             {needsVerification && (
               <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
@@ -86,8 +92,9 @@ export default function Login() {
               </p>
             )}
             <FormGroup>
-              <Label required className="mb-2 text-[15px] leading-5 font-semibold text-[#2E2F2D] dark:!text-[#2E2F2D]">Email</Label>
+              <Label htmlFor="login-email" required className="mb-2 text-[13px] leading-5 font-semibold text-[#2E2F2D] dark:!text-[#2E2F2D]">Email</Label>
               <Input
+                id="login-email"
                 type="email"
                 autoComplete="email"
                 value={form.email}
@@ -97,17 +104,26 @@ export default function Login() {
               />
             </FormGroup>
             <FormGroup>
-              <Label required className="mb-2 text-[15px] leading-5 font-semibold text-[#2E2F2D] dark:!text-[#2E2F2D]">Password</Label>
-              <Input
-                type="password"
-                autoComplete="current-password"
-                value={form.password}
-                onChange={update("password")}
-                className="min-h-11 rounded-[9px] border-[#DFE5DF] bg-white px-3 text-[13px] text-[#2E2F2D] dark:!border-[#DFE5DF] dark:!bg-white dark:!text-[#2E2F2D]"
-                required
-              />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="login-password" required className="mb-2 text-[13px] leading-5 font-semibold text-[#2E2F2D] dark:!text-[#2E2F2D]">Password</Label>
+                <Link to="/forgot-password" className="mb-2 text-[12px] font-semibold text-[#214740] hover:underline">Forgot password?</Link>
+              </div>
+              <div className="relative">
+                <Input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={form.password}
+                  onChange={update("password")}
+                  className="min-h-11 rounded-[9px] border-[#DFE5DF] bg-white px-3 pr-11 text-[13px] text-[#2E2F2D] dark:!border-[#DFE5DF] dark:!bg-white dark:!text-[#2E2F2D]"
+                  required
+                />
+                <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[#707E79] hover:bg-[#ECF3EB] hover:text-[#214740]">
+                  {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
             </FormGroup>
-            <label className="flex cursor-pointer items-center gap-2 text-[13px] font-medium text-[#707E79]">
+            <label className="flex cursor-pointer items-center gap-2 text-[12px] font-medium text-[#707E79]">
               <input
                 type="checkbox"
                 checked={remember}
@@ -122,20 +138,17 @@ export default function Login() {
               loading={submitting}
               className="w-full"
             >
-              <LogIn className="h-5 w-5" /> Log In
+              <LogIn className="h-4 w-4" /> Login
             </Button>
           </form>
-          <p className="mt-7 text-center text-base text-black">
-            <Link to="/forgot-password" className="font-bold text-[#0E3B2E] decoration-[#F58232] decoration-2 underline-offset-4 hover:underline">
-              Forgot your password?
-            </Link>
-          </p>
+          <div className="my-6 flex items-center gap-3 text-[11px] text-[#707E79]"><span className="h-px flex-1 bg-[#DFE5DF]" /><span>OR</span><span className="h-px flex-1 bg-[#DFE5DF]" /></div>
+          <GoogleButton onError={setError} />
         </Card>
 
-        <p className="mt-7 text-center text-base font-semibold text-black sm:text-lg">
+        <p className="mt-6 text-center text-[13px] text-[#707E79]">
           Don't have an account?{" "}
-          <Link to="/register" className="font-extrabold text-[#0E3B2E] decoration-[#F58232] decoration-2 underline-offset-4 hover:underline">
-            Create one
+          <Link to="/register" className="font-semibold text-[#214740] hover:underline">
+            Sign up
           </Link>
         </p>
       </div>

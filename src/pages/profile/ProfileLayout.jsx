@@ -5,6 +5,7 @@ import {
   FileCheck,
   GraduationCap,
   Briefcase,
+  Wrench,
   FileText,
   Sliders,
   Sparkles,
@@ -17,20 +18,21 @@ import {
 import api from "../../api/client";
 import { accountAuthHeader } from "../../auth/accountAuth";
 import { Card } from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
 import PersonalTab from "./tabs/PersonalTab";
 import DocumentsTab from "./tabs/DocumentsTab";
 import EducationTab from "./tabs/EducationTab";
 import ExperienceTab from "./tabs/ExperienceTab";
 import PreferencesTab from "./tabs/PreferencesTab";
+import SkillsTab from "./tabs/SkillsTab";
 import ResumeManager from "./ResumeManager";
 
 const TABS = [
-  { id: "personal", label: "Personal Info", icon: User },
-  { id: "documents", label: "Documents & Trust", icon: FileCheck },
+  { id: "personal", label: "Basic Information", icon: User },
   { id: "education", label: "Education", icon: GraduationCap },
+  { id: "skills", label: "Skills", icon: Wrench },
   { id: "experience", label: "Experience", icon: Briefcase },
-  { id: "resumes", label: "Resume Versions ★", icon: FileText },
-  { id: "preferences", label: "Preferences & Data", icon: Sliders },
+  { id: "preferences", label: "Work Preferences", icon: Sliders },
 ];
 
 export default function ProfileLayout() {
@@ -39,16 +41,18 @@ export default function ProfileLayout() {
 
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
+  const [loadError, setLoadError] = useState("");
 
   const fetchFullProfile = async () => {
     try {
       setLoading(true);
+      setLoadError("");
       const res = await api.get("/candidate-dashboard/profile/full", {
         headers: accountAuthHeader(),
       });
       setProfileData(res.data);
     } catch (err) {
-      console.error("Failed to load full profile:", err);
+      setLoadError(err?.response?.data?.error || "Your profile could not be loaded. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,6 +67,14 @@ export default function ProfileLayout() {
   const strength = profileData?.strengthScore || 0;
   const ver = profile?.verification || {};
   const hasDefaultResume = profileData?.hasDefaultResume || false;
+
+  const setupSections = [
+    { id: "personal", label: "Basic Information", done: Boolean(profile.personal?.firstName && profile.personal?.lastName && profile.user?.email && profile.personal?.phone && (profile.personal?.locationCity || profile.location)) },
+    { id: "education", label: "Education", done: profile.education?.length > 0 },
+    { id: "skills", label: "Skills", done: profile.skills?.length > 0 },
+    { id: "experience", label: "Experience", done: profile.experience?.length > 0 },
+    { id: "preferences", label: "Work Preferences", done: Boolean(profile.preferences?.availabilityWindow) },
+  ];
 
   const handleTabChange = (tabId) => {
     setSearchParams({ tab: tabId });
@@ -92,14 +104,39 @@ export default function ProfileLayout() {
 
   if (!profileData) {
     return (
-      <div className="rounded-[14px] border border-[#D2ECC9] bg-white p-8 text-center text-base font-semibold text-[#214740] shadow-card">
-        Your profile could not be loaded. Please refresh and try again.
+      <div role="alert" className="rounded-[14px] border border-[#DFE5DF] bg-white p-8 text-center shadow-card">
+        <p className="text-sm font-semibold text-[#2E2F2D]">{loadError || "Your profile could not be loaded."}</p>
+        <Button type="button" size="sm" className="mt-4" onClick={fetchFullProfile}>Try again</Button>
       </div>
     );
   }
 
   return (
     <div className="candidate-profile-page space-y-6">
+      <section className="rounded-2xl border border-[#DFE5DF] bg-white p-6 shadow-card sm:p-8">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#707E79]">Candidate profile</p>
+            <h1 className="mt-2 text-2xl font-bold text-[#2E2F2D]">Complete your profile</h1>
+            <p className="mt-2 max-w-xl text-sm text-[#707E79]">A complete profile helps AptusHire match you with the right opportunities.</p>
+          </div>
+          <div className="text-left sm:text-right">
+            <p className="text-3xl font-bold text-[#214740]">{strength}%</p>
+            <p className="text-xs text-[#707E79]">profile complete</p>
+          </div>
+        </div>
+        <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#EAF9E1]" role="progressbar" aria-valuenow={strength} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion">
+          <div className="h-full rounded-full bg-[#214740] transition-[width] duration-500" style={{ width: `${strength}%` }} />
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+          {setupSections.map((section) => (
+            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#C1EBAD] bg-[#EAF9E1] text-[#214740]" : "border-[#DFE5DF] bg-[#FBFBFD] text-[#707E79] hover:border-[#C1EBAD]"}`}>
+              <span aria-hidden="true" className="text-sm">{section.done ? "✓" : "○"}</span>
+              <span>{section.label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
       {/* Tab Header Bar (Horizontal on mobile, rail on desktop) */}
       <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#DFE5DF] bg-white p-2 shadow-xs dark:border-[#DFE5DF] dark:bg-white">
         {TABS.map((tab) => {
@@ -127,9 +164,10 @@ export default function ProfileLayout() {
         <div className="lg:col-span-8">
           <Card className="rounded-3xl border border-[#DFE5DF] bg-white p-6 shadow-soft dark:border-[#DFE5DF] dark:bg-white sm:p-8">
             {activeTab === "personal" && <PersonalTab profile={profile} onRefresh={fetchFullProfile} />}
-            {activeTab === "documents" && <DocumentsTab profile={profile} documents={documents} onRefresh={fetchFullProfile} />}
             {activeTab === "education" && <EducationTab profile={profile} onRefresh={fetchFullProfile} />}
+            {activeTab === "skills" && <SkillsTab profile={profile} onRefresh={fetchFullProfile} />}
             {activeTab === "experience" && <ExperienceTab profile={profile} onRefresh={fetchFullProfile} />}
+            {activeTab === "documents" && <DocumentsTab profile={profile} documents={documents} onRefresh={fetchFullProfile} />}
             {activeTab === "resumes" && <ResumeManager />}
             {activeTab === "preferences" && <PreferencesTab profile={profile} onRefresh={fetchFullProfile} />}
           </Card>

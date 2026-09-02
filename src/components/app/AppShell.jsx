@@ -10,8 +10,12 @@ import {
   UserRound,
   Briefcase,
   BookOpen,
+  Bookmark,
+  ClipboardList,
+  Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  ScanSearch,
 } from "lucide-react";
 import { useAccountAuth } from "../../auth/useAccountAuth.js";
 import { logoutAccount } from "../../auth/logout.js";
@@ -52,11 +56,32 @@ const PUBLIC_NAV = [
   { to: "/welcome", label: "How it Works", icon: BookOpen },
 ];
 
-const ACCOUNT_NAV = [
-  { to: "/", label: "Find Jobs", icon: Briefcase, end: true },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/profile?tab=resumes", label: "Resumes ★", icon: FileText },
-  { to: "/profile", label: "My Profile", icon: UserRound },
+const ACCOUNT_NAV_GROUPS = [
+  {
+    label: "Main",
+    items: [
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
+      { to: "/", label: "Find Jobs", icon: Briefcase, end: true },
+      { to: "/dashboard#recommended", label: "Recommended", icon: Sparkles, anchor: true },
+      { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
+      { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
+      { to: "/cv-evaluation", label: "CV Evaluation", icon: ScanSearch, badge: "1" },
+    ],
+  },
+  {
+    label: "My Progress",
+    items: [
+      { to: "/assessments", label: "Past Assessment", icon: ClipboardList },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { to: "/profile", label: "Profile", icon: UserRound },
+      { to: "/profile?tab=resumes", label: "Resume", icon: FileText },
+      { to: "/account", label: "Settings", icon: Settings },
+    ],
+  },
 ];
 
 // Fixed ids rather than useId(): `aria-controls` has to name a node that
@@ -100,31 +125,44 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [ta
 // name is a maze to anyone listing landmarks to get their bearings.
 function SidebarNav({ collapsed, onNavigate, label }) {
   const { isAuthenticated } = useAccountAuth();
-  const items = isAuthenticated ? ACCOUNT_NAV : PUBLIC_NAV;
+  const groups = isAuthenticated
+    ? ACCOUNT_NAV_GROUPS
+    : [{ label: null, items: PUBLIC_NAV }];
 
   return (
     <nav aria-label={label} className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-2">
-      {items.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.end}
-          onClick={onNavigate}
-          // The tooltip is for the pointer; the sr-only label below is what
-          // gives the link an accessible name once the text is gone. An
-          // icon-only rail with neither is a row of unnamed links.
-          title={collapsed ? item.label : undefined}
-          className={({ isActive }) =>
-            `${NAV_ROW} ${collapsed ? "justify-center px-2" : ""} ${
-              isActive
-                ? "bg-[#EAF9E1] font-semibold text-[#214740]"
-                : "text-[#707E79] hover:bg-[#F7F8F8] hover:text-[#2E2F2D]"
-            }`
-          }
-        >
-          <item.icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-          <span className={collapsed ? "sr-only" : "truncate"}>{item.label}</span>
-        </NavLink>
+      {groups.map((group) => (
+        <div key={group.label || "public"} className="mb-4 last:mb-0">
+          {group.label && !collapsed && (
+            <p className="px-3 pb-2 pt-3 text-[11px] font-medium uppercase tracking-[0.12em] text-[#8C9790]">
+              {group.label}
+            </p>
+          )}
+          {group.items.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              onClick={onNavigate}
+              title={collapsed ? item.label : undefined}
+              className={({ isActive }) =>
+                `${NAV_ROW} ${collapsed ? "justify-center px-2" : ""} ${
+                  isActive && !item.anchor
+                    ? "bg-[#EAF9E1] font-semibold text-[#214740]"
+                    : "text-[#707E79] hover:bg-[#F7F8F8] hover:text-[#2E2F2D]"
+                }`
+              }
+            >
+              <item.icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+              <span className={collapsed ? "sr-only" : "truncate"}>{item.label}</span>
+              {item.badge && !collapsed && (
+                <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-md bg-[#F0F2F5] px-1.5 py-0.5 text-[11px] font-bold text-[#67736E]">
+                  {item.badge}
+                </span>
+              )}
+            </NavLink>
+          ))}
+        </div>
       ))}
     </nav>
   );
@@ -147,7 +185,7 @@ function SidebarBrand({ collapsed, onNavigate }) {
 
   return (
     <div className="flex h-16 shrink-0 items-center px-5">
-      <BrandLogo to="/" size="lg" textWeight="font-semibold" theme="light" onClick={onNavigate} />
+      <BrandLogo to="/" size="lg" textWeight="font-semibold" theme="light" className="uppercase" onClick={onNavigate} />
     </div>
   );
 }

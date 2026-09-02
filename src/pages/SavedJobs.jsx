@@ -1,0 +1,84 @@
+import { useEffect, useMemo, useState } from "react";
+import { Bookmark, Briefcase, Clock, MapPin, Search, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import api from "../api/client.js";
+import { accountAuthHeader } from "../auth/accountAuth.js";
+import { Card, EmptyState, Skeleton } from "../components/ui/Card.jsx";
+import Button from "../components/ui/Button.jsx";
+
+function companyInitials(name) {
+  return String(name || "Company").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+}
+
+function SavedJobCard({ job, onUnsave, saving }) {
+  const to = `/jobs/${job.slug || job._id}`;
+  return (
+    <Card className="relative border-[#DFE5DF] bg-white dark:border-[#DFE5DF] dark:bg-white">
+      <div className="flex items-start gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#EAF9E1] text-sm font-bold text-[#214740]">{companyInitials(job.company?.name)}</span>
+        <div className="min-w-0 flex-1">
+          <Link to={to} className="block truncate text-[15px] font-semibold text-[#2E2F2D] hover:text-[#214740] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5A7B71]">{job.title || "Open position"}</Link>
+          <p className="mt-1 truncate text-sm text-[#3B5D52]">{job.company?.name || "Company unavailable"}{job.department ? ` · ${job.department}` : ""}</p>
+        </div>
+        <button type="button" onClick={() => onUnsave(job)} disabled={saving} aria-label={`Unsave ${job.title || "job"}`} aria-pressed="true" className="tap-target inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#C1EBAD] bg-[#EAF9E1] text-[#214740] transition-colors hover:bg-[#D2ECC9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C1EBAD] disabled:cursor-wait disabled:opacity-60">
+          <Bookmark className="h-4 w-4 fill-current" aria-hidden="true" />
+        </button>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#3B5D52]">
+        {job.location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{job.location}</span>}
+        {job.minExperienceYears != null && <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{job.minExperienceYears ? `${job.minExperienceYears}+ yrs experience` : "No minimum experience"}</span>}
+      </div>
+      {job.description && <p className="mt-3 line-clamp-2 text-sm leading-5 text-[#596660]">{job.description}</p>}
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#EDF1ED] pt-3"><span className="text-xs font-medium text-[#707E79]">Saved for later</span><Button as={Link} to={to} size="sm">View job</Button></div>
+    </Card>
+  );
+}
+
+export default function SavedJobs() {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState(null);
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api.get("/candidate-dashboard", { headers: accountAuthHeader() }).then(({ data }) => {
+      const unique = new Map();
+      for (const job of data.savedJobs || []) if (job?._id) unique.set(String(job._id), job);
+      setJobs([...unique.values()]);
+    }).catch((err) => {
+      setError(err?.response?.data?.error || "We couldn't load your saved jobs. Please try again.");
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const visibleJobs = useMemo(() => {
+    const value = query.trim().toLowerCase();
+    if (!value) return jobs;
+    return jobs.filter((job) => `${job.title || ""} ${job.company?.name || ""} ${job.department || ""} ${job.location || ""}`.toLowerCase().includes(value));
+  }, [jobs, query]);
+
+  async function unsave(job) {
+    const id = String(job._id);
+    setSavingId(id);
+    setError("");
+    try {
+      const response = await api.post(`/candidate-dashboard/saved-jobs/${job._id}`, {}, { headers: accountAuthHeader() });
+      if (!response.data.saved) setJobs((current) => current.filter((entry) => String(entry._id) !== id));
+    } catch (err) {
+      setError(err?.response?.data?.error || "We couldn't update your saved jobs. Please try again.");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6 pb-10">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#707E79]">Your activity</p><h1 className="mt-2 text-2xl font-bold text-[#2E2F2D]">Saved Jobs</h1><p className="mt-2 text-sm text-[#707E79]">Roles you're considering for your next application.</p></div><label className="flex min-h-11 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-4 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E] focus-within:ring-2 focus-within:ring-[#EAF9E1]"><Search className="h-4 w-4" /><span className="sr-only">Search saved jobs</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-32 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-40" /></label></div>
+      {error && <div role="alert" className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700"><Trash2 className="h-4 w-4" />{error}</div>}
+      {loading && <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map((item) => <Card key={item}><Skeleton className="h-11 w-11" /><Skeleton className="mt-4 h-5 w-2/3" /><Skeleton className="mt-3 h-4 w-1/2" /><Skeleton className="mt-6 h-10 w-full" /></Card>)}</div>}
+      {!loading && jobs.length === 0 && <EmptyState icon={Bookmark} title="No saved jobs yet" description="Bookmark roles you want to revisit and they'll appear here." action={<Button as={Link} to="/" size="sm">Find jobs</Button>} />}
+      {!loading && jobs.length > 0 && visibleJobs.length === 0 && <EmptyState icon={Search} title="No matching saved jobs" description="Try a different company, role, department, or location." />}
+      {!loading && visibleJobs.length > 0 && <><p className="text-[13px] text-[#707E79]"><span className="font-semibold text-[#2E2F2D]">{visibleJobs.length}</span> {visibleJobs.length === 1 ? "saved job" : "saved jobs"}</p><div className="grid gap-4 md:grid-cols-2">{visibleJobs.map((job) => <SavedJobCard key={job._id} job={job} onUnsave={unsave} saving={savingId === String(job._id)} />)}</div></>}
+    </div>
+  );
+}

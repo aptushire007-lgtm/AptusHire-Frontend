@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader, clearAccountAuth } from "../auth/accountAuth.js";
+import { useAccountAuth } from "../auth/useAccountAuth.js";
 // The two portals are separate identities from the account (see portalAuth.js),
 // so entering one from here means minting and storing ITS token — not reusing
 // the account's.
@@ -73,6 +74,17 @@ function formatAbsolute(value) {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function indianGreeting(now = new Date()) {
+  const hour = Number(new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "numeric",
+    hourCycle: "h23",
+  }).format(now));
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 // "in 3 hours" / "5 days ago". Always rendered next to the absolute timestamp —
@@ -171,6 +183,14 @@ const SESSION_STATUS_LABELS = {
 function sessionStatusLabel(status) {
   if (!status) return "Unknown";
   return SESSION_STATUS_LABELS[status] || String(status).replace(/_/g, " ");
+}
+
+function applicationPipelineBucket(status) {
+  if (isRejected(status)) return "rejected";
+  if (["shortlisted"].includes(status)) return "shortlisted";
+  if (["interview_scheduled", "ai_interview_completed", "hr_interview", "technical_interview", "manager_interview"].includes(status)) return "interview";
+  if (["ats_passed", "assessment_scheduled", "assessment_completed", "under_review"].includes(status)) return "screening";
+  return "applied";
 }
 
 // A progress bar is a measurement, so it names what it measures. Without the
@@ -425,9 +445,9 @@ function ApplicationCard({ application, next, now, onOpen, openingId }) {
 // These cards are siblings of the "Needs you" panel, not children of it, so
 // they sit at the same heading level. They were <h3> under an <h1>, which skips
 // a level and leaves a screen-reader user's section list with a hole in it.
-function SectionCard({ title, icon: Icon, description, children, action }) {
+function SectionCard({ title, icon: Icon, description, children, action, ...props }) {
   return (
-    <Card as="section" className="border-[#DFE5DF] !bg-white text-[#2E2F2D] dark:border-[#DFE5DF] dark:!bg-white">
+    <Card as="section" {...props} className="border-[#DFE5DF] !bg-[#FBFBFD] text-[#2E2F2D] dark:border-[#DFE5DF] dark:!bg-[#FBFBFD]">
       {/* Composes <SectionHeader> rather than re-rolling a title row, so the
           icon chip, heading size, and action alignment match every other
           section in both apps instead of drifting one screen at a time. */}
@@ -439,6 +459,7 @@ function SectionCard({ title, icon: Icon, description, children, action }) {
 
 export default function CandidateDashboard() {
   const navigate = useNavigate();
+  const { user } = useAccountAuth();
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [openingId, setOpeningId] = useState(null);
@@ -503,12 +524,13 @@ export default function CandidateDashboard() {
     }
   };
 
-  const greeting = () => {
-    const hr = new Date().getHours();
-    if (hr < 12) return "Good morning";
-    if (hr < 18) return "Good afternoon";
-    return "Good evening";
-  };
+  const [greeting, setGreeting] = useState(() => indianGreeting());
+
+  useEffect(() => {
+    const updateGreeting = () => setGreeting(indianGreeting());
+    const id = setInterval(updateGreeting, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   // Live-refresh when an admin moves this candidate's stage — no page refresh
   // required (Module 11 realtime requirement).
@@ -697,126 +719,54 @@ export default function CandidateDashboard() {
   }
 
   const pct = data.profile.profileCompletionPercent;
-  const activeApplications = data.appliedJobs.filter((a) => !isRejected(a.status));
+  const applications = data.appliedJobs || [];
+  const activeApplications = applications.filter((a) => !isRejected(a.status));
+  const interviewCount = (data.upcomingInterviews?.length || 0) + (data.aiInterviewHistory?.length || 0);
+  const pipeline = [
+    { key: "applied", label: "Applied" },
+    { key: "screening", label: "Screening" },
+    { key: "interview", label: "Interview" },
+    { key: "shortlisted", label: "Shortlisted" },
+    { key: "rejected", label: "Rejected" },
+  ].map((stage) => ({
+    ...stage,
+    count: applications.filter((application) => applicationPipelineBucket(application.status) === stage.key).length,
+  }));
 
   return (
-    <div className="space-y-6 text-[#214740]">
-      {/* 1. Light marketing-palette greeting band */}
-      <section className="relative overflow-hidden rounded-2xl border border-[#DFE5DF] bg-white p-6 text-[#2E2F2D] shadow-card sm:p-8">
-        <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#C1EBAD]/35 blur-3xl" />
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 left-1/3 h-52 w-52 rounded-full bg-[#D2ECC9]/35 blur-3xl" />
-        <div className="relative z-10 flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#3B5D52]">
-              <span>Candidate Portal</span>
-              <span className="rounded-full bg-[#EAF9E1] px-2.5 py-1 text-[11px] font-bold text-[#3B5D52]">
-                Live Overview
-              </span>
-            </div>
-            <h1 className="mt-1 font-display text-[22px] leading-7 font-bold tracking-tight text-[#2E2F2D] sm:text-2xl">
-              {greeting()}, {data.profile?.headline ? data.profile.headline.split(" ")[0] : "Candidate"}
-            </h1>
-            <p className="mt-1.5 max-w-xl text-xs font-medium text-[#3E4E46] sm:text-sm">
-              {needsYou.length} action{needsYou.length === 1 ? "" : "s"} waiting on you · {data.upcomingInterviews?.length || 0} upcoming interview{(data.upcomingInterviews?.length || 0) === 1 ? "" : "s"} scheduled.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              to="/profile"
-              className="flex items-center gap-2 rounded-2xl border border-[#D2ECC9] bg-[#EAF9E1] px-3 py-2 text-xs font-semibold text-[#214740] backdrop-blur-xs hover:bg-[#D2ECC9]"
-            >
-              <Sparkles className="h-4 w-4 text-[#3B5D52]" />
-              <span>Profile Strength: <strong className="text-[#3B5D52]">{pct}%</strong></span>
-            </Link>
-
-            <button
-              onClick={handleDownloadData}
-              disabled={exporting}
-              className="inline-flex items-center gap-2 rounded-[9px] bg-[#214740] px-4 py-2 text-xs font-semibold text-white shadow-card transition-colors hover:bg-[#2E4F48]"
-            >
-              <Download className="h-4 w-4" />
-              <span>{exporting ? "Exporting…" : "Download My Data"}</span>
-            </button>
-          </div>
+    <div className="candidate-dashboard space-y-6 text-[#214740]">
+      <section className="flex flex-col justify-between gap-4 rounded-2xl border border-[#DFE5DF] bg-white p-6 text-[#2E2F2D] shadow-card sm:flex-row sm:items-end sm:p-8">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707E79]">Candidate dashboard</p>
+          <h1 className="mt-2 text-2xl font-bold text-[#2E2F2D]">{greeting}, {user?.name || "Candidate"} <span aria-hidden="true">👋</span></h1>
+          <p className="mt-2 text-sm text-[#707E79]">Here's your hiring progress.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link to="/profile" className="rounded-[9px] border border-[#D2ECC9] bg-[#EAF9E1] px-3 py-2 text-xs font-semibold text-[#214740] hover:bg-[#D2ECC9]">Profile completion: {pct}%</Link>
+          <button onClick={handleDownloadData} disabled={exporting} className="inline-flex items-center gap-2 rounded-[9px] bg-[#214740] px-4 py-2 text-xs font-semibold text-white shadow-card transition-colors hover:bg-[#2E4F48]"><Download className="h-4 w-4" /><span>{exporting ? "Exporting…" : "Download My Data"}</span></button>
         </div>
       </section>
 
-      {/* 2. Overlapping 5 Bento Stat Cards */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {/* Card 1: Active Applications */}
-        <Card className="rounded-2xl border border-[#DFE5DF] !bg-white p-4 text-[#2E2F2D] shadow-xs dark:border-[#DFE5DF] dark:!bg-white">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#5A7B71]">Active Apps</span>
-            <span className="rounded-full bg-[#EAF9E1] px-2 py-0.5 text-[11px] font-bold text-[#3B5D52] dark:bg-[#EAF9E1] dark:text-[#3B5D52]">
-              +{activeApplications.length}
-            </span>
-          </div>
-          <p className="mt-2 font-display text-2xl font-bold text-[#214740]">
-            {activeApplications.length}
-          </p>
-          <p className="mt-0.5 text-[12px] text-[#707E79]">In Progress</p>
-        </Card>
-
-        {/* Card 2: AI Screens */}
-        <Card className="rounded-2xl border border-[#DFE5DF] !bg-white p-4 text-[#2E2F2D] shadow-xs dark:border-[#DFE5DF] dark:!bg-white">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#5A7B71]">AI Screenings</span>
-            <span className="rounded-full bg-[#EAF9E1] px-2 py-0.5 text-[11px] font-bold text-[#3B5D52] dark:bg-[#EAF9E1] dark:text-[#3B5D52]">
-              Live
-            </span>
-          </div>
-          <p className="mt-2 font-display text-2xl font-bold text-[#214740]">
-            {data.aiInterviewHistory?.length || 0}
-          </p>
-          <p className="mt-0.5 text-[12px] text-[#707E79]">Evidence Scored</p>
-        </Card>
-
-        {/* Card 3: Needs Attention */}
-        <Card className="rounded-2xl border border-[#DFE5DF] !bg-white p-4 text-[#2E2F2D] shadow-xs dark:border-[#DFE5DF] dark:!bg-white">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#5A7B71]">Action Items</span>
-            <span className="rounded-full bg-[#EAF9E1] px-2 py-0.5 text-[11px] font-bold text-[#3B5D52] dark:bg-[#EAF9E1] dark:text-[#3B5D52]">
-              {needsYou.length > 0 ? "Urgent ⚠" : "Clear"}
-            </span>
-          </div>
-          <p className="mt-2 font-display text-2xl font-bold text-[#214740]">
-            {needsYou.length}
-          </p>
-          <p className="mt-0.5 text-[12px] text-[#707E79]">Waiting on you</p>
-        </Card>
-
-        {/* Card 4: Avg Match Score */}
-        <Card className="rounded-2xl border border-[#DFE5DF] !bg-white p-4 text-[#2E2F2D] shadow-xs dark:border-[#DFE5DF] dark:!bg-white">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#5A7B71]">Avg Match</span>
-            <span className="rounded-full bg-[#EAF9E1] px-2 py-0.5 text-[11px] font-bold text-[#3B5D52] dark:bg-[#EAF9E1] dark:text-[#3B5D52]">
-              Match
-            </span>
-          </div>
-          <p className="mt-2 font-display text-2xl font-bold text-[#214740]">
-            87%
-          </p>
-          <p className="mt-0.5 text-[12px] text-[#707E79]">Target Fit</p>
-        </Card>
-
-        {/* Card 5: Finish Profile CTA Card */}
-        <Link
-          to="/profile"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-[14px] border border-[#DFE5DF] bg-[#214740] p-4 text-white shadow-card transition-colors hover:bg-[#2E4F48]"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white">Profile Level</span>
-            <span className="rounded-full bg-[#EAF9E1] px-2 py-0.5 text-[11px] font-extrabold text-[#214740]">
-              {pct}%
-            </span>
-          </div>
-          <div className="mt-3">
-            <p className="text-xs font-bold text-white group-hover:underline">Complete profile →</p>
-            <p className="text-[11px] text-white/90">Boost match priority</p>
-          </div>
-        </Link>
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Hiring progress summary">
+        {[
+          { label: "Applications", value: applications.length, detail: "Total submitted", icon: Briefcase },
+          { label: "Interviews", value: interviewCount, detail: "Scheduled or completed", icon: Video },
+          { label: "Assessments", value: data.assessments?.length || 0, detail: "Assigned or completed", icon: ClipboardList },
+          { label: "Profile completion", value: pct, detail: "Profile strength", icon: UserRound },
+        ].map(({ label, value, detail, icon: Icon }) => (
+          <Card key={label} className="border-[#DFE5DF] !bg-white p-5 text-[#2E2F2D] shadow-xs dark:border-[#DFE5DF] dark:!bg-white">
+            <div className="flex items-center justify-between gap-3"><span className="text-xs font-semibold text-[#707E79]">{label}</span><Icon className="h-4 w-4 text-[#214740]" aria-hidden="true" /></div>
+            <p className="mt-3 text-3xl font-bold text-[#214740]">{value}{label === "Profile completion" ? "%" : ""}</p>
+            <p className="mt-1 text-xs text-[#707E79]">{detail}</p>
+          </Card>
+        ))}
       </section>
+
+      <SectionCard id="pipeline" title="Application pipeline" icon={ListChecks} description="A current count of your applications by stage.">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {pipeline.map((stage) => <div key={stage.key} className="rounded-xl border border-[#DFE5DF] bg-white p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-[#707E79]">{stage.label}</p><p className="mt-2 text-2xl font-bold text-[#214740]">{stage.count}</p></div>)}
+        </div>
+      </SectionCard>
 
       {/* Quick Navigation Chips */}
       <ChipRow label="Jump to">
@@ -909,6 +859,7 @@ export default function CandidateDashboard() {
       )}
 
       <SectionCard
+        id="applications"
         title="Your applications"
         icon={ListChecks}
         action={
@@ -947,7 +898,7 @@ export default function CandidateDashboard() {
       </SectionCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard title="Assessments" icon={ClipboardList}>
+        <SectionCard id="assessments" title="Assessments" icon={ClipboardList}>
           {data.assessments?.length ? (
             <div className="space-y-3">
               {data.assessments.map((s) => (
@@ -994,7 +945,7 @@ export default function CandidateDashboard() {
           )}
         </SectionCard>
 
-        <SectionCard title="Interviews" icon={Video}>
+        <SectionCard id="interviews" title="Interviews" icon={Video}>
           {data.upcomingInterviews.length === 0 && data.aiInterviewHistory.length === 0 ? (
             <p className="text-sm text-slate-500">No interviews scheduled yet.</p>
           ) : (
@@ -1075,7 +1026,7 @@ export default function CandidateDashboard() {
           </Link>
         </SectionCard>
 
-        <SectionCard title="Saved Jobs" icon={Bookmark}>
+        <SectionCard id="saved-jobs" title="Saved Jobs" icon={Bookmark}>
           {data.savedJobs.length === 0 ? (
             <p className="text-sm text-slate-500">No saved jobs yet.</p>
           ) : (
@@ -1102,7 +1053,7 @@ export default function CandidateDashboard() {
           )}
         </SectionCard>
 
-        <SectionCard title="Recommended Jobs" icon={Sparkles}>
+        <SectionCard id="recommended" title="Recommended Jobs" icon={Sparkles}>
           {data.recommendedJobs.length === 0 ? (
             <p className="text-sm text-slate-500">No recommendations yet — add skills to your profile to get matched.</p>
           ) : (

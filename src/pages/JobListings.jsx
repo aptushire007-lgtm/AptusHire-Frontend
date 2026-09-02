@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Briefcase, MapPin, ArrowRight, GraduationCap, Clock, Search, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Briefcase, MapPin, ArrowRight, GraduationCap, Clock, Search, X, Bookmark, Check, SlidersHorizontal } from "lucide-react";
 import api from "../api/client.js";
+import { accountAuthHeader } from "../auth/accountAuth.js";
+import { useAccountAuth } from "../auth/useAccountAuth.js";
 import { Card, Skeleton, EmptyState } from "../components/ui/Card.jsx";
 import { PageHero, TokenList, MetaItem } from "../components/ui/Panels.jsx";
 
@@ -66,18 +68,15 @@ function CompanySticker({ company }) {
   );
 }
 
-function JobCard({ job }) {
+function JobCard({ job, saved, onToggleSave, saving }) {
   const to = `/jobs/${job.slug || job._id}`;
 
   return (
     <Card interactive className="relative flex h-full flex-col border-[#DFE5DF] bg-white dark:border-[#DFE5DF] dark:bg-white">
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg leading-6 font-semibold text-[#2E2F2D]">
-            <Link
-              to={to}
-              className="rounded after:absolute after:inset-0 hover:text-brand-700 dark:hover:text-brand-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
-            >
+          <h2 className="text-[15px] leading-6 font-semibold text-[#2E2F2D]">
+            <Link to={to} className="hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600">
               {job.title}
             </Link>
           </h2>
@@ -87,7 +86,19 @@ function JobCard({ job }) {
             {job.department}
           </p>
         </div>
-        <CompanySticker company={job.company} />
+        <div className="flex shrink-0 items-start gap-2">
+          <CompanySticker company={job.company} />
+          <button
+            type="button"
+            onClick={() => onToggleSave(job)}
+            disabled={saving}
+            aria-label={saved ? `Unsave ${job.title}` : `Save ${job.title}`}
+            aria-pressed={saved}
+            className={`tap-target inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${saved ? "border-[#C1EBAD] bg-[#EAF9E1] text-[#214740]" : "border-[#DFE5DF] bg-white text-[#707E79] hover:bg-[#EAF9E1] hover:text-[#214740]"}`}
+          >
+            {saved ? <Bookmark className="h-4 w-4 fill-current" aria-hidden="true" /> : <Bookmark className="h-4 w-4" aria-hidden="true" />}
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[#0E3B2E]">
@@ -102,37 +113,90 @@ function JobCard({ job }) {
 
       <TokenList className="mt-3" items={job.requiredSkills} max={6} />
 
-      <div className="mt-4 flex items-center justify-between border-t border-[#EDF1ED] pt-3 text-[13px] font-semibold text-[#214740]">
-        <span aria-hidden="true">View &amp; apply</span>
-        <ArrowRight aria-hidden="true" className="h-4 w-4" />
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#EDF1ED] pt-3">
+        <Link to={to} className="inline-flex min-h-10 items-center gap-2 rounded-[9px] bg-[#214740] px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#2E4F48] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#C1EBAD]">
+          View Job <ArrowRight aria-hidden="true" className="h-4 w-4" />
+        </Link>
+        {saved && <span className="text-[12px] font-medium text-[#707E79]">Saved</span>}
       </div>
     </Card>
   );
 }
 
 export default function JobListings() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAccountAuth();
   const [jobs, setJobs] = useState([]);
+  const [savedIds, setSavedIds] = useState(new Set());
+  const [savingId, setSavingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState({ location: "", experience: "", skills: "", company: "", department: "" });
+  const [sort, setSort] = useState("match");
 
   const filteredJobs = useMemo(() => {
-    if (!query.trim()) return jobs;
-    return jobs
-      .map((job) => ({ job, score: jobSearchScore(job, query) }))
-      .filter(({ score }) => score >= 0)
-      .sort((a, b) => b.score - a.score)
-      .map(({ job }) => job);
-  }, [jobs, query]);
+    const location = filters.location.trim().toLowerCase();
+    const skills = filters.skills.trim().toLowerCase().split(/[,\s]+/).filter(Boolean);
+    const company = filters.company.trim().toLowerCase();
+    const department = filters.department.trim().toLowerCase();
+    const minimumExperience = filters.experience === "" ? null : Number(filters.experience);
+    const matches = jobs.filter((job) => {
+      const jobSkills = (job.requiredSkills || []).map((skill) => skill.toLowerCase());
+      return (!location || String(job.location || "").toLowerCase().includes(location))
+        && (minimumExperience === null || Number(job.minExperienceYears || 0) >= minimumExperience)
+        && (!skills.length || skills.every((skill) => jobSkills.some((jobSkill) => jobSkill.includes(skill))))
+        && (!company || String(job.company?.name || "").toLowerCase().includes(company))
+        && (!department || String(job.department || "").toLowerCase().includes(department));
+    });
+    const ranked = matches.map((job) => ({ job, score: query.trim() ? jobSearchScore(job, query) : 0 }));
+    const visible = query.trim() ? ranked.filter(({ score }) => score >= 0) : ranked;
+    visible.sort((a, b) => sort === "match" ? b.score - a.score : new Date(b.job.createdAt || 0) - new Date(a.job.createdAt || 0));
+    return visible.map(({ job }) => job);
+  }, [filters, jobs, query, sort]);
 
   useEffect(() => {
-    api
-      .get("/jobs/published")
-      .then((res) => setJobs(res.data))
-      .catch(() => setError("Failed to load jobs"))
+    Promise.all([
+      api.get("/jobs/published"),
+      isAuthenticated
+        ? api.get("/candidate-dashboard", { headers: accountAuthHeader() }).catch(() => null)
+        : Promise.resolve(null),
+    ])
+      .then(([jobsRes, dashboardRes]) => {
+        setJobs(jobsRes.data);
+        if (dashboardRes) setSavedIds(new Set((dashboardRes.data.savedJobs || []).map((job) => String(job._id || job))));
+      })
+      .catch(() => setError("We couldn't load jobs right now. Please try again."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [isAuthenticated]);
+
+  function updateFilter(name, value) {
+    setFilters((current) => ({ ...current, [name]: value }));
+  }
+
+  async function toggleSave(job) {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: "/" } });
+      return;
+    }
+    const id = String(job._id);
+    setSavingId(id);
+    try {
+      const response = await api.post(`/candidate-dashboard/saved-jobs/${job._id}`, {}, { headers: accountAuthHeader() });
+      setSavedIds((current) => {
+        const next = new Set(current);
+        if (response.data.saved) next.add(id); else next.delete(id);
+        return next;
+      });
+    } catch (err) {
+      setError(err?.response?.data?.error || "We couldn't update saved jobs. Please try again.");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  const hasFilters = Object.values(filters).some(Boolean) || query;
 
   return (
     <div className="space-y-6">
@@ -160,7 +224,7 @@ export default function JobListings() {
             type="search"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Search by role, skill, company, location, or department"
+            placeholder="Search jobs, skills, companies..."
             className="h-12 w-full rounded-[10px] border border-[#DFE5DF] bg-[#FBFBFD] py-3 pl-11 pr-11 text-[15px] text-[#2E2F2D] placeholder:text-[#8C9790] focus:border-[#5A7B71] focus:outline-none focus:ring-3 focus:ring-[#C1EBAD]/40"
           />
           {(searchInput || query) && (
@@ -178,6 +242,24 @@ export default function JobListings() {
           <Search className="h-4 w-4" aria-hidden="true" /> Search jobs
         </button>
       </form>
+
+      <section aria-label="Job filters" className="rounded-2xl border border-[#DFE5DF] bg-white p-4 shadow-card">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-[13px] font-semibold text-[#2E2F2D]"><SlidersHorizontal className="h-4 w-4 text-[#214740]" /> Filters</div>
+          {hasFilters && <button type="button" onClick={() => { setFilters({ location: "", experience: "", skills: "", company: "", department: "" }); setQuery(""); setSearchInput(""); setSort("match"); }} className="text-[12px] font-semibold text-[#214740] hover:underline">Clear all</button>}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="text-[12px] font-semibold text-[#707E79]">Location<input value={filters.location} onChange={(event) => updateFilter("location", event.target.value)} placeholder="City or region" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]" /></label>
+          <label className="text-[12px] font-semibold text-[#707E79]">Experience<select value={filters.experience} onChange={(event) => updateFilter("experience", event.target.value)} className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]"><option value="">Any experience</option><option value="0">Entry level</option><option value="2">2+ years</option><option value="5">5+ years</option><option value="8">8+ years</option></select></label>
+          <label className="text-[12px] font-semibold text-[#707E79]">Skills<input value={filters.skills} onChange={(event) => updateFilter("skills", event.target.value)} placeholder="e.g. React, SQL" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]" /></label>
+          <label className="text-[12px] font-semibold text-[#707E79]">Company<input value={filters.company} onChange={(event) => updateFilter("company", event.target.value)} placeholder="Company name" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]" /></label>
+          <label className="text-[12px] font-semibold text-[#707E79]">Industry<input value={filters.department} onChange={(event) => updateFilter("department", event.target.value)} placeholder="Department" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]" /></label>
+          <label className="text-[12px] font-semibold text-[#707E79]">Job type<select disabled title="Job type is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#ECF3EB] px-3 text-[13px] font-normal text-[#707E79]"><option>Not available</option></select></label>
+          <label className="text-[12px] font-semibold text-[#707E79]">Salary<select disabled title="Salary is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#ECF3EB] px-3 text-[13px] font-normal text-[#707E79]"><option>Not available</option></select></label>
+          <label className="text-[12px] font-semibold text-[#707E79]">Remote<select disabled title="Remote preference is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#ECF3EB] px-3 text-[13px] font-normal text-[#707E79]"><option>Not available</option></select></label>
+        </div>
+        <p className="mt-3 text-[11px] text-[#707E79]">Some filters will appear once those fields are supported by the job data.</p>
+      </section>
 
       {error && (
         <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4">
@@ -207,10 +289,10 @@ export default function JobListings() {
         </div>
       ) : (
         <>
-          <p className="text-[14px] text-[#707E79]">
-            <span className="font-semibold text-[#2E2F2D]">{filteredJobs.length}</span>{" "}
-            {query ? `matching ${query}` : `${filteredJobs.length === 1 ? "role is" : "roles are"} open right now`}.
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[13px] text-[#707E79]"><span className="font-semibold text-[#2E2F2D]">{filteredJobs.length}</span>{" "}{query ? `matching ${query}` : `${filteredJobs.length === 1 ? "role is" : "roles are"} open right now`}.</p>
+            <label className="flex items-center gap-2 text-[12px] font-semibold text-[#707E79]">Sort by<select value={sort} onChange={(event) => setSort(event.target.value)} className="h-9 rounded-[9px] border border-[#DFE5DF] bg-white px-2 text-[12px] font-semibold text-[#2E2F2D]"><option value="match">Best Match</option><option value="newest">Newest</option><option value="salary" disabled>Salary unavailable</option></select></label>
+          </div>
           {filteredJobs.length === 0 ? (
             <EmptyState
               icon={Search}
@@ -223,7 +305,7 @@ export default function JobListings() {
             <ul className="grid list-none items-stretch gap-4">
               {filteredJobs.map((job) => (
                 <li key={job._id} className="min-w-0">
-                  <JobCard job={job} />
+                  <JobCard job={job} saved={savedIds.has(String(job._id))} saving={savingId === String(job._id)} onToggleSave={toggleSave} />
                 </li>
               ))}
             </ul>

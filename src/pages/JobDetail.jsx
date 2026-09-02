@@ -98,77 +98,79 @@ export default function JobDetail() {
 
   const applyTo = `/jobs/${job.slug || id}/apply${window.location.search}`;
   const experience = job.minExperienceYears > 0 ? `${job.minExperienceYears}+ years experience` : "No minimum experience";
+  const jobType = job.jobType || job.employmentType || "Not specified";
+  const salary = job.salary || job.salaryRange || job.compensation;
+  const match = job.match || job.matchInfo;
 
   return (
     <div className="mx-auto max-w-5xl space-y-5 pb-10">
-      <Link to="/" className="inline-flex items-center gap-2 rounded-lg text-[14px] font-semibold text-[#3B5D52] transition-colors hover:text-[#214740] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A7B71]">
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to listings
+      <Link to="/" className="inline-flex items-center gap-2 rounded-lg text-[13px] font-semibold text-[#214740] transition-colors hover:text-[#2E4F48] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A7B71]">
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
       </Link>
 
       <Card className="border-[#DFE5DF] bg-white dark:border-[#DFE5DF] dark:bg-white" padding="none">
         <div className="p-6 sm:p-8">
-          <div className="flex items-start justify-between gap-5">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <h1 className="font-display text-[25px] leading-tight font-semibold tracking-tight text-[#202521] sm:text-[30px]">{job.title}</h1>
-              <p className="mt-2 text-[15px] text-[#3B5D52]">
+              <h1 className="font-display text-[24px] leading-tight font-bold tracking-tight text-[#2E2F2D] sm:text-[28px]">{job.title}</h1>
+              <p className="mt-2 text-[14px] text-[#707E79]">
                 {job.company?.name && <span className="font-semibold text-[#214740]">{job.company.name}</span>}
-                {job.company?.name && job.department ? <span className="mx-2 text-[#A7B2AB]">•</span> : null}
-                {job.department}
+                {job.company?.name && job.location ? <span className="mx-2 text-[#A7B2AB]">•</span> : null}
+                {job.location || "Location not specified"}
+                <span className="mx-2 text-[#A7B2AB]">•</span>
+                {jobType}
               </p>
             </div>
             <CompanyLogo company={job.company} />
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-x-7 gap-y-3 border-b border-[#E5EBE6] pb-6">
+          <div className="mt-6 flex flex-wrap gap-x-7 gap-y-3 border-t border-[#E5EBE6] pt-5">
             <MetaFact icon={Clock3}>{experience}</MetaFact>
-            <MetaFact icon={MapPin}>{job.location}</MetaFact>
-            <MetaFact icon={GraduationCap}>{job.requiredEducation}</MetaFact>
+            {job.requiredEducation && <MetaFact icon={GraduationCap}>{job.requiredEducation}</MetaFact>}
+            <MetaFact icon={CalendarDays}>{postedLabel(job.publishedAt || job.createdAt)}</MetaFact>
           </div>
 
-          <div className="flex flex-col gap-5 pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <MetaFact icon={CalendarDays}>{postedLabel(job.publishedAt || job.createdAt)}</MetaFact>
-              {job.employmentType && <MetaFact icon={BriefcaseBusiness}>{job.employmentType}</MetaFact>}
-            </div>
-            <Button as={Link} to={applyTo} size="lg" className="w-full px-8 text-[15px] sm:w-auto">
-              Apply now <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          </div>
+          <Button as={Link} to={applyTo} size="lg" className="mt-6 w-full px-8 text-[14px] sm:w-auto">Apply Now <ArrowRight className="h-4 w-4" aria-hidden="true" /></Button>
         </div>
       </Card>
 
-      {job.requirements && (
-        <Card className="border-[#DFE5DF] bg-white dark:border-[#DFE5DF] dark:bg-white">
-          <div className="rounded-xl bg-[#F5F8F5] p-5 sm:p-6">
-            <h2 className="text-lg font-semibold text-[#202521]">Job highlights</h2>
-            <div className="mt-3 border-l-[3px] border-[#C1EBAD] pl-4"><TextBlock>{job.requirements}</TextBlock></div>
-          </div>
+      {match && (
+        <Card className="border-[#C1EBAD] bg-[#EAF9E1] dark:border-[#C1EBAD] dark:bg-[#EAF9E1]">
+          <h2 className="text-[16px] font-semibold text-[#214740]">Why this job matches you</h2>
+          <TextBlock>{match.explanation || match.reason || match.summary}</TextBlock>
+          {match.score != null && <p className="mt-3 text-[13px] font-semibold text-[#214740]">Match score: {match.score}%</p>}
         </Card>
       )}
 
       <Card className="border-[#DFE5DF] bg-white dark:border-[#DFE5DF] dark:bg-white">
         <section>
-          <h2 className="text-lg font-semibold text-[#202521]">Job description</h2>
-          <div className="mt-3"><TextBlock>{job.description}</TextBlock></div>
+          <h2 className="text-[16px] font-semibold text-[#2E2F2D]">Job Description</h2>
+          <div className="mt-3"><TextBlock>{job.description || "No job description provided."}</TextBlock></div>
         </section>
 
-        {job.requiredSkills?.length > 0 && (
-          <section className="mt-8 border-t border-[#E5EBE6] pt-7">
-            <h2 className="text-lg font-semibold text-[#202521]">Key skills</h2>
-            <p className="mt-1.5 text-[14px] text-[#5A6761]">Skills relevant to this role</p>
+        <section className="mt-8 border-t border-[#E5EBE6] pt-7">
+          <h2 className="text-[16px] font-semibold text-[#2E2F2D]">Requirements</h2>
+          <div className="mt-3"><TextBlock>{job.requirements || "No specific requirements provided."}</TextBlock></div>
+        </section>
+
+        <section className="mt-8 border-t border-[#E5EBE6] pt-7">
+          <h2 className="text-[16px] font-semibold text-[#2E2F2D]">Skills</h2>
+          {job.requiredSkills?.length > 0 ? (
             <ul className="mt-4 flex flex-wrap gap-2.5">
-              {job.requiredSkills.map((skill) => (
-                <li key={skill} className="rounded-full border border-[#D5DED7] bg-white px-3.5 py-2 text-[14px] font-medium text-[#2E4F48]">{skill}</li>
-              ))}
+              {job.requiredSkills.map((skill) => <li key={skill} className="rounded-full border border-[#D5DED7] bg-[#FBFBFD] px-3.5 py-2 text-[13px] font-medium text-[#2E4F48]">{skill}</li>)}
             </ul>
-          </section>
-        )}
+          ) : <p className="mt-3 text-[13px] text-[#707E79]">No specific skills listed.</p>}
+        </section>
+
+        <div className="mt-8 grid gap-4 border-t border-[#E5EBE6] pt-7 sm:grid-cols-3">
+          <div><h2 className="text-[16px] font-semibold text-[#2E2F2D]">Salary</h2><p className="mt-2 text-[13px] text-[#707E79]">{salary || "Not provided"}</p></div>
+          <div><h2 className="text-[16px] font-semibold text-[#2E2F2D]">Location</h2><p className="mt-2 text-[13px] text-[#707E79]">{job.location || "Not specified"}</p></div>
+          <div><h2 className="text-[16px] font-semibold text-[#2E2F2D]">Job Type</h2><p className="mt-2 text-[13px] text-[#707E79]">{jobType}</p></div>
+        </div>
 
         <div className="mt-8 flex flex-col gap-3 border-t border-[#E5EBE6] pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-xl text-[13px] leading-5 text-[#707E79]">You'll be asked for your details and a resume. Screening starts as soon as you submit.</p>
-          <Button as={Link} to={applyTo} size="lg" className="w-full px-8 text-[15px] sm:w-auto">
-            Apply now <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Button>
+          <Button as={Link} to={applyTo} size="lg" className="w-full px-8 text-[14px] sm:w-auto">Apply Now <ArrowRight className="h-4 w-4" aria-hidden="true" /></Button>
         </div>
       </Card>
     </div>

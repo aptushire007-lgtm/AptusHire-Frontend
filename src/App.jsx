@@ -25,6 +25,7 @@ const JobDetail = lazy(() => import("./pages/JobDetail.jsx"));
 const ApplyForm = lazy(() => import("./pages/ApplyForm.jsx"));
 const ResumeUpload = lazy(() => import("./pages/ResumeUpload.jsx"));
 const InterviewDashboard = lazy(() => import("./pages/InterviewDashboard.jsx"));
+const Interviews = lazy(() => import("./pages/Interviews.jsx"));
 const PreInterviewCheck = lazy(() => import("./pages/PreInterviewCheck.jsx"));
 // The heavy one — proctoring, captions and the LiveKit room. PreInterviewCheck
 // warms this chunk on mount (see the prefetch in that file), so by the time the
@@ -33,6 +34,8 @@ const PreInterviewCheck = lazy(() => import("./pages/PreInterviewCheck.jsx"));
 const InterviewRoom = lazy(() => import("./pages/InterviewRoom.jsx"));
 const PhoneCam = lazy(() => import("./pages/PhoneCam.jsx"));
 const AssessmentHub = lazy(() => import("./pages/AssessmentHub.jsx"));
+const Assessments = lazy(() => import("./pages/Assessments.jsx"));
+const AssessmentResult = lazy(() => import("./pages/AssessmentResult.jsx"));
 const AssessmentRoom = lazy(() => import("./pages/AssessmentRoom.jsx"));
 const ScorecardLogin = lazy(() => import("./pages/ScorecardLogin.jsx"));
 const ScorecardForm = lazy(() => import("./pages/ScorecardForm.jsx"));
@@ -43,6 +46,10 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword.jsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.jsx"));
 const Account = lazy(() => import("./pages/Account.jsx"));
 const CandidateDashboard = lazy(() => import("./pages/CandidateDashboard.jsx"));
+const CvEvaluation = lazy(() => import("./pages/CvEvaluation.jsx"));
+const SavedJobs = lazy(() => import("./pages/SavedJobs.jsx"));
+const AppliedJobs = lazy(() => import("./pages/AppliedJobs.jsx"));
+const ImprovementPlan = lazy(() => import("./pages/ImprovementPlan.jsx"));
 const ProfileLayout = lazy(() => import("./pages/profile/ProfileLayout.jsx"));
 const ResumeManager = lazy(() => import("./pages/profile/ResumeManager.jsx"));
 const NotificationCenter = lazy(() => import("./pages/NotificationCenter.jsx"));
@@ -124,8 +131,32 @@ export default function App() {
                   />
                   <Route path="/interview/:token" element={<InterviewLogin />} />
                   <Route path="/portal/dashboard" element={<InterviewDashboard />} />
+                  <Route
+                    path="/interviews"
+                    element={
+                      <RequireAccount>
+                        <Interviews />
+                      </RequireAccount>
+                    }
+                  />
                   <Route path="/assessment/:token" element={<AssessmentLogin />} />
                   <Route path="/assessment-portal/hub" element={<AssessmentHub />} />
+                  <Route
+                    path="/assessments"
+                    element={
+                      <RequireAccount>
+                        <Assessments />
+                      </RequireAccount>
+                    }
+                  />
+                  <Route
+                    path="/assessments/:id/result"
+                    element={
+                      <RequireAccount>
+                        <AssessmentResult />
+                      </RequireAccount>
+                    }
+                  />
                   <Route
                     path="/account"
                     element={
@@ -139,6 +170,38 @@ export default function App() {
                     element={
                       <RequireAccount>
                         <CandidateDashboard />
+                      </RequireAccount>
+                    }
+                  />
+                  <Route
+                    path="/cv-evaluation"
+                    element={
+                      <RequireAccount>
+                        <CvEvaluation />
+                      </RequireAccount>
+                    }
+                  />
+                  <Route
+                    path="/saved-jobs"
+                    element={
+                      <RequireAccount>
+                        <SavedJobs />
+                      </RequireAccount>
+                    }
+                  />
+                  <Route
+                    path="/applied-jobs"
+                    element={
+                      <RequireAccount>
+                        <AppliedJobs />
+                      </RequireAccount>
+                    }
+                  />
+                  <Route
+                    path="/applied-jobs/:id/improvement-plan"
+                    element={
+                      <RequireAccount>
+                        <ImprovementPlan />
                       </RequireAccount>
                     }
                   />

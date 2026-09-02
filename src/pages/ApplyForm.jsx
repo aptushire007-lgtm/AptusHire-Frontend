@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -178,8 +178,18 @@ export default function ApplyForm() {
 
   const [resume, setResume] = useState(null);
   const [resumeId, setResumeId] = useState(null);
+  const [savedResumes, setSavedResumes] = useState([]);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileLoadError, setProfileLoadError] = useState("");
   const [parseState, setParseState] = useState("idle"); // idle | working | done | failed
   const [autofill, setAutofill] = useState(null);
+  const autofillRequestRef = useRef(0);
+  const profileFallbackRef = useRef({
+    basic: { ...basicDetails },
+    experience: [],
+    education: [],
+    skills: [],
+  });
 
   const [experience, setExperience] = useState([]);
   const [education, setEducation] = useState([]);
@@ -213,6 +223,122 @@ export default function ApplyForm() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      api.get("/candidate-dashboard/profile/full", { headers: accountAuthHeader() }),
+      api.get("/candidate-dashboard/resumes", { headers: accountAuthHeader() }),
+    ])
+      .then(([profileResponse, resumeResponse]) => {
+        if (cancelled) return;
+        const profile = profileResponse.data.profile || {};
+        const personal = profile.personal || {};
+        const user = profile.user || account || {};
+        const nextBasic = {
+          ...basicDetails,
+          name: [personal.firstName, personal.lastName].filter(Boolean).join(" ") || user.name || basicDetails.name,
+          email: user.email || basicDetails.email,
+          phone: personal.phone || user.phone || basicDetails.phone,
+          location: personal.locationCity || profile.location || basicDetails.location,
+          linkedinUrl: profile.verification?.linkedinProfileUrl || basicDetails.linkedinUrl,
+        };
+        const nextEducation = (profile.education || []).map((item) => ({ ...item }));
+        const nextExperience = (profile.experience || []).map((item) => ({
+          company: item.company || "",
+          role: item.title || "",
+          startDate: item.startDate || "",
+          endDate: item.endDate || "",
+          currentlyWorking: Boolean(item.current),
+          description: item.summary || "",
+        }));
+        const nextSkills = profile.skills || [];
+        profileFallbackRef.current = { basic: nextBasic, education: nextEducation, experience: nextExperience, skills: nextSkills };
+        setBasicDetails(() => ({
+          ...nextBasic,
+        }));
+        setEducation(nextEducation);
+        setExperience(nextExperience);
+        setSkillsInput(nextSkills.join(", "));
+
+        const versions = (resumeResponse.data.versions || []).filter((version) => !version.isArchived);
+        const selected = versions.find((version) => version.isDefault) || versions[0];
+        setSavedResumes(versions);
+        if (selected) {
+          const selectedId = String(selected._id);
+          setResumeId(selectedId);
+          importResume({ resumeVersionId: selectedId });
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setProfileLoadError(err?.response?.data?.error || "We could not load your saved profile. You can still complete the form manually.");
+      })
+      .finally(() => {
+        if (!cancelled) setProfileLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  async function importResume(body) {
+    const requestId = autofillRequestRef.current + 1;
+    autofillRequestRef.current = requestId;
+    setAutofill(null);
+    setError("");
+    setParseState("working");
+    setExperience(profileFallbackRef.current.experience);
+    setEducation(profileFallbackRef.current.education);
+    setProjects([]);
+    setCertificates([]);
+    setSuggestedSkills([]);
+    setSkillsInput(profileFallbackRef.current.skills.join(", "));
+    setBasicDetails(profileFallbackRef.current.basic);
+
+    try {
+      const res = await api.post(`/jobs/${id}/apply/autofill`, body, { headers: accountAuthHeader() });
+      if (requestId !== autofillRequestRef.current) return;
+      const payload = res.data;
+      const sections = payload.sections || {};
+      const fallback = profileFallbackRef.current;
+      const importedExperience = toEntries(sections.experience);
+      const importedEducation = toEntries(sections.education);
+      const importedProjects = toEntries(sections.projects);
+      const importedCertificates = toEntries(sections.certificates);
+      const importedSkills = (sections.skills || []).map((item) => ({ name: item.value.name, spans: item.spans }));
+      setAutofill(payload);
+      setExperience(importedExperience.length ? importedExperience : fallback.experience);
+      setEducation(importedEducation.length ? importedEducation : fallback.education);
+      setProjects(importedProjects);
+      setCertificates(importedCertificates);
+      setSuggestedSkills(importedSkills);
+      setSkillsInput(importedSkills.length ? importedSkills.map((item) => item.name).join(", ") : fallback.skills.join(", "));
+      setBasicDetails({
+        ...fallback.basic,
+        name: sections.basics?.name?.value || fallback.basic.name,
+        // The account email is authoritative for submission and remains the
+        // displayed value even when a resume contains a different address.
+        phone: sections.basics?.phone?.value || fallback.basic.phone,
+        location: sections.basics?.location?.value || fallback.basic.location,
+        linkedinUrl: sections.basics?.linkedinUrl?.value || fallback.basic.linkedinUrl,
+        portfolioUrl: sections.basics?.portfolioUrl?.value || fallback.basic.portfolioUrl,
+      });
+      setParseState("done");
+    } catch (err) {
+      if (requestId !== autofillRequestRef.current) return;
+      console.warn("autofill unavailable", err);
+      setParseState("failed");
+    }
+  }
+
+  function selectSavedResume(event) {
+    const selectedId = event.target.value || null;
+    setResumeId(selectedId);
+    setResume(null);
+    if (selectedId) importResume({ resumeVersionId: selectedId });
+    else {
+      setAutofill(null);
+      setParseState("idle");
+    }
+  }
 
   const skills = useMemo(
     () => skillsInput.split(",").map((s) => s.trim()).filter(Boolean),
@@ -263,36 +389,12 @@ export default function ApplyForm() {
       });
       setResumeId(uploaded.data._id);
 
-      const res = await api.post(
-        `/jobs/${id}/apply/autofill`,
-        { resumeId: uploaded.data._id },
-        { headers: accountAuthHeader() }
-      );
-      const payload = res.data;
-      setAutofill(payload);
-
-      const s = payload.sections || {};
-      setExperience(toEntries(s.experience));
-      setEducation(toEntries(s.education));
-      setProjects(toEntries(s.projects));
-      setCertificates(toEntries(s.certificates));
-      setSuggestedSkills((s.skills || []).map((k) => ({ name: k.value.name, spans: k.spans })));
-
-      // Contact details are matched exactly rather than inferred, so they fill
-      // straight in — but only where the candidate has not already typed something.
-      setBasicDetails((prev) => ({
-        ...prev,
-        location: prev.location || s.basics?.location?.value || "",
-        linkedinUrl: prev.linkedinUrl || s.basics?.linkedinUrl?.value || "",
-        portfolioUrl: prev.portfolioUrl || s.basics?.portfolioUrl?.value || "",
-      }));
-
-      setParseState("done");
+      await importResume({ resumeId: uploaded.data._id });
     } catch (err) {
       // Autofill is a convenience and must never block an application: the file
       // is still attached and the form still submits, just without suggestions.
       console.warn("autofill unavailable", err);
-      setParseState("failed");
+      if (parseState !== "working") setParseState("failed");
     }
   }
 
@@ -304,8 +406,16 @@ export default function ApplyForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (status === "submitting") return; // double-click guard — one application, one submit
+    if (profileLoading) {
+      setError("Please wait while we load your saved profile and resume.");
+      return;
+    }
     if (!resume && !resumeId) {
       setError("Please attach your resume");
+      return;
+    }
+    if (parseState === "working") {
+      setError("Please wait while we import information from your resume.");
       return;
     }
     if (pendingReview > 0) {
@@ -327,8 +437,10 @@ export default function ApplyForm() {
     Object.entries(basicDetails).forEach(([key, value]) => data.append(key, value));
     // Prefer the library reference: the file is already stored and parsed. The
     // raw upload stays supported for the case where that upload failed.
-    if (resumeId) data.append("resumeId", resumeId);
-    else data.append("resume", resume);
+    if (resumeId) {
+      const selectedVersion = savedResumes.find((version) => String(version._id) === String(resumeId));
+      data.append(selectedVersion ? "resumeVersionId" : "resumeId", resumeId);
+    } else data.append("resume", resume);
     data.append("experience", JSON.stringify(experience.map(stripMeta)));
     data.append("education", JSON.stringify(education.map(stripMeta)));
     data.append("skills", JSON.stringify(skills));
@@ -384,9 +496,9 @@ export default function ApplyForm() {
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-verdict-positive-tint text-verdict-positive">
           <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
         </div>
-        <h1 className="font-display text-xl font-bold tracking-tight text-slate-900 dark:text-white">Application submitted</h1>
+        <h1 className="font-display text-xl font-bold tracking-tight text-slate-900 dark:text-white">Application submitted ✓</h1>
         <p className="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
-          Your application for <span className="font-semibold text-slate-800 dark:text-slate-200">{job.title}</span> was received.
+          Your application is now being reviewed.
         </p>
         {receipt?._id && (
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
@@ -403,7 +515,7 @@ export default function ApplyForm() {
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Button as={Link} to="/dashboard" size="sm">
-            Track it on your dashboard
+            Track Application
           </Button>
           <Button as={Link} to="/" size="sm" variant="outline">
             Back to listings
@@ -419,7 +531,7 @@ export default function ApplyForm() {
         <ArrowLeft className="h-4 w-4" /> Back to job
       </Link>
       <div>
-        <h1 className="font-display text-[26px] leading-8 font-semibold tracking-tight text-[#2E2F2D] sm:text-[30px]">Apply — {job.title}</h1>
+        <h1 className="font-display text-[26px] leading-8 font-semibold tracking-tight text-[#2E2F2D] sm:text-[30px]">Apply for {job.title}</h1>
         <p className="mt-2 text-[15px] text-[#3B5D52]">
           {job.company?.name ? `${job.company.name} · ` : ""}Screening starts as soon as you submit.
         </p>
@@ -436,7 +548,67 @@ export default function ApplyForm() {
             </p>
           )}
 
-          <p className="mb-5 text-lg font-semibold text-[#214740]">Basic Details</p>
+          {profileLoadError && <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs text-amber-900">{profileLoadError}</p>}
+          {profileLoading && <p className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-[#707E79]"><Loader2 className="h-4 w-4 animate-spin" /> Loading your saved profile and resume...</p>}
+
+          <div className="mb-6 rounded-xl border border-[#DFE5DF] bg-[#FBFBFD] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[15px] font-semibold text-[#214740]">Resume</p>
+              {resumeId && <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#214740]"><Check className="h-4 w-4" /> Selected Resume</span>}
+            </div>
+            {savedResumes.length > 0 ? (
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <select value={resumeId || ""} onChange={selectSavedResume} className="min-h-11 flex-1 rounded-xl border border-[#DFE5DF] bg-white px-3 text-[13px] text-[#2E2F2D]">
+                  {savedResumes.map((version) => <option key={version._id} value={version._id}>{version.label || "Saved resume"}{version.isDefault ? " (Default)" : ""}</option>)}
+                </select>
+                <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-[9px] border border-[#DFE5DF] bg-white px-4 text-[13px] font-semibold text-[#214740] hover:bg-[#EAF9E1]">
+                  Change Resume
+                  <input type="file" name="resume" accept=".pdf,.docx" className="hidden" onChange={handleResumeChange} />
+                </label>
+              </div>
+            ) : (
+              <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-600 hover:border-brand-400">
+                <Paperclip className="h-4 w-4 text-slate-400" /> Choose a PDF or DOCX file (max 5 MB)
+                <input type="file" name="resume" accept=".pdf,.docx" className="hidden" onChange={handleResumeChange} />
+              </label>
+            )}
+            {resume && <p className="mt-2 text-xs text-[#707E79]">New resume selected: {resume.name}</p>}
+            {parseState === "working" && (
+              <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-brand-700">
+                <Loader2 className="h-4 w-4 animate-spin" /> Importing information from your resume...
+              </p>
+            )}
+            {parseState === "done" && !autofill?.degraded && (
+              <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#214740]" role="status">
+                <Check className="h-4 w-4" /> Information imported from your resume. You can edit it before submitting.
+              </p>
+            )}
+            {parseState === "done" && autofill?.degraded && (
+              <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-900" role="status">
+                <AlertTriangle className="h-4 w-4 shrink-0" /> {autofill.degraded.message}
+              </p>
+            )}
+            {parseState === "failed" && (
+              <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-900" role="alert">
+                <Info className="h-4 w-4 shrink-0" /> We couldn&apos;t read this resume automatically. Please enter any missing information below.
+              </p>
+            )}
+          </div>
+
+          <div className="mb-6 rounded-xl border border-[#DFE5DF] bg-white p-4">
+            <p className="text-[13px] font-semibold text-[#214740]">Application readiness</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+              {[
+                ["Resume", Boolean(resume || resumeId)],
+                ["Profile", Boolean(basicDetails.name && basicDetails.email && basicDetails.phone && basicDetails.location)],
+                ["Education", education.length > 0],
+                ["Skills", skills.length > 0],
+                ["Experience", experience.length > 0],
+              ].map(([item, complete]) => <span key={item} className={`inline-flex items-center gap-1.5 text-xs font-medium ${complete ? "text-[#214740]" : "text-[#707E79]"}`}><span aria-hidden="true">{complete ? "✓" : "○"}</span> {item}</span>)}
+            </div>
+          </div>
+
+          <p className="mb-5 text-lg font-semibold text-[#214740]">Profile information</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormGroup>
               <Label required>Full Name</Label>
@@ -465,11 +637,10 @@ export default function ApplyForm() {
             </FormGroup>
           </div>
 
-          <FormGroup className="mt-2">
+          <FormGroup className="mt-2 hidden">
             <Label required>Resume</Label>
             <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600 hover:border-brand-400">
-              <Paperclip className="h-4 w-4 text-slate-400" />
-              {resume ? resume.name : "Choose a PDF or DOCX file (max 5 MB)"}
+              <Paperclip className="h-4 w-4 text-slate-400" /> {resume ? resume.name : "Choose a PDF or DOCX file"}
               {/* Not `required` — see ResumeUpload.jsx: a hidden invalid control makes
                   Chrome abort the submit silently and onSubmit never fires, so the
                   candidate gets no message at all. handleSubmit enforces the resume. */}

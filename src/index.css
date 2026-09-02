@@ -302,6 +302,61 @@
   opacity: 1;
 }
 
+/* Candidate dashboard: quiet surfaces, compact type, and one consistent visual
+   language for the information-dense home screen. */
+.candidate-dashboard {
+  color: #2E2F2D;
+}
+
+.candidate-dashboard .bg-white,
+.candidate-dashboard .dark\:bg-white {
+  background-color: #FBFBFD !important;
+}
+
+.candidate-dashboard .border-slate-200 {
+  border-color: #DFE5DF;
+}
+
+.candidate-dashboard h1 {
+  color: #2E2F2D;
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.candidate-dashboard h2 {
+  color: #2E2F2D;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.candidate-dashboard h3 {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.candidate-dashboard p.text-sm {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.candidate-dashboard .text-xs {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 639px) {
+  .candidate-dashboard {
+    gap: 1.25rem;
+  }
+
+  .candidate-dashboard section.rounded-2xl {
+    border-radius: 12px;
+  }
+}
+
 .candidate-profile-page {
   color: #214740;
 }
