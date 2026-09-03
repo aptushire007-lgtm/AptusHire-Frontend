@@ -46,7 +46,11 @@ export default function GoogleButton({ onError, onStart, onFinish }) {
           clearReturnTo();
           navigate(redirectTo, { replace: true });
         } catch (error) {
-          onError?.(error?.response?.data?.error || "Google sign-in failed. Please try again.");
+          const backendError = error?.response?.data?.error;
+          const message = error?.response
+            ? backendError || "Google sign-in could not be completed. Please try again."
+            : "The Backend is unavailable. Start the Backend after fixing its MongoDB connection, then try Google sign-in again.";
+          onError?.(message);
         } finally {
           onFinish?.();
         }
