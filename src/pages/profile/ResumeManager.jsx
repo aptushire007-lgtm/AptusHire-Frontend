@@ -41,6 +41,7 @@ export default function ResumeManager() {
   const [tags, setTags] = useState([]);
   const [extractedSkills, setExtractedSkills] = useState([]);
   const [newSkillInput, setNewSkillInput] = useState("");
+  const [replaceTarget, setReplaceTarget] = useState(null);
 
   const fileInputRef = useRef(null);
 
@@ -91,11 +92,15 @@ export default function ResumeManager() {
       });
 
       const uploaded = res.data;
+      if (replaceTarget) {
+        await api.patch(`/candidate-dashboard/resumes/${replaceTarget}/archive`, {}, { headers: accountAuthHeader() });
+      }
       setPendingVersion(uploaded);
       setCustomLabel(uploaded.label || file.name);
       setTags(uploaded.tags || ["Targeted"]);
       setExtractedSkills(uploaded.parsedSnapshot?.skills || []);
       setReviewModalOpen(true);
+      setReplaceTarget(null);
       await fetchVersions();
     } catch (err) {
       setError(err?.response?.data?.error || "Failed to upload and parse resume");
@@ -103,6 +108,11 @@ export default function ResumeManager() {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const startReplace = (id) => {
+    setReplaceTarget(id);
+    fileInputRef.current?.click();
   };
 
   const handleSaveReview = async () => {
@@ -197,7 +207,7 @@ export default function ResumeManager() {
       />
 
       {error && (
-        <div role="alert" className="flex items-center gap-2.5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+        <div role="alert" className="flex items-center gap-2.5 rounded-2xl border-2 border-[#B42318] bg-[#FDECEC] p-4 text-sm font-semibold text-[#8F1D14]">
           <AlertTriangle className="h-5 w-5 shrink-0" />
           <span>{error}</span>
           <button onClick={() => setError("")} className="ml-auto text-xs underline">Dismiss</button>
@@ -234,7 +244,8 @@ export default function ResumeManager() {
             />
             <label
               htmlFor="resume-version-upload"
-              className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all shadow-xs ${
+              onClick={() => setReplaceTarget(null)}
+              className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold !text-white transition-all shadow-xs ${
                 activeVersions.length >= 5
                   ? "cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
                   : "cursor-pointer bg-[#214740] text-white hover:bg-[#2E4F48] dark:bg-[#214740] dark:text-white"
@@ -279,6 +290,7 @@ export default function ResumeManager() {
                 onSetDefault={() => handleSetDefault(version._id)}
                 onArchive={() => handleArchive(version._id)}
                 onDelete={() => handleDelete(version._id)}
+                onReplace={() => startReplace(version._id)}
               />
             ))}
           </div>
@@ -390,7 +402,7 @@ export default function ResumeManager() {
   );
 }
 
-function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete }) {
+function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onReplace }) {
   const [shareLogOpen, setShareLogOpen] = useState(false);
   const skills = version.parsedSnapshot?.skills || [];
   const shareLog = version.shareLog || [];
@@ -403,13 +415,13 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete }) {
     }`}>
       <div>
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
+          <div className="flex min-w-0 items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
               <FileText className="h-5 w-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">
+            <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <h3 className="min-w-0 flex-1 font-display text-sm font-bold [overflow-wrap:anywhere] text-slate-900 dark:text-white">
                   {version.label}
                 </h3>
                 {version.isDefault && (
@@ -463,6 +475,13 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete }) {
           )}
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={onReplace}
+              title="Replace version"
+              className="tap-target rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            >
+              <UploadCloud className="h-4 w-4" />
+            </button>
             {shareLog.length > 0 && (
               <button
                 onClick={() => setShareLogOpen(!shareLogOpen)}

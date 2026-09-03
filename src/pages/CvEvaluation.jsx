@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, FileSearch, Info, ShieldCheck, UploadCloud } from "lucide-react";
-import { Link } from "react-router-dom";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 
@@ -140,12 +139,43 @@ function EvaluationCard({ section }) {
 
 export default function CvEvaluation() {
   const [resume, setResume] = useState(null);
+  const [versions, setVersions] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
   const analysis = resume ? analyseResume(resume) : null;
   useEffect(() => {
     api.get("/candidate-dashboard/resumes", { headers: accountAuthHeader() }).then(({ data }) => {
-      setResume((data.versions || []).find((version) => version.isDefault) || data.versions?.[0] || null);
-    }).catch(() => setResume(null));
+      const available = (data.versions || []).filter((version) => !version.isArchived);
+      setVersions(available);
+      setResume(available.find((version) => version.isDefault) || available[0] || null);
+    }).catch((err) => {
+      setError(err?.response?.data?.error || "Could not load your CVs.");
+    });
   }, []);
+
+  async function handleUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("resume", file);
+    formData.append("label", file.name);
+    try {
+      setUploading(true);
+      setError("");
+      const { data: uploaded } = await api.post("/candidate-dashboard/resumes/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data", ...accountAuthHeader() },
+      });
+      const next = [...versions, uploaded].filter((version) => !version.isArchived);
+      setVersions(next);
+      setResume(uploaded);
+    } catch (err) {
+      setError(err?.response?.data?.error || "Could not upload your CV.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   return (
     <div className="space-y-5 pb-8 text-[#14233A]">
@@ -155,8 +185,16 @@ export default function CvEvaluation() {
           <h1 className="text-[28px] font-semibold tracking-[-.02em] text-[#252B29]">Professional profile analysis</h1>
           <p className="mt-1 text-sm text-[#77807D]">A clear view of what your CV communicates to hiring teams.</p>
         </div>
-        <Link to="/profile?tab=resumes" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#214740] px-5 text-sm font-semibold text-white shadow-[0_7px_16px_rgba(33,71,64,.15)] hover:bg-[#2E4F48]"><UploadCloud className="h-4 w-4" /> Update CV</Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {versions.length > 0 && <select aria-label="Select CV for evaluation" value={resume?._id || ""} onChange={(event) => setResume(versions.find((version) => String(version._id) === event.target.value) || null)} className="min-h-11 max-w-full rounded-full border border-[#DDE8DE] bg-white px-3 text-sm text-[#214740]">
+            {versions.map((version) => <option key={version._id} value={version._id}>{version.label || "Saved CV"}</option>)}
+          </select>}
+          <input ref={fileInputRef} type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleUpload} className="hidden" />
+          <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#214740] px-5 text-sm font-semibold text-white shadow-[0_7px_16px_rgba(33,71,64,.15)] hover:bg-[#2E4F48] disabled:opacity-60"><UploadCloud className="h-4 w-4" /> {uploading ? "Uploading…" : "Upload CV"}</button>
+        </div>
       </div>
+
+      {error && <p role="alert" className="rounded-[14px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>}
 
       <div className="flex flex-wrap items-center gap-3 rounded-[14px] border border-[#DDE8DE] bg-[#F5FAF2] px-4 py-3 text-sm text-[#596660]">
         <ShieldCheck className="h-5 w-5 text-[#2FBE62]" />

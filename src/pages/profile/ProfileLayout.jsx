@@ -8,7 +8,6 @@ import {
   Wrench,
   FileText,
   Sliders,
-  Sparkles,
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
@@ -33,6 +32,7 @@ const TABS = [
   { id: "skills", label: "Skills", icon: Wrench },
   { id: "experience", label: "Experience", icon: Briefcase },
   { id: "preferences", label: "Work Preferences", icon: Sliders },
+  { id: "resumes", label: "Resumes", icon: FileText },
 ];
 
 export default function ProfileLayout() {
@@ -74,6 +74,7 @@ export default function ProfileLayout() {
     { id: "skills", label: "Skills", done: profile.skills?.length > 0 },
     { id: "experience", label: "Experience", done: profile.experience?.length > 0 },
     { id: "preferences", label: "Work Preferences", done: Boolean(profile.preferences?.availabilityWindow) },
+    { id: "resumes", label: "Resumes", done: Boolean(hasDefaultResume) },
   ];
 
   const handleTabChange = (tabId) => {
@@ -128,10 +129,10 @@ export default function ProfileLayout() {
         <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#EAF9E1]" role="progressbar" aria-valuenow={strength} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion">
           <div className="h-full rounded-full bg-[#214740] transition-[width] duration-500" style={{ width: `${strength}%` }} />
         </div>
-        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
           {setupSections.map((section) => (
-            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#C1EBAD] bg-[#EAF9E1] text-[#214740]" : "border-[#DFE5DF] bg-[#FBFBFD] text-[#707E79] hover:border-[#C1EBAD]"}`}>
-              <span aria-hidden="true" className="text-sm">{section.done ? "✓" : "○"}</span>
+            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#DFE5DF] bg-white text-[#214740] hover:border-[#C1EBAD]" : "border-[#DFE5DF] bg-[#FBFBFD] text-[#707E79] hover:border-[#C1EBAD]"}`}>
+              <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${section.done ? "bg-[#EAF9E1] text-[#214740]" : "text-[#8C9790]"}`}>{section.done ? "✓" : "○"}</span>
               <span>{section.label}</span>
             </button>
           ))}
@@ -178,10 +179,7 @@ export default function ProfileLayout() {
           {/* Profile Strength Card */}
           <Card className="rounded-3xl border border-[#DFE5DF] bg-white p-5 shadow-soft dark:border-[#DFE5DF] dark:bg-white">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs font-bold text-[#3B5D52]">
-                <Sparkles className="h-4 w-4 text-[#5A7B71]" />
-                Profile Strength
-              </span>
+              <span className="text-xs font-bold text-[#3B5D52]">Profile Strength</span>
               <span className="font-display text-base font-extrabold text-[#214740]">
                 {strength}%
               </span>
@@ -213,7 +211,7 @@ export default function ProfileLayout() {
                       {item.label}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-400">+{item.points}</span>
+                  <span className="text-[11px] font-bold text-[#214740]">{item.points}%</span>
                 </div>
               ))}
             </div>

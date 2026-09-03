@@ -1,12 +1,9 @@
 import { useEffect, useState, useCallback, useId, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  FileText,
   Bell,
   History,
-  Bookmark,
   Sparkles,
-  ExternalLink,
   ListChecks,
   AlertTriangle,
   CircleCheck,
@@ -557,11 +554,6 @@ export default function CandidateDashboard() {
     return () => socket.off("notification:new", onNotification);
   }, [load]);
 
-  async function toggleSaveJob(jobId) {
-    await api.post(`/candidate-dashboard/saved-jobs/${jobId}`, {}, { headers: accountAuthHeader() });
-    await load();
-  }
-
   async function markNotificationRead(id) {
     await api.patch(`/notifications/${id}/read`, {}, { headers: accountAuthHeader() });
     await load();
@@ -751,7 +743,6 @@ export default function CandidateDashboard() {
         {[
           { label: "Applications", value: applications.length, detail: "Total submitted", icon: Briefcase },
           { label: "Interviews", value: interviewCount, detail: "Scheduled or completed", icon: Video },
-          { label: "Assessments", value: data.assessments?.length || 0, detail: "Assigned or completed", icon: ClipboardList },
           { label: "Profile completion", value: pct, detail: "Profile strength", icon: UserRound },
         ].map(({ label, value, detail, icon: Icon }) => (
           <Card key={label} className="border-[#DFE5DF] !bg-white p-5 text-[#2E2F2D] shadow-xs dark:border-[#DFE5DF] dark:!bg-white">
@@ -772,9 +763,6 @@ export default function CandidateDashboard() {
       <ChipRow label="Jump to">
         <Chip as={Link} to="/" icon={Search}>
           Find Roles
-        </Chip>
-        <Chip as={Link} to="/profile?tab=resumes" icon={FileText}>
-          Resume Versions ★
         </Chip>
         <Chip as={Link} to="/profile" icon={UserRound}>
           My Profile &amp; Trust
@@ -898,53 +886,6 @@ export default function CandidateDashboard() {
       </SectionCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard id="assessments" title="Assessments" icon={ClipboardList}>
-          {data.assessments?.length ? (
-            <div className="space-y-3">
-              {data.assessments.map((s) => (
-                <div key={s._id} className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-brand-200">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="min-w-0 truncate text-sm font-semibold text-slate-800">{s.job?.title}</p>
-                    <Badge tone={s.status === "completed" ? "green" : s.status === "expired" ? "red" : "brand"}>
-                      {sessionStatusLabel(s.status)}
-                    </Badge>
-                  </div>
-                  {s.progress?.totalSections > 0 && (
-                    <p className="mt-1 text-xs text-slate-500">
-                      {s.progress.completedSections} of {s.progress.totalSections} sections complete
-                      {s.progress.totalItems > 0 ? ` · ${s.progress.answered}/${s.progress.totalItems} answered` : ""}
-                    </p>
-                  )}
-                  <p className="mt-1 text-xs text-slate-500">
-                    {s.status === "completed" ? "Submitted" : "Closes"}{" "}
-                    {formatAbsolute(s.status === "completed" ? s.completedAt : s.expiresAt)}
-                  </p>
-                  {/* Results belong to the hiring team until they choose to
-                      share them — saying so is better than an unexplained gap. */}
-                  {s.status === "completed" && (
-                    <p className="mt-1 text-xs text-slate-500">
-                      Results are reviewed by the hiring team and aren't shown here.
-                    </p>
-                  )}
-                  {openableSessions.has(String(s._id)) && (
-                    <Button
-                      size="sm"
-                      variant="orange"
-                      className="mt-2"
-                      loading={openingId === s._id}
-                      onClick={() => openSession(openableSessions.get(String(s._id)))}
-                    >
-                      {openLabel(openableSessions.get(String(s._id)))} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-slate-500">No assessments yet.</p>
-          )}
-        </SectionCard>
-
         <SectionCard id="interviews" title="Interviews" icon={Video}>
           {data.upcomingInterviews.length === 0 && data.aiInterviewHistory.length === 0 ? (
             <p className="text-sm text-slate-500">No interviews scheduled yet.</p>
@@ -976,27 +917,6 @@ export default function CandidateDashboard() {
           )}
         </SectionCard>
 
-        <SectionCard title="Resume" icon={FileText}>
-          {data.resume.hasResume ? (
-            // Uploaded filenames are user-supplied and routinely arrive as one
-            // 80-character unbroken string. It must be `overflow-wrap: anywhere`
-            // and not `break-words`: only `anywhere` reduces the min-content
-            // contribution, and this <p> sits in a grid track that otherwise
-            // sizes itself to the whole unbroken filename — measured at 569px
-            // wide in a 320px viewport before this changed.
-            <p className="text-sm [overflow-wrap:anywhere] text-verdict-positive">
-              Resume on file: {data.resume.latest.originalName}
-            </p>
-          ) : (
-            <p className="text-sm text-slate-500">No resume uploaded yet.</p>
-          )}
-          <Link to="/resume">
-            <Button variant="outline" size="sm" className="mt-3">
-              Manage Resumes
-            </Button>
-          </Link>
-        </SectionCard>
-
         <SectionCard title="Notifications" icon={Bell}>
           {data.notifications.length === 0 && <p className="text-sm text-slate-500">No notifications yet.</p>}
           <div className="space-y-3">
@@ -1026,62 +946,6 @@ export default function CandidateDashboard() {
           </Link>
         </SectionCard>
 
-        <SectionCard id="saved-jobs" title="Saved Jobs" icon={Bookmark}>
-          {data.savedJobs.length === 0 ? (
-            <p className="text-sm text-slate-500">No saved jobs yet.</p>
-          ) : (
-            <div className="space-y-2">
-              {data.savedJobs.map((job) => (
-                <div key={job._id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-brand-200">
-                  <div className="min-w-0">
-                    <Link to={`/jobs/${job.slug || job._id}`} className="block truncate text-sm font-semibold text-slate-800 hover:text-brand-700">
-                      {job.title}
-                    </Link>
-                    <p className="truncate text-xs text-slate-500">{job.company?.name}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => toggleSaveJob(job._id)}
-                    className={`${INLINE_ACTION} shrink-0 text-red-600 hover:bg-red-50 hover:underline focus-visible:ring-red-300`}
-                  >
-                    Remove
-                    <span className="sr-only"> {job.title} from saved jobs</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
-
-        <SectionCard id="recommended" title="Recommended Jobs" icon={Sparkles}>
-          {data.recommendedJobs.length === 0 ? (
-            <p className="text-sm text-slate-500">No recommendations yet — add skills to your profile to get matched.</p>
-          ) : (
-            <div className="space-y-2">
-              {data.recommendedJobs.map((job) => (
-                <div key={job._id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-brand-200">
-                  <div className="min-w-0">
-                    <Link
-                      to={`/jobs/${job.slug || job._id}`}
-                      className="flex items-center gap-1 truncate text-sm font-semibold text-slate-800 hover:text-brand-700"
-                    >
-                      {job.title} <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
-                    </Link>
-                    <p className="truncate text-xs text-slate-500">{job.company?.name}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => toggleSaveJob(job._id)}
-                    className={`${INLINE_ACTION} shrink-0 text-brand-700 hover:bg-brand-50 hover:underline focus-visible:ring-brand-300`}
-                  >
-                    Save
-                    <span className="sr-only"> {job.title}</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
       </div>
 
       <SectionCard title="Past interviews" icon={History}>

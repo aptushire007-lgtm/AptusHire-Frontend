@@ -130,7 +130,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
               ) : (
                 <>
                   <UploadCloud className="h-4 w-4" />
-                  <span>Upload &amp; Verify (+20%)</span>
+                  <span>Upload &amp; Verify (20%)</span>
                 </>
               )}
             </label>
@@ -181,7 +181,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
             <div>
               <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">LinkedIn Account</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Connect your LinkedIn profile to auto-verify career milestones (+10% strength).
+                Connect your LinkedIn profile to auto-verify career milestones (10% strength).
               </p>
             </div>
           </div>

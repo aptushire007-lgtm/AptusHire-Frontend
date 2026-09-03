@@ -302,6 +302,52 @@
   opacity: 1;
 }
 
+/* The account portal uses light surfaces even when the global dark preference
+   is active. Keep dark-mode utility text readable on those white cards. */
+.candidate-side .dark\:text-white,
+.candidate-side .dark\:text-slate-100,
+.candidate-side .dark\:text-slate-200,
+.candidate-side .dark\:text-slate-300 {
+  color: #214740 !important;
+}
+
+/* Filled controls intentionally invert their text. This must win over the
+   light-surface readability rule above. */
+.candidate-side label.bg-\[\#214740\],
+.candidate-side button.bg-\[\#214740\],
+.candidate-side a.bg-\[\#214740\] {
+  color: #FFFFFF !important;
+}
+
+/* Candidate account surfaces use sage/neutral status colors; avoid brown or
+   amber-looking accents in the persistent portal chrome. */
+.candidate-side .bg-amber-50,
+.candidate-side .bg-amber-100,
+.candidate-side .bg-amber-950\/40 {
+  background-color: #EAF9E1 !important;
+}
+
+.candidate-side .text-amber-700,
+.candidate-side .text-amber-800,
+.candidate-side .text-amber-900,
+.candidate-side .text-amber-300 {
+  color: #214740 !important;
+}
+
+.candidate-side .border-amber-200,
+.candidate-side .border-amber-300 {
+  border-color: #C1EBAD !important;
+}
+
+.candidate-side [role="alert"] .dark\:text-red-300,
+.candidate-side [role="alert"].dark\:text-red-300 {
+  color: #B42318 !important;
+}
+
+.candidate-side [role="alert"].dark\:bg-red-950\/40 {
+  background-color: #FDECEC !important;
+}
+
 /* Candidate dashboard: quiet surfaces, compact type, and one consistent visual
    language for the information-dense home screen. */
 .candidate-dashboard {

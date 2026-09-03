@@ -35,7 +35,7 @@ export default function ExperienceTab({ profile, onRefresh }) {
     try {
       setSaving(true);
       await api.put("/candidate-dashboard/profile/experience", { experience }, { headers: accountAuthHeader() });
-      setSuccess("Experience history saved successfully (+10% profile strength).");
+      setSuccess("Experience history saved successfully (10% profile strength).");
       setTimeout(() => setSuccess(""), 4000);
       onRefresh();
     } catch (err) {
@@ -71,7 +71,7 @@ export default function ExperienceTab({ profile, onRefresh }) {
           <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
             <Briefcase className="mx-auto h-10 w-10 text-slate-400" />
             <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">No experience added</p>
-            <p className="mt-0.5 text-xs text-slate-500">Adding at least one role awards +10% profile strength.</p>
+            <p className="mt-0.5 text-xs text-slate-500">Adding at least one role awards 10% profile strength.</p>
             <Button size="sm" className="mt-4" onClick={addEntry}>Add Experience</Button>
           </div>
         ) : (

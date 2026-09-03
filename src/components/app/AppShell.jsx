@@ -24,6 +24,8 @@ import NotificationBell from "./NotificationBell.jsx";
 import { BrandLogo, AptusMark } from "../ui/BrandLogo.jsx";
 import ThemeToggle from "../ui/ThemeToggle.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import api from "../../api/client.js";
+import { accountAuthHeader } from "../../auth/accountAuth.js";
 
 /**
  * The candidate app's chrome: a collapsible left rail, a slim header that owns
@@ -61,24 +63,23 @@ const ACCOUNT_NAV_GROUPS = [
     label: "Main",
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
-      { to: "/", label: "Find Jobs", icon: Briefcase, end: true },
-      { to: "/dashboard#recommended", label: "Recommended", icon: Sparkles, anchor: true },
+      { to: "/", label: "Find Jobs", icon: Briefcase, end: true, hideWhenRecommended: true },
+      { to: "/?recommended=1", label: "Recommended", icon: Sparkles, recommendedOnly: true },
       { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
       { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
-      { to: "/cv-evaluation", label: "CV Evaluation", icon: ScanSearch, badge: "1" },
+      { to: "/cv-evaluation", label: "CV Evaluation", icon: ScanSearch },
     ],
   },
   {
     label: "My Progress",
     items: [
-      { to: "/assessments", label: "Past Assessment", icon: ClipboardList },
+      { to: "/assessments", label: "Assessment", icon: ClipboardList, badgeKey: "assessments" },
     ],
   },
   {
     label: "Account",
     items: [
       { to: "/profile", label: "Profile", icon: UserRound },
-      { to: "/profile?tab=resumes", label: "Resume", icon: FileText },
       { to: "/account", label: "Settings", icon: Settings },
     ],
   },
@@ -125,6 +126,24 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [ta
 // name is a maze to anyone listing landmarks to get their bearings.
 function SidebarNav({ collapsed, onNavigate, label }) {
   const { isAuthenticated } = useAccountAuth();
+  const { search } = useLocation();
+  const [counts, setCounts] = useState({ assessments: 0 });
+
+  useEffect(() => {
+    if (!isAuthenticated) return undefined;
+    let active = true;
+    api.get("/candidate-dashboard", { headers: accountAuthHeader() })
+      .then(({ data }) => {
+        if (!active) return;
+        const assessments = data.assessments || [];
+        setCounts({
+          assessments: assessments.filter((assessment) => !["completed", "expired", "cancelled"].includes(String(assessment.status || "").toLowerCase())).length,
+        });
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [isAuthenticated]);
+
   const groups = isAuthenticated
     ? ACCOUNT_NAV_GROUPS
     : [{ label: null, items: PUBLIC_NAV }];
@@ -147,7 +166,7 @@ function SidebarNav({ collapsed, onNavigate, label }) {
               title={collapsed ? item.label : undefined}
               className={({ isActive }) =>
                 `${NAV_ROW} ${collapsed ? "justify-center px-2" : ""} ${
-                  isActive && !item.anchor
+                  isActive && !item.anchor && !(item.hideWhenRecommended && search.includes("recommended=1")) && !(item.recommendedOnly && !search.includes("recommended=1"))
                     ? "bg-[#EAF9E1] font-semibold text-[#214740]"
                     : "text-[#707E79] hover:bg-[#F7F8F8] hover:text-[#2E2F2D]"
                 }`
@@ -155,9 +174,9 @@ function SidebarNav({ collapsed, onNavigate, label }) {
             >
               <item.icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
               <span className={collapsed ? "sr-only" : "truncate"}>{item.label}</span>
-              {item.badge && !collapsed && (
+              {item.badgeKey && !collapsed && (
                 <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-md bg-[#F0F2F5] px-1.5 py-0.5 text-[11px] font-bold text-[#67736E]">
-                  {item.badge}
+                  {counts[item.badgeKey] || 0}
                 </span>
               )}
             </NavLink>
@@ -221,7 +240,7 @@ function HeaderActions({ onNavigate, showThemeToggle = true }) {
           <Link
             to="/account"
             onClick={onNavigate}
-            className={`${HEADER_ACTION} text-[#214740] hover:bg-[#EAF9E1] hover:text-[#214740] focus-visible:ring-[#C1EBAD]`}
+            className={`${HEADER_ACTION} !bg-transparent !text-[#214740] hover:!bg-[#EAF9E1] hover:!text-[#214740] focus-visible:ring-[#C1EBAD]`}
           >
             <UserRound className="h-4 w-4 shrink-0" aria-hidden="true" />
             {/* The name is the first thing to go on a narrow header — the icon
@@ -236,7 +255,7 @@ function HeaderActions({ onNavigate, showThemeToggle = true }) {
               onNavigate?.();
               navigate("/login");
             }}
-            className={`${HEADER_ACTION} text-[#2E4F48] hover:bg-[#EAF9E1] hover:text-[#214740] focus-visible:ring-[#C1EBAD]`}
+            className={`${HEADER_ACTION} !bg-transparent !text-[#214740] hover:!bg-[#EAF9E1] hover:!text-[#214740] focus-visible:ring-[#C1EBAD]`}
           >
             <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">Log Out</span>

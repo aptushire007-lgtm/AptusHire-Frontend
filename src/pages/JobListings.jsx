@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Briefcase, MapPin, ArrowRight, GraduationCap, Clock, Search, X, Bookmark, Check, SlidersHorizontal } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
@@ -125,12 +125,15 @@ function JobCard({ job, saved, onToggleSave, saving }) {
 
 export default function JobListings() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const recommendationsOnly = searchParams.get("recommended") === "1";
   const { isAuthenticated } = useAccountAuth();
   const [jobs, setJobs] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
   const [savingId, setSavingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [recommendedOrder, setRecommendedOrder] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState({ location: "", experience: "", skills: "", company: "", department: "" });
@@ -143,6 +146,7 @@ export default function JobListings() {
     const department = filters.department.trim().toLowerCase();
     const minimumExperience = filters.experience === "" ? null : Number(filters.experience);
     const matches = jobs.filter((job) => {
+      if (recommendationsOnly && !recommendedOrder.includes(String(job._id))) return false;
       const jobSkills = (job.requiredSkills || []).map((skill) => skill.toLowerCase());
       return (!location || String(job.location || "").toLowerCase().includes(location))
         && (minimumExperience === null || Number(job.minExperienceYears || 0) >= minimumExperience)
@@ -152,9 +156,11 @@ export default function JobListings() {
     });
     const ranked = matches.map((job) => ({ job, score: query.trim() ? jobSearchScore(job, query) : 0 }));
     const visible = query.trim() ? ranked.filter(({ score }) => score >= 0) : ranked;
-    visible.sort((a, b) => sort === "match" ? b.score - a.score : new Date(b.job.createdAt || 0) - new Date(a.job.createdAt || 0));
+    visible.sort((a, b) => recommendationsOnly
+      ? recommendedOrder.indexOf(String(a.job._id)) - recommendedOrder.indexOf(String(b.job._id))
+      : sort === "match" ? b.score - a.score : new Date(b.job.createdAt || 0) - new Date(a.job.createdAt || 0));
     return visible.map(({ job }) => job);
-  }, [filters, jobs, query, sort]);
+  }, [filters, jobs, query, recommendationsOnly, recommendedOrder, sort]);
 
   useEffect(() => {
     Promise.all([
@@ -165,7 +171,10 @@ export default function JobListings() {
     ])
       .then(([jobsRes, dashboardRes]) => {
         setJobs(jobsRes.data);
-        if (dashboardRes) setSavedIds(new Set((dashboardRes.data.savedJobs || []).map((job) => String(job._id || job))));
+        if (dashboardRes) {
+          setSavedIds(new Set((dashboardRes.data.savedJobs || []).map((job) => String(job._id || job))));
+          setRecommendedOrder((dashboardRes.data.recommendedJobs || []).map((job) => String(job._id)));
+        }
       })
       .catch(() => setError("We couldn't load jobs right now. Please try again."))
       .finally(() => setLoading(false));
@@ -201,9 +210,9 @@ export default function JobListings() {
   return (
     <div className="space-y-6">
       <PageHero
-        title="Open positions"
+        title={recommendationsOnly ? "Recommended jobs" : "Open positions"}
         descriptionClassName="text-[13px] font-normal text-[#707E79]"
-        description="Apply once — AI screening and interviews take it from there. Every step names who it's waiting on and when it closes."
+        description={recommendationsOnly ? "Roles ranked for your profile, resume skills, and experience." : "Apply once — AI screening and interviews take it from there. Every step names who it's waiting on and when it closes."}
         points={["One application per role", "Evidence-backed screening", "Track every stage"]}
         pointsClassName="text-[12px]"
       />
@@ -243,7 +252,7 @@ export default function JobListings() {
         </button>
       </form>
 
-      <section aria-label="Job filters" className="rounded-2xl border border-[#DFE5DF] bg-white p-4 shadow-card">
+      {!recommendationsOnly && <section aria-label="Job filters" className="rounded-2xl border border-[#DFE5DF] bg-white p-4 shadow-card">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-[13px] font-semibold text-[#2E2F2D]"><SlidersHorizontal className="h-4 w-4 text-[#214740]" /> Filters</div>
           {hasFilters && <button type="button" onClick={() => { setFilters({ location: "", experience: "", skills: "", company: "", department: "" }); setQuery(""); setSearchInput(""); setSort("match"); }} className="text-[12px] font-semibold text-[#214740] hover:underline">Clear all</button>}
@@ -259,7 +268,7 @@ export default function JobListings() {
           <label className="text-[12px] font-semibold text-[#707E79]">Remote<select disabled title="Remote preference is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#ECF3EB] px-3 text-[13px] font-normal text-[#707E79]"><option>Not available</option></select></label>
         </div>
         <p className="mt-3 text-[11px] text-[#707E79]">Some filters will appear once those fields are supported by the job data.</p>
-      </section>
+      </section>}
 
       {error && (
         <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4">

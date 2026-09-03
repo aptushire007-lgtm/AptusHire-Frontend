@@ -30,7 +30,7 @@ export default function EducationTab({ profile, onRefresh }) {
     try {
       setSaving(true);
       await api.put("/candidate-dashboard/profile/education", { education }, { headers: accountAuthHeader() });
-      setSuccess("Education history saved successfully (+10% profile strength).");
+      setSuccess("Education history saved successfully (10% profile strength).");
       setTimeout(() => setSuccess(""), 4000);
       onRefresh();
     } catch (err) {
@@ -66,7 +66,7 @@ export default function EducationTab({ profile, onRefresh }) {
           <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
             <GraduationCap className="mx-auto h-10 w-10 text-slate-400" />
             <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">No education added</p>
-            <p className="mt-0.5 text-xs text-slate-500">Adding at least one education entry awards +10% profile strength.</p>
+            <p className="mt-0.5 text-xs text-slate-500">Adding at least one education entry awards 10% profile strength.</p>
             <Button size="sm" className="mt-4" onClick={addEntry}>Add Education</Button>
           </div>
         ) : (
