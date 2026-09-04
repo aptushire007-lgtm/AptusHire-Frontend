@@ -13,18 +13,17 @@ export function AptusMark({ size = 32, className = "" }) {
     >
       <defs>
         <linearGradient id="aptusGradComponent" x1="15%" y1="0%" x2="85%" y2="100%">
-          <stop offset="0%" stopColor="#D4F056" />
-          <stop offset="38%" stopColor="#7CDE4A" />
-          <stop offset="68%" stopColor="#2FBE62" />
-          <stop offset="100%" stopColor="#12B98A" />
+          <stop offset="0%" stopColor="#8BD83A" />
+          <stop offset="55%" stopColor="#3E7C59" />
+          <stop offset="100%" stopColor="#2F6B4F" />
         </linearGradient>
         <linearGradient id="aptusFoldComponent" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#0E3B2E" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="#0E3B2E" stopOpacity="0" />
+          <stop offset="0%" stopColor="#2F6B4F" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#2F6B4F" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="aptusPersonComponent" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#55D858" />
-          <stop offset="100%" stopColor="#1AA368" />
+          <stop offset="0%" stopColor="#8BD83A" />
+          <stop offset="100%" stopColor="#3E7C59" />
         </linearGradient>
       </defs>
 
@@ -55,18 +54,18 @@ export function BrandLogo({
   className = "",
   onClick,
 }) {
-  let textColor = "text-[#0C1F1B] dark:text-[#F3F7F1]";
-  let taglineColor = "text-[#5B6B63] dark:text-[#9AADA4]";
-  let hireColor = "text-[#1A9A4F] dark:text-[#7CDE4A]";
+  let textColor = "text-primary dark:text-white";
+  let taglineColor = "text-text-muted";
+  let hireColor = "text-primary dark:text-lime";
 
   if (theme === "dark") {
     textColor = "text-white";
     taglineColor = "text-slate-300";
-    hireColor = "text-[#7CDE4A]";
+    hireColor = "text-lime";
   } else if (theme === "light") {
-    textColor = "text-[#0C1F1B]";
-    taglineColor = "text-[#5B6B63]";
-    hireColor = "text-[#1A9A4F]";
+    textColor = "text-primary";
+    taglineColor = "text-text-muted";
+    hireColor = "text-primary";
   }
 
   const iconSizes = {
@@ -133,7 +132,7 @@ export function BrandLogo({
       <Link
         to={to}
         onClick={onClick}
-        className="inline-flex items-center rounded-lg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+        className="inline-flex items-center rounded-lg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         {content}
       </Link>

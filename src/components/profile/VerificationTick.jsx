@@ -18,23 +18,23 @@ export default function VerificationTick({
 }) {
   const configs = {
     verified: {
-      bg: "bg-[#EAF9E1] dark:bg-[#EAF9E1]",
-      text: "text-[#3B5D52] dark:text-[#3B5D52]",
-      border: "border-[#D2ECC9] dark:border-[#D2ECC9]",
+      bg: "bg-brand-50 dark:bg-brand-50",
+      text: "text-primary dark:text-primary",
+      border: "border-brand-200 dark:border-brand-200",
       icon: CheckCircle2,
       label: "Verified",
     },
     pending: {
-      bg: "bg-[#EAF9E1] dark:bg-[#EAF9E1]",
-      text: "text-[#3B5D52] dark:text-[#3B5D52]",
-      border: "border-[#D2ECC9] dark:border-[#D2ECC9]",
+      bg: "bg-brand-50 dark:bg-brand-50",
+      text: "text-primary dark:text-primary",
+      border: "border-brand-200 dark:border-brand-200",
       icon: Clock,
       label: "Pending Verification",
     },
     missing: {
-      bg: "bg-[#ECF3EB] dark:bg-[#ECF3EB]",
-      text: "text-[#5A7B71] dark:text-[#5A7B71]",
-      border: "border-[#D2ECC9] dark:border-[#D2ECC9]",
+      bg: "bg-canvas dark:bg-canvas",
+      text: "text-text-muted dark:text-text-muted",
+      border: "border-brand-200 dark:border-brand-200",
       icon: Minus,
       label: "Not Verified",
     },
@@ -65,7 +65,7 @@ export default function VerificationTick({
         <button
           type="button"
           onClick={onFix}
-          className="text-xs font-bold text-red-600 underline hover:text-red-700 dark:text-red-400"
+          className="text-xs font-bold text-red-600 underline hover:text-red-700"
         >
           Fix
         </button>
@@ -74,7 +74,7 @@ export default function VerificationTick({
         <button
           type="button"
           onClick={onFix}
-          className="text-sm font-bold text-[#3B5D52] hover:text-[#214740] dark:text-[#3B5D52]"
+          className="text-sm font-bold text-primary hover:text-primary dark:text-primary"
         >
           {fixLabel}
         </button>

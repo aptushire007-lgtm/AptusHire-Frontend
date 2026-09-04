@@ -173,7 +173,7 @@ export default function ScorecardForm() {
       <Shell>
         <Card className="text-center">
           <Loader2 className="mx-auto h-6 w-6 animate-spin text-brand-600" />
-          <p className="mt-3 text-sm text-slate-500">Loading your scorecard…</p>
+          <p className="mt-3 text-sm text-text-muted">Loading your scorecard…</p>
         </Card>
       </Shell>
     );
@@ -186,7 +186,7 @@ export default function ScorecardForm() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
             <AlertTriangle className="h-6 w-6" />
           </div>
-          <h1 className="text-lg font-semibold text-slate-900">Scorecard unavailable</h1>
+          <h1 className="text-lg font-semibold text-text-strong">Scorecard unavailable</h1>
           <p className="mt-2 text-sm font-medium text-red-600">{loadError}</p>
           <Button variant="outline" className="mt-5" onClick={() => navigate("/welcome")}>
             Close
@@ -206,40 +206,40 @@ export default function ScorecardForm() {
               <CheckCircle2 className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-slate-900">Scorecard recorded</h1>
-              <p className="mt-1 text-sm text-slate-600">{result.message}</p>
+              <h1 className="text-lg font-semibold text-text-strong">Scorecard recorded</h1>
+              <p className="mt-1 text-sm text-text-muted">{result.message}</p>
             </div>
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Your rating</p>
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Your rating</p>
               {result.score === null ? (
                 <>
-                  <p className="mt-1 text-2xl font-bold text-slate-400">Not scored</p>
-                  <p className="mt-1 text-xs text-slate-500">{result.withheldReason}</p>
+                  <p className="mt-1 text-2xl font-bold text-text-faint">Not scored</p>
+                  <p className="mt-1 text-xs text-text-muted">{result.withheldReason}</p>
                 </>
               ) : (
                 <>
-                  <p className="mt-1 text-3xl font-bold text-slate-900">{result.score}</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-3xl font-bold text-text-strong">{result.score}</p>
+                  <p className="mt-1 text-xs text-text-muted">
                     Computed from your per-criterion ratings and this role&apos;s rubric weights — not entered by you or by AI.
                   </p>
                 </>
               )}
             </div>
-            <div className="rounded-xl border border-slate-200 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                 What the screening engine had
               </p>
               {result.engineSnapshot?.score === null || result.engineSnapshot?.score === undefined ? (
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-text-muted">
                   No engine score for this candidate — nothing to compare against.
                 </p>
               ) : (
                 <>
-                  <p className="mt-1 text-3xl font-bold text-slate-900">{result.engineSnapshot.score}</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-3xl font-bold text-text-strong">{result.engineSnapshot.score}</p>
+                  <p className="mt-1 text-xs text-text-muted">
                     {result.disagreement?.delta === null || result.disagreement?.delta === undefined
                       ? "No comparison available."
                       : result.disagreement.delta === 0
@@ -254,7 +254,7 @@ export default function ScorecardForm() {
           </div>
 
           {result.reproducibilityHash && (
-            <p className="mt-5 flex items-center gap-2 text-xs text-slate-400">
+            <p className="mt-5 flex items-center gap-2 text-xs text-text-faint">
               <ShieldCheck className="h-3.5 w-3.5" />
               Record {result.reproducibilityHash.slice(0, 12)} — the same observations will always produce the same number.
             </p>
@@ -270,11 +270,11 @@ export default function ScorecardForm() {
     <Shell>
       {/* Header */}
       <div className="mb-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
           {payload.stage?.replace(/_/g, " ")}
         </p>
-        <h1 className="mt-1 text-xl font-bold text-slate-900">{payload.candidate?.name}</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="mt-1 text-xl font-bold text-text-strong">{payload.candidate?.name}</h1>
+        <p className="text-sm text-text-muted">
           {payload.job?.title}
           {payload.job?.department ? ` · ${payload.job.department}` : ""} · rubric v{payload.rubricVersion}
         </p>
@@ -300,8 +300,8 @@ export default function ScorecardForm() {
             <Card key={c.id} className="p-5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h2 className="text-base font-semibold text-slate-900">{c.label}</h2>
-                  <p className="mt-0.5 text-xs text-slate-500">{c.rationale}</p>
+                  <h2 className="text-base font-semibold text-text-strong">{c.label}</h2>
+                  <p className="mt-0.5 text-xs text-text-muted">{c.rationale}</p>
                 </div>
                 <Badge tone={c.kind === "must_have" ? "brand" : "slate"}>
                   {c.kind === "must_have" ? "Must have" : "Nice to have"}
@@ -309,8 +309,8 @@ export default function ScorecardForm() {
               </div>
 
               {c.probeHint && (
-                <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                  <strong className="text-slate-700">Suggested probe:</strong> {c.probeHint}
+                <p className="mt-3 rounded-lg bg-brand-50 px-3 py-2 text-xs text-text-muted">
+                  <strong className="text-text-muted font-semibold">Suggested probe:</strong> {c.probeHint}
                 </p>
               )}
 
@@ -326,7 +326,7 @@ export default function ScorecardForm() {
                       const v = row.claimVerdicts?.[t.claimId] || {};
                       return (
                         <div key={t.claimId} className="rounded-lg bg-white/70 p-2.5">
-                          <p className="text-sm text-slate-800">&ldquo;{t.summary}&rdquo;</p>
+                          <p className="text-sm text-text-strong">&ldquo;{t.summary}&rdquo;</p>
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {VERDICT_OPTIONS.map((o) => (
                               <button
@@ -335,8 +335,8 @@ export default function ScorecardForm() {
                                 onClick={() => setVerdict(c.id, t.claimId, { verdict: v.verdict === o.value ? "" : o.value })}
                                 className={`tap-target rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
                                   v.verdict === o.value
-                                    ? "bg-slate-900 text-white"
-                                    : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                                    ? "bg-primary text-white"
+                                    : "bg-surface text-text-muted ring-1 ring-border hover:bg-brand-50"
                                 }`}
                                 title={o.help}
                               >
@@ -351,7 +351,7 @@ export default function ScorecardForm() {
                               value={v.note || ""}
                               onChange={(e) => setVerdict(c.id, t.claimId, { note: e.target.value })}
                               placeholder="What did they say? A rough quote is enough."
-                              className="mt-2 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+                              className="mt-2 w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-brand-100"
                             />
                           )}
                         </div>
@@ -371,7 +371,7 @@ export default function ScorecardForm() {
                 onChange={(e) => patchRow(c.id, { note: e.target.value })}
                 rows={2}
                 placeholder="e.g. Walked through a Sev1 he was primary on-call for, named the rollback step."
-                className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+                className="mt-1.5 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-brand-100"
               />
 
               {/* Rating — inert until there is something behind it */}
@@ -387,10 +387,10 @@ export default function ScorecardForm() {
                       title={payload.ratingLabels?.[n]}
                       className={`tap-target h-10 w-10 rounded-xl text-sm font-bold transition ${
                         active
-                          ? "bg-brand-600 text-white shadow-soft"
+                          ? "bg-primary text-white shadow-soft"
                           : hasNote
-                            ? "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
-                            : "cursor-not-allowed bg-slate-100 text-slate-300"
+                            ? "bg-surface text-text-muted ring-1 ring-border hover:bg-brand-50"
+                            : "cursor-not-allowed bg-canvas text-text-faint"
                       }`}
                     >
                       {n}
@@ -402,8 +402,8 @@ export default function ScorecardForm() {
                   onClick={() => patchRow(c.id, { notAssessed: true, rating: null })}
                   className={`tap-target rounded-xl px-3 py-2 text-sm font-semibold transition ${
                     row.notAssessed
-                      ? "bg-slate-800 text-white"
-                      : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                      ? "bg-primary text-white"
+                      : "bg-surface text-text-muted ring-1 ring-border hover:bg-brand-50"
                   }`}
                 >
                   Not assessed
@@ -411,13 +411,13 @@ export default function ScorecardForm() {
               </div>
 
               {!hasNote ? (
-                <p className="mt-2 text-xs text-slate-400">
+                <p className="mt-2 text-xs text-text-faint">
                   Add an observation to enable the rating — or leave this as Not assessed.
                 </p>
               ) : (
                 !row.notAssessed &&
                 row.rating && (
-                  <p className="mt-2 text-xs text-slate-500">{payload.ratingLabels?.[row.rating]}</p>
+                  <p className="mt-2 text-xs text-text-muted">{payload.ratingLabels?.[row.rating]}</p>
                 )
               )}
             </Card>
@@ -427,11 +427,11 @@ export default function ScorecardForm() {
 
       {/* Decision */}
       <Card className="mt-5 p-5">
-        <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+        <h2 className="flex items-center gap-2 text-base font-semibold text-text-strong">
           <ClipboardCheck className="h-4 w-4 text-brand-600" />
           Your recommendation
         </h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-text-muted">
           This is a recommendation, not the decision — a recruiter reviews it alongside the other rounds.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
@@ -442,12 +442,12 @@ export default function ScorecardForm() {
               onClick={() => setDecision(d)}
               className={`rounded-xl px-4 py-3 text-left transition ${
                 decision === d
-                  ? "bg-slate-900 text-white"
-                  : "bg-white ring-1 ring-slate-200 hover:bg-slate-50"
+                  ? "bg-primary text-white"
+                  : "bg-surface ring-1 ring-border hover:bg-brand-50"
               }`}
             >
               <span className="block text-sm font-semibold">{DECISION_COPY[d]?.label || d}</span>
-              <span className={`block text-xs ${decision === d ? "text-slate-300" : "text-slate-500"}`}>
+              <span className={`block text-xs ${decision === d ? "text-white/80" : "text-text-muted"}`}>
                 {DECISION_COPY[d]?.help}
               </span>
             </button>
@@ -457,13 +457,13 @@ export default function ScorecardForm() {
         {decision === "decline" && (
           <div className="mt-3">
             <label className="block text-xs font-semibold text-slate-700">
-              Why? <span className="font-normal text-slate-500">(required — a decline is recorded with its reason)</span>
+              Why? <span className="font-normal text-text-muted">(required — a decline is recorded with its reason)</span>
             </label>
             <textarea
               value={decisionReason}
               onChange={(e) => setDecisionReason(e.target.value)}
               rows={2}
-              className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+              className="mt-1.5 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-brand-100"
               placeholder="Could not evidence the must-have at any depth."
             />
           </div>
@@ -474,14 +474,14 @@ export default function ScorecardForm() {
         )}
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-text-muted">
             {assessedCount} of {payload.criteria.length} criteria rated · your notes save as you type
           </p>
           <Button onClick={submit} loading={submitting} disabled={!decisionValid} size="lg">
             Submit scorecard
           </Button>
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-text-faint">
           Once submitted it can&apos;t be edited — it becomes part of the hiring record.
         </p>
       </Card>

@@ -29,20 +29,20 @@ export default function MarketingNavbar() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#EDF1ED] bg-[#FBFDF8]/95 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur-md transition-colors">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
         <BrandLogo to="/welcome" size="lg" textWeight="font-medium" theme="light" />
 
         <nav className="hidden items-center gap-9 md:flex">
           {LINKS.map((link) => (
-            <a key={link.label} href={link.href} className="text-[15px] font-semibold text-[#2E2F2D] transition-colors hover:text-[#214740]">
+            <a key={link.label} href={link.href} className="text-[15px] font-semibold text-text-strong transition-colors hover:text-primary">
               {link.label}
             </a>
           ))}
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="ghost" size="sm" className="rounded-full px-4 text-[15px] text-[#214740]" onClick={() => navigate("/login")}>
+          <Button variant="ghost" size="sm" className="rounded-full px-4 text-[15px] text-primary" onClick={() => navigate("/login")}>
             Log In
           </Button>
           <Button size="sm" className="rounded-full px-5 py-2.5 text-[15px] shadow-[0_8px_20px_rgba(33,71,64,0.16)]" onClick={() => navigate("/register")}>
@@ -53,7 +53,7 @@ export default function MarketingNavbar() {
         <button
           ref={menuButtonRef}
           type="button"
-          className="tap-target -mr-2 inline-flex items-center justify-center rounded-lg p-2 text-[#214740] hover:bg-[#EAF9E1] md:hidden"
+          className="tap-target -mr-2 inline-flex items-center justify-center rounded-lg p-2 text-primary hover:bg-brand-50 md:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
           aria-expanded={open}
@@ -63,10 +63,10 @@ export default function MarketingNavbar() {
       </div>
 
       {open && (
-        <div className="border-t border-[#EDF1ED] bg-[#FBFDF8] px-5 pb-5 pt-3 md:hidden">
+        <div className="border-t border-border bg-surface px-5 pb-5 pt-3 md:hidden">
           <nav className="flex flex-col gap-3">
             {LINKS.map((link) => (
-              <a key={link.label} href={link.href} className="tap-target flex items-center py-1 text-[15px] font-semibold text-[#2E2F2D]" onClick={() => setOpen(false)}>
+              <a key={link.label} href={link.href} className="tap-target flex items-center py-1 text-[15px] font-semibold text-text-strong" onClick={() => setOpen(false)}>
                 {link.label}
               </a>
             ))}

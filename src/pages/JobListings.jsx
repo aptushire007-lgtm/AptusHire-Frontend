@@ -56,11 +56,11 @@ function CompanySticker({ company }) {
   const [logoFailed, setLogoFailed] = useState(false);
   const logo = company?.logoPath;
   return (
-    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#DFE5DF] bg-white shadow-card">
+    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-control border border-border bg-surface shadow-card">
       {logo && !logoFailed ? (
         <img src={logo} alt={`${company?.name || "Company"} logo`} className="h-full w-full object-contain p-1.5" onError={() => setLogoFailed(true)} />
       ) : (
-        <span className="flex h-full w-full items-center justify-center bg-[#EAF9E1] text-[15px] font-bold text-[#214740]">
+        <span className="flex h-full w-full items-center justify-center bg-brand-50 text-[15px] font-bold text-primary">
           {companyInitials(company?.name)}
         </span>
       )}
@@ -72,16 +72,16 @@ function JobCard({ job, saved, onToggleSave, saving }) {
   const to = `/jobs/${job.slug || job._id}`;
 
   return (
-    <Card interactive className="relative flex h-full flex-col border-[#DFE5DF] bg-white dark:border-[#DFE5DF] dark:bg-white">
+    <Card interactive className="relative flex h-full flex-col border-border bg-surface">
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="text-[15px] leading-6 font-semibold text-[#2E2F2D]">
-            <Link to={to} className="hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600">
+          <h2 className="text-[15px] leading-6 font-semibold text-text">
+            <Link to={to} className="hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
               {job.title}
             </Link>
           </h2>
-          <p className="mt-1 truncate text-[14px] text-[#3B5D52]">
-            {job.company?.name && <span className="font-medium text-[#0E3B2E]">{job.company.name}</span>}
+          <p className="mt-1 truncate text-[14px] text-primary">
+            {job.company?.name && <span className="font-medium text-primary">{job.company.name}</span>}
             {job.company?.name && job.department ? " · " : ""}
             {job.department}
           </p>
@@ -94,30 +94,30 @@ function JobCard({ job, saved, onToggleSave, saving }) {
             disabled={saving}
             aria-label={saved ? `Unsave ${job.title}` : `Save ${job.title}`}
             aria-pressed={saved}
-            className={`tap-target inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${saved ? "border-[#C1EBAD] bg-[#EAF9E1] text-[#214740]" : "border-[#DFE5DF] bg-white text-[#707E79] hover:bg-[#EAF9E1] hover:text-[#214740]"}`}
+            className={`tap-target inline-flex h-9 w-9 items-center justify-center rounded-control border transition-colors ${saved ? "border-brand-300 bg-brand-50 text-primary" : "border-border bg-surface text-text-muted hover:bg-brand-50 hover:text-primary"}`}
           >
             {saved ? <Bookmark className="h-4 w-4 fill-current" aria-hidden="true" /> : <Bookmark className="h-4 w-4" aria-hidden="true" />}
           </button>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[#0E3B2E]">
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-primary">
         <MetaItem icon={MapPin}>{job.location}</MetaItem>
         <MetaItem icon={Clock}>{experienceLabel(job.minExperienceYears)}</MetaItem>
         <MetaItem icon={GraduationCap}>{job.requiredEducation}</MetaItem>
       </div>
 
       {job.description && (
-        <p className="mt-3 line-clamp-1 text-[14px] leading-5 text-[#434B47]">{job.description}</p>
+        <p className="mt-3 line-clamp-1 text-[14px] leading-5 text-text-muted">{job.description}</p>
       )}
 
       <TokenList className="mt-3" items={job.requiredSkills} max={6} />
 
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#EDF1ED] pt-3">
-        <Link to={to} className="inline-flex min-h-10 items-center gap-2 rounded-[9px] bg-[#214740] px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#2E4F48] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#C1EBAD]">
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3">
+        <Link to={to} className="inline-flex min-h-10 items-center gap-2 rounded-control bg-primary px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime">
           View Job <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
-        {saved && <span className="text-[12px] font-medium text-[#707E79]">Saved</span>}
+        {saved && <span className="text-[12px] font-medium text-text-muted">Saved</span>}
       </div>
     </Card>
   );
@@ -211,7 +211,7 @@ export default function JobListings() {
     <div className="space-y-6">
       <PageHero
         title={recommendationsOnly ? "Recommended jobs" : "Open positions"}
-        descriptionClassName="text-[13px] font-normal text-[#707E79]"
+        descriptionClassName="text-[13px] font-normal text-text-muted"
         description={recommendationsOnly ? "Roles ranked for your profile, resume skills, and experience." : "Apply once — AI screening and interviews take it from there. Every step names who it's waiting on and when it closes."}
         points={["One application per role", "Evidence-backed screening", "Track every stage"]}
         pointsClassName="text-[12px]"
@@ -223,51 +223,51 @@ export default function JobListings() {
           event.preventDefault();
           setQuery(searchInput.trim());
         }}
-        className="flex flex-col gap-3 rounded-2xl border border-[#DFE5DF] bg-white p-4 shadow-card sm:flex-row"
+        className="flex flex-col gap-3 rounded-card border border-border bg-surface p-4 shadow-card sm:flex-row"
       >
         <label className="sr-only" htmlFor="job-search">Search open roles</label>
         <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#5A7B71]" aria-hidden="true" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" aria-hidden="true" />
           <input
             id="job-search"
             type="search"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             placeholder="Search jobs, skills, companies..."
-            className="h-12 w-full rounded-[10px] border border-[#DFE5DF] bg-[#FBFBFD] py-3 pl-11 pr-11 text-[15px] text-[#2E2F2D] placeholder:text-[#8C9790] focus:border-[#5A7B71] focus:outline-none focus:ring-3 focus:ring-[#C1EBAD]/40"
+            className="h-12 w-full rounded-control border border-border bg-surface py-3 pl-11 pr-11 text-[15px] text-text placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/20"
           />
           {(searchInput || query) && (
             <button
               type="button"
               onClick={() => { setSearchInput(""); setQuery(""); }}
-              className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#707E79] hover:bg-[#EAF9E1] hover:text-[#214740]"
+              className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-control text-text-muted hover:bg-brand-50 hover:text-primary"
               aria-label="Clear job search"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
         </div>
-        <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-[10px] bg-[#214740] px-6 text-[15px] font-semibold text-white transition-colors hover:bg-[#2E4F48]">
+        <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-control bg-primary px-6 text-[15px] font-semibold text-white transition-colors hover:bg-primary-dark">
           <Search className="h-4 w-4" aria-hidden="true" /> Search jobs
         </button>
       </form>
 
-      {!recommendationsOnly && <section aria-label="Job filters" className="rounded-2xl border border-[#DFE5DF] bg-white p-4 shadow-card">
+      {!recommendationsOnly && <section aria-label="Job filters" className="rounded-card border border-border bg-surface p-4 shadow-card">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-[13px] font-semibold text-[#2E2F2D]"><SlidersHorizontal className="h-4 w-4 text-[#214740]" /> Filters</div>
-          {hasFilters && <button type="button" onClick={() => { setFilters({ location: "", experience: "", skills: "", company: "", department: "" }); setQuery(""); setSearchInput(""); setSort("match"); }} className="text-[12px] font-semibold text-[#214740] hover:underline">Clear all</button>}
+          <div className="flex items-center gap-2 text-[13px] font-semibold text-text"><SlidersHorizontal className="h-4 w-4 text-primary" /> Filters</div>
+          {hasFilters && <button type="button" onClick={() => { setFilters({ location: "", experience: "", skills: "", company: "", department: "" }); setQuery(""); setSearchInput(""); setSort("match"); }} className="text-[12px] font-semibold text-primary hover:underline">Clear all</button>}
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="text-[12px] font-semibold text-[#707E79]">Location<input value={filters.location} onChange={(event) => updateFilter("location", event.target.value)} placeholder="City or region" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]" /></label>
-          <label className="text-[12px] font-semibold text-[#707E79]">Experience<select value={filters.experience} onChange={(event) => updateFilter("experience", event.target.value)} className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]"><option value="">Any experience</option><option value="0">Entry level</option><option value="2">2+ years</option><option value="5">5+ years</option><option value="8">8+ years</option></select></label>
-          <label className="text-[12px] font-semibold text-[#707E79]">Skills<input value={filters.skills} onChange={(event) => updateFilter("skills", event.target.value)} placeholder="e.g. React, SQL" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]" /></label>
-          <label className="text-[12px] font-semibold text-[#707E79]">Company<input value={filters.company} onChange={(event) => updateFilter("company", event.target.value)} placeholder="Company name" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]" /></label>
-          <label className="text-[12px] font-semibold text-[#707E79]">Industry<input value={filters.department} onChange={(event) => updateFilter("department", event.target.value)} placeholder="Department" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#FBFBFD] px-3 text-[13px] font-normal text-[#2E2F2D]" /></label>
-          <label className="text-[12px] font-semibold text-[#707E79]">Job type<select disabled title="Job type is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#ECF3EB] px-3 text-[13px] font-normal text-[#707E79]"><option>Not available</option></select></label>
-          <label className="text-[12px] font-semibold text-[#707E79]">Salary<select disabled title="Salary is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#ECF3EB] px-3 text-[13px] font-normal text-[#707E79]"><option>Not available</option></select></label>
-          <label className="text-[12px] font-semibold text-[#707E79]">Remote<select disabled title="Remote preference is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-[#DFE5DF] bg-[#ECF3EB] px-3 text-[13px] font-normal text-[#707E79]"><option>Not available</option></select></label>
+          <label className="text-[12px] font-semibold text-text-muted">Location<input value={filters.location} onChange={(event) => updateFilter("location", event.target.value)} placeholder="City or region" className="mt-1 h-10 w-full rounded-[9px] border border-border bg-surface px-3 text-[13px] font-normal text-text-strong" /></label>
+          <label className="text-[12px] font-semibold text-text-muted">Experience<select value={filters.experience} onChange={(event) => updateFilter("experience", event.target.value)} className="mt-1 h-10 w-full rounded-[9px] border border-border bg-surface px-3 text-[13px] font-normal text-text-strong"><option value="">Any experience</option><option value="0">Entry level</option><option value="2">2+ years</option><option value="5">5+ years</option><option value="8">8+ years</option></select></label>
+          <label className="text-[12px] font-semibold text-text-muted">Skills<input value={filters.skills} onChange={(event) => updateFilter("skills", event.target.value)} placeholder="e.g. React, SQL" className="mt-1 h-10 w-full rounded-[9px] border border-border bg-surface px-3 text-[13px] font-normal text-text-strong" /></label>
+          <label className="text-[12px] font-semibold text-text-muted">Company<input value={filters.company} onChange={(event) => updateFilter("company", event.target.value)} placeholder="Company name" className="mt-1 h-10 w-full rounded-[9px] border border-border bg-surface px-3 text-[13px] font-normal text-text-strong" /></label>
+          <label className="text-[12px] font-semibold text-text-muted">Industry<input value={filters.department} onChange={(event) => updateFilter("department", event.target.value)} placeholder="Department" className="mt-1 h-10 w-full rounded-[9px] border border-border bg-surface px-3 text-[13px] font-normal text-text-strong" /></label>
+          <label className="text-[12px] font-semibold text-text-muted">Job type<select disabled title="Job type is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-border bg-canvas px-3 text-[13px] font-normal text-text-muted"><option>Not available</option></select></label>
+          <label className="text-[12px] font-semibold text-text-muted">Salary<select disabled title="Salary is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-border bg-canvas px-3 text-[13px] font-normal text-text-muted"><option>Not available</option></select></label>
+          <label className="text-[12px] font-semibold text-text-muted">Remote<select disabled title="Remote preference is not available in the current job API" className="mt-1 h-10 w-full rounded-[9px] border border-border bg-canvas px-3 text-[13px] font-normal text-text-muted"><option>Not available</option></select></label>
         </div>
-        <p className="mt-3 text-[11px] text-[#707E79]">Some filters will appear once those fields are supported by the job data.</p>
+        <p className="mt-3 text-[11px] text-text-muted">Some filters will appear once those fields are supported by the job data.</p>
       </section>}
 
       {error && (
@@ -292,22 +292,22 @@ export default function JobListings() {
           <EmptyState
             icon={Briefcase}
             title="No open positions right now"
-            descriptionClassName="text-[13px] font-normal text-[#707E79]"
+            descriptionClassName="text-[13px] font-normal text-text-muted"
             description="Check back soon — new roles are posted regularly."
           />
         </div>
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[13px] text-[#707E79]"><span className="font-semibold text-[#2E2F2D]">{filteredJobs.length}</span>{" "}{query ? `matching ${query}` : `${filteredJobs.length === 1 ? "role is" : "roles are"} open right now`}.</p>
-            <label className="flex items-center gap-2 text-[12px] font-semibold text-[#707E79]">Sort by<select value={sort} onChange={(event) => setSort(event.target.value)} className="h-9 rounded-[9px] border border-[#DFE5DF] bg-white px-2 text-[12px] font-semibold text-[#2E2F2D]"><option value="match">Best Match</option><option value="newest">Newest</option><option value="salary" disabled>Salary unavailable</option></select></label>
+            <p className="text-[13px] text-text-muted"><span className="font-semibold text-text-strong">{filteredJobs.length}</span>{" "}{query ? `matching ${query}` : `${filteredJobs.length === 1 ? "role is" : "roles are"} open right now`}.</p>
+            <label className="flex items-center gap-2 text-[12px] font-semibold text-text-muted">Sort by<select value={sort} onChange={(event) => setSort(event.target.value)} className="h-9 rounded-[9px] border border-border bg-white px-2 text-[12px] font-semibold text-text-strong"><option value="match">Best Match</option><option value="newest">Newest</option><option value="salary" disabled>Salary unavailable</option></select></label>
           </div>
           {filteredJobs.length === 0 ? (
             <EmptyState
               icon={Search}
               title="No matching roles"
               description="Try a different role, skill, company, location, or a shorter search phrase."
-              descriptionClassName="text-[14px] text-[#707E79]"
+              descriptionClassName="text-[14px] text-text-muted"
             />
           ) : (
             /* `items-stretch` keeps every card in a row aligned. */

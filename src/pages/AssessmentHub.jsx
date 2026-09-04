@@ -344,7 +344,7 @@ export default function AssessmentHub() {
                           <div
                             className={`h-full ${
                               status !== "completed"
-                                ? "bg-brand-600"
+                                ? "bg-primary"
                                 : answered === total
                                   ? "bg-verdict-positive"
                                   : "bg-slate-400"

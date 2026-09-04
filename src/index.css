@@ -1,154 +1,216 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Lexend", "Inter", system-ui, sans-serif;
+/**
+ * ============================================================
+ *  AptusHire — Centralized Design Token System
+ *  User / Candidate Frontend
+ *  Tailwind CSS v4 (@theme block = single source of truth)
+ *
+ *  PALETTE PHILOSOPHY
+ *  ------------------
+ *  Green    → Primary brand identity, main actions, active states
+ *  Gold/Orange → Warm accent for highlights, CTAs, badges, metrics
+ *  White/Cream → Page backgrounds, card surfaces (clean + premium)
+ *  Charcoal  → Typography — high-contrast, readable, professional
+ *
+ *  RULES
+ *  -----
+ *  • No raw black (#000) on surfaces. Deepest text = charcoal (#1C2B27).
+ *  • No dark-green or near-black sidebar backgrounds.
+ *  • No neon lime on its own — only as a tint/background pair.
+ *  • Orange/gold is an ACCENT — never for status/verdict semantics.
+ *  • Verdict semantics: green=positive, gold=pending, red=negative.
+ * ============================================================
+ */
 
-  /* ---- Type scale --------------------------------------------------------- */
-  --text-xs: 0.8125rem;
+@theme {
+  /* ── Typography ─────────────────────────────────────────── */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Inter", system-ui, sans-serif;
+
+  /* Type scale */
+  --text-xs:              0.75rem;
   --text-xs--line-height: 1.4;
-  --text-sm: 0.9375rem;
+  --text-sm:              0.875rem;
   --text-sm--line-height: 1.55;
-  --text-base: 1.0625rem;
+  --text-base:            1rem;
   --text-base--line-height: 1.65;
 
-  /* ---- Core Official AptusHire Brand Tokens ------------------------------ */
-  --aptus-lime: #7CDE4A;
-  --aptus-lime-bright: #D4F056;
-  --aptus-green: #2FBE62;
-  --aptus-teal: #12B98A;
-  --aptus-forest: #0E3B2E;
-  --aptus-ink: #0C1F1B;
-  --aptus-night: #081210;
-  --aptus-cream: #F3F7F1;
-  --aptus-paper: #FAFCF8;
-  --aptus-white: #FFFFFF;
-  --aptus-cloud: #E3EBE4;
-  --aptus-mist: #C5D2C8;
-  --aptus-slate: #5B6B63;
-  --aptus-body: #24332E;
+  /* ── Core Brand Colors ──────────────────────────────────── */
 
-  /* ---- Brand Scale (Forest to Lime) -------------------------------------- */
-  --color-brand-50: #F4FDE8;
-  --color-brand-100: #E4F8C6;
-  --color-brand-200: #D4F056;
-  --color-brand-300: #B6E84A;
-  --color-brand-400: #7CDE4A;
-  --color-brand-500: #2FBE62;
-  --color-brand-600: #1A9A4F;
-  --color-brand-700: #147A40;
-  --color-brand-800: #0E3B2E;
-  --color-brand-900: #0C1F1B;
-  --color-brand-950: #081210;
+  /* PRIMARY: AptusHire Green — identity, main CTAs, active states */
+  --color-primary:        #1E7B5B;   /* rich mid-green — main action color  */
+  --color-primary-dark:   #185F47;   /* hover / pressed state              */
+  --color-primary-light:  #D0EDE3;   /* tint surface for primary context   */
+  --color-brand-green:    #1E7B5B;   /* alias used throughout components   */
 
-  /* ---- Accent Scale (Teal Intelligence) ---------------------------------- */
-  --color-accent-50: #E8FBF5;
-  --color-accent-100: #C7F4E6;
-  --color-accent-200: #8BE8CB;
-  --color-accent-300: #4DD6B0;
-  --color-accent-400: #12B98A;
-  --color-accent-500: #0E9A74;
-  --color-accent-600: #0C7D5F;
-  --color-accent-700: #0A624B;
-  --color-accent-800: #084538;
-  --color-accent-900: #062E26;
-  --color-accent-950: #041F1A;
+  /* SECONDARY ACCENT: Warm Gold/Orange — highlights, badges, metrics */
+  --color-accent-gold:       #D4860A;   /* warm amber-gold — AAA on white    */
+  --color-accent-gold-dark:  #B06F08;   /* hover/pressed state               */
+  --color-accent-gold-light: #FEF3DC;   /* soft tint background              */
+  --color-accent-gold-mid:   #F9C96C;   /* mid for badges, pips              */
 
-  /* ---- Green-cast Neutrals (Paper, Cream, Cloud, Mist, Slate, Ink, Night) - */
-  --color-slate-50: #FAFCF8;
-  --color-slate-100: #F3F7F1;
-  --color-slate-200: #E3EBE4;
-  --color-slate-300: #C5D2C8;
-  --color-slate-400: #8FA297;
-  --color-slate-500: #5B6B63;
-  --color-slate-600: #3E4E46;
-  --color-slate-700: #24332E;
-  --color-slate-800: #162420;
-  --color-slate-900: #0C1F1B;
-  --color-slate-950: #081210;
+  /* Keep legacy orange token names mapped to gold for backward compat */
+  --color-accent-orange:      #D4860A;
+  --color-accent-orange-soft: #FEF3DC;
 
-  /* ---- Outcomes / Hiring Semantics --------------------------------------- */
-  --color-verdict-positive: #2FBE62;
-  --color-verdict-positive-tint: #EAF8E4;
-  --color-verdict-pending: #E8A317;
-  --color-verdict-pending-tint: #FFF6E0;
-  --color-verdict-negative: #D4534A;
-  --color-verdict-negative-tint: #FDECEC;
+  /* GREEN SCALE — 50→950 perceptual ramp */
+  --color-brand-50:  #F0FAF5;
+  --color-brand-100: #D0EDE3;
+  --color-brand-200: #A3D9C7;
+  --color-brand-300: #6CC2A8;
+  --color-brand-400: #3EA88A;
+  --color-brand-500: #1E7B5B;   /* === PRIMARY ===                      */
+  --color-brand-600: #185F47;   /* primary dark / hover                 */
+  --color-brand-700: #124A38;
+  --color-brand-800: #0C3428;
+  --color-brand-900: #081F18;
+  --color-brand-950: #040F0C;
 
-  /* Canvas */
-  --color-canvas: #FAFCF8;
-  --color-canvas-deep: #F3F7F1;
+  /* ── Surface & Background Colors ───────────────────────── */
+  --color-canvas:       #F7F8F6;   /* page body — light warm-grey         */
+  --color-canvas-deep:  #EEF0EC;   /* second-level page background        */
+  --color-background:   #F7F8F6;   /* alias — used in components          */
+  --color-surface:      #FFFFFF;   /* card / panel fill                   */
+  --color-surface-alt:  #FAFBF9;   /* slightly off-white for nested cards */
 
-  /* Elevation */
-  --shadow-card: 0 1px 3px rgba(8, 18, 16, 0.05), 0 1px 2px rgba(8, 18, 16, 0.03);
-  --shadow-soft: 0 4px 20px -2px rgba(8, 18, 16, 0.08), 0 2px 6px -1px rgba(8, 18, 16, 0.04);
-  --shadow-lift: 0 12px 30px -4px rgba(8, 18, 16, 0.10), 0 6px 12px -2px rgba(8, 18, 16, 0.04);
-  --shadow-deep: 0 24px 50px -12px rgba(8, 18, 16, 0.16);
+  /* CREAM — warm off-white tones for premium feel */
+  --color-cream:        #FDFCF8;   /* warmest near-white                  */
+  --color-cream-mid:    #F5F3EE;   /* warm off-white, section backgrounds */
 
-  /* Motion */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  /* ── Typography Colors ─────────────────────────────────── */
+  --color-text:         #1C2B27;   /* primary text — dark charcoal-green  */
+  --color-text-strong:  #111A17;   /* headings — deepest charcoal         */
+  --color-text-muted:   #5A6E67;   /* secondary/muted text                */
+  --color-text-faint:   #8A9E97;   /* placeholder, disabled               */
+  --color-text-on-fill: #FFFFFF;   /* text on colored fills               */
+
+  /* ── Border Colors ─────────────────────────────────────── */
+  --color-border:       #E2E8E5;   /* default border                      */
+  --color-border-mid:   #CBD6D2;   /* stronger dividers                   */
+  --color-border-brand: #A3D9C7;   /* brand-tinted border                 */
+
+  /* ── Verdict / Hiring Outcome Semantics ─────────────────── */
+  --color-verdict-positive:      #1E7B5B;
+  --color-verdict-positive-tint: #D0EDE3;
+  --color-verdict-pending:       #D4860A;
+  --color-verdict-pending-tint:  #FEF3DC;
+  --color-verdict-negative:      #C2392D;
+  --color-verdict-negative-tint: #FDECEA;
+
+  /* LIME — active-state indicator strip & hover tints */
+  --color-lime:         #4FBA8A;   /* bright green for active indicators  */
+  --color-lime-soft:    #D0EDE3;   /* active nav background tint          */
+
+  /* ── Neutral / Greyscale (warm-charcoal cast) ───────────── */
+  --color-slate-50:  #FFFFFF;
+  --color-slate-100: #F7F8F6;
+  --color-slate-200: #E2E8E5;
+  --color-slate-300: #CBD6D2;
+  --color-slate-400: #9BADA7;
+  --color-slate-500: #5A6E67;
+  --color-slate-600: #44554E;
+  --color-slate-700: #2E3E39;
+  --color-slate-800: #1E2E2A;
+  --color-slate-900: #1C2B27;   /* body text charcoal                  */
+  --color-slate-950: #111A17;
+
+  /* ── Elevation / Shadows ───────────────────────────────── */
+  --shadow-card:  0 1px 3px rgba(28, 43, 39, 0.06), 0 1px 2px rgba(28, 43, 39, 0.04);
+  --shadow-soft:  0 4px 16px rgba(28, 43, 39, 0.08);
+  --shadow-lift:  0 8px 28px rgba(28, 43, 39, 0.10);
+  --shadow-deep:  0 20px 48px -8px rgba(28, 43, 39, 0.14);
+  --shadow-glow:  0 0 0 3px rgba(30, 123, 91, 0.18);
+
+  /* ── Spacing ────────────────────────────────────────────── */
+  --spacing-page-x:        1.5rem;
+  --spacing-page-y:        1.5rem;
+  --spacing-card:          1.25rem;
+  --spacing-card-lg:       1.5rem;
+  --spacing-table-cell-x:  0.875rem;
+  --spacing-table-cell-y:  0.75rem;
+
+  /* ── Shape / Radius ─────────────────────────────────────── */
+  --radius-control: 0.5rem;
+  --radius-card:    0.75rem;
+  --radius-panel:   1rem;
+  --radius-pill:    9999px;
+
+  /* ── Control Heights ───────────────────────────────────── */
+  --control-height-sm: 2.125rem;
+  --control-height-md: 2.5rem;
+  --control-height-lg: 2.75rem;
+  --input-height:      2.75rem;
+
+  /* ── Motion Easings ─────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── Named aptus-* tokens (kept for backward compat) ───── */
+  --aptus-ink:    #1C2B27;
+  --aptus-cream:  #F7F8F6;
+  --aptus-paper:  #FFFFFF;
+  --aptus-forest: #1E7B5B;
+  --aptus-green:  #1E7B5B;
+  --aptus-lime:   #4FBA8A;
+  --aptus-body:   #1C2B27;
 }
 
-/* AptusHire premium SaaS design system */
+/* ─────────────────────────────────────────────────────────────
+   Legacy :root aliases — keep in sync with @theme above
+   ───────────────────────────────────────────────────────────── */
 :root {
-  --green-900: #214740; --green-800: #2E4F48; --green-700: #3B5D52; --green-500: #5A7B71;
-  --lime-400: #C1EBAD; --lime-200: #D2ECC9; --lime-100: #EAF9E1;
-  --background: #ECF3EB; --surface: #FBFBFD; --white: #FFFFFF;
-  --text-primary: #2E2F2D; --text-secondary: #707E79; --text-muted: #8C9790;
-  --border: #DFE5DF; --border-light: #EDF1ED;
-  --font-family: "Inter", sans-serif;
+  --background:     #F7F8F6;
+  --surface:        #FFFFFF;
+  --white:          #FFFFFF;
+  --text-primary:   #1C2B27;
+  --text-secondary: #5A6E67;
+  --text-muted:     #5A6E67;
+  --border:         #E2E8E5;
+  --border-light:   #EEF1EE;
+  --green-900:      #124A38;
+  --green-700:      #1E7B5B;
+  --green-500:      #3EA88A;
+  --lime-400:       #4FBA8A;
+  --lime-200:       #D0EDE3;
+  --font-family:    "Inter", sans-serif;
 }
 
-@theme {
-  --font-sans: "Inter", system-ui, sans-serif; --font-display: "Inter", system-ui, sans-serif;
-  --text-xs: 0.8125rem; --text-xs--line-height: 1.2rem; --text-sm: 0.9375rem; --text-sm--line-height: 1.45rem;
-  --text-base: 1rem; --text-base--line-height: 1.55rem;
-  --color-brand-50: #F7FAF6; --color-brand-100: #EAF9E1; --color-brand-200: #D2ECC9;
-  --color-brand-300: #C1EBAD; --color-brand-400: #5A7B71; --color-brand-500: #4A6B61;
-  --color-brand-600: #3B5D52; --color-brand-700: #2E4F48; --color-brand-800: #214740; --color-brand-900: #193A34;
-  --color-slate-50: #F7F8F8; --color-slate-100: #EDF1ED; --color-slate-200: #DFE5DF;
-  --color-slate-300: #C9D2CC; --color-slate-400: #8C9790; --color-slate-500: #707E79;
-  --color-slate-600: #596660; --color-slate-700: #434B47; --color-slate-800: #353936; --color-slate-900: #2E2F2D;
-  --color-canvas: #ECF3EB; --color-canvas-deep: #E6EEE5;
-  --shadow-card: 0 1px 3px rgba(33, 71, 64, 0.04); --shadow-soft: 0 6px 20px rgba(33, 71, 64, 0.08);
-}
-
+/* ─────────────────────────────────────────────────────────────
+   Base Layer
+   ───────────────────────────────────────────────────────────── */
 @layer base {
   html {
     font-family: var(--font-sans);
     overflow-x: clip;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     background-color: var(--color-canvas);
-    color: var(--color-slate-900);
-    @apply antialiased;
+    color: var(--color-text);
+    line-height: 1.6;
     overflow-x: clip;
+    /* Force light mode — the candidate product has one palette */
+    color-scheme: light;
   }
 
-  html.dark {
-    color-scheme: dark;
-    --color-canvas: #081210;
-    --color-canvas-deep: #050D0B;
+  /* Lock to light — the candidate UI has no dark mode */
+  html.dark body,
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-text);
   }
 
-  .dark body {
-    background-color: #081210;
-    color: #F3F7F1;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4 {
+  h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    @apply tracking-tight;
+    color: var(--color-text-strong);
+    letter-spacing: -0.02em;
+    line-height: 1.25;
   }
 
-  /* Form controls */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -159,88 +221,155 @@
   input[type="date"],
   select,
   textarea {
-    @apply rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs transition-colors dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100;
+    min-height: var(--input-height);
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: var(--color-text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   input:focus,
   select:focus,
   textarea:focus {
-    @apply border-brand-800 ring-2 ring-brand-700/20 outline-none dark:border-brand-400 dark:ring-brand-400/20;
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(30, 123, 91, 0.15);
+  }
+
+  ::selection {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
   }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Utility Layer
+   ───────────────────────────────────────────────────────────── */
 @layer utilities {
   .bg-grid {
     background-image:
-      linear-gradient(to right, rgba(14, 59, 46, 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(14, 59, 46, 0.04) 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-
-  .dark .bg-grid {
-    background-image:
-      linear-gradient(to right, rgba(124, 222, 74, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(124, 222, 74, 0.05) 1px, transparent 1px);
+      linear-gradient(to right, rgba(30, 123, 91, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30, 123, 91, 0.05) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
   .bg-aurora {
     background-image:
-      radial-gradient(58rem 32rem at 12% -10%, rgba(124, 222, 74, 0.14), transparent 62%),
-      radial-gradient(46rem 28rem at 92% 6%, rgba(18, 185, 138, 0.12), transparent 64%),
-      radial-gradient(52rem 34rem at 50% 108%, rgba(227, 235, 228, 0.5), transparent 66%);
+      radial-gradient(52rem 28rem at 10% -8%, rgba(30, 123, 91, 0.08), transparent 60%),
+      radial-gradient(40rem 24rem at 90% 5%, rgba(212, 134, 10, 0.07), transparent 62%),
+      radial-gradient(46rem 32rem at 50% 110%, rgba(208, 237, 227, 0.45), transparent 65%);
   }
 
-  .dark .bg-aurora {
-    background-image:
-      radial-gradient(58rem 32rem at 12% -10%, rgba(124, 222, 74, 0.12), transparent 62%),
-      radial-gradient(46rem 28rem at 92% 6%, rgba(18, 185, 138, 0.10), transparent 64%),
-      radial-gradient(52rem 34rem at 50% 108%, rgba(8, 18, 16, 0.9), transparent 66%);
-  }
+  .surface-brand  { background: var(--color-primary-light); }
+  .surface-ember  { background: var(--color-accent-gold-light); }
+  .surface-cream  { background: var(--color-cream-mid); }
+  .fill-brand { background: var(--color-primary); }
+  .fill-gold  { background: var(--color-accent-gold); }
+  /* backward-compat alias — fill-ember was used in some components */
+  .fill-ember { background: var(--color-accent-gold); }
 
-  .surface-brand {
-    background-image: linear-gradient(160deg, #F4FDE8 0%, #FFFFFF 65%);
-  }
-
-  .dark .surface-brand {
-    background-image: linear-gradient(160deg, #122420 0%, #0C1F1B 100%);
-  }
-
-  .surface-ember {
-    background-image: linear-gradient(160deg, #FFF6E0 0%, #FFFFFF 65%);
-  }
-
-  .dark .surface-ember {
-    background-image: linear-gradient(160deg, #241D12 0%, #0C1F1B 100%);
-  }
-
-  .fill-brand {
-    background-image: linear-gradient(150deg, #0E3B2E 0%, #081210 100%);
-  }
-
-  .fill-ember {
-    background-image: linear-gradient(150deg, #D4F056 0%, #7CDE4A 100%);
-  }
-
-.tap-target {
+  .tap-target {
     min-height: 44px;
     min-width: 44px;
   }
+
+  .ring-brand { box-shadow: var(--shadow-glow); }
+  .table-row-hover:hover { background: var(--color-brand-50); }
 }
 
-/* Candidate application typography and controls. Scoped to this long form so
-   its larger reading size does not change the denser dashboard components. */
+/* ─────────────────────────────────────────────────────────────
+   Candidate-side scoped overrides
+   (locks all candidate/user pages to the light palette and
+    ensures form controls have consistent brand styling)
+   ───────────────────────────────────────────────────────────── */
+.candidate-side {
+  background: var(--color-canvas);
+  color: var(--color-text);
+  color-scheme: light;
+}
+
+.candidate-side header,
+.candidate-side header a,
+.candidate-side header button {
+  color: var(--color-text);
+}
+
+.candidate-side .text-slate-400,
+.candidate-side .text-slate-500 {
+  color: var(--color-text-muted);
+}
+
+.candidate-side input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.candidate-side textarea,
+.candidate-side select {
+  border-color: var(--color-border) !important;
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+}
+
+.candidate-side input::placeholder,
+.candidate-side textarea::placeholder {
+  color: var(--color-text-faint) !important;
+  opacity: 1;
+}
+
+/* Keep dark-mode utility classes readable on light candidate surfaces */
+.candidate-side .dark\:text-white,
+.candidate-side .dark\:text-slate-100,
+.candidate-side .dark\:text-slate-200,
+.candidate-side .dark\:text-slate-300 {
+  color: var(--color-text) !important;
+}
+
+/* Filled controls — white text must win over the light-surface rule */
+.candidate-side label.bg-primary,
+.candidate-side button.bg-primary,
+.candidate-side a.bg-primary {
+  color: #FFFFFF !important;
+}
+
+/* Amber/warning colors → brand gold equivalents */
+.candidate-side .bg-amber-50,
+.candidate-side .bg-amber-100,
+.candidate-side .bg-amber-950\/40 {
+  background-color: var(--color-accent-gold-light) !important;
+}
+
+.candidate-side .text-amber-700,
+.candidate-side .text-amber-800,
+.candidate-side .text-amber-900,
+.candidate-side .text-amber-300 {
+  color: var(--color-accent-gold) !important;
+}
+
+.candidate-side .border-amber-200,
+.candidate-side .border-amber-300 {
+  border-color: var(--color-accent-gold-mid) !important;
+}
+
+.candidate-side [role="alert"] .dark\:text-red-300 {
+  color: var(--color-verdict-negative) !important;
+}
+
+.candidate-side [role="alert"].dark\:bg-red-950\/40 {
+  background-color: var(--color-verdict-negative-tint) !important;
+}
+
+/* ── Application form surface ───────────────────────────── */
 .application-form-page {
-  color: #2E2F2D;
+  color: var(--color-text);
 }
 
 .application-form-surface input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 .application-form-surface textarea,
 .application-form-surface select {
   min-height: 46px;
-  border-color: #D5DED7;
-  background: #FFFFFF;
-  color: #2E2F2D;
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -248,130 +377,33 @@
 .application-form-surface input:disabled,
 .application-form-surface textarea:disabled,
 .application-form-surface select:disabled {
-  background: #F3F6F3;
-  color: #596660;
+  background: var(--color-canvas);
+  color: var(--color-text-muted);
 }
 
 .application-form-surface label {
-  color: #2E2F2D;
+  color: var(--color-text);
   font-size: 14px;
   line-height: 1.35rem;
 }
 
-.application-form-surface .text-xs {
-  font-size: 13px;
-  line-height: 1.25rem;
-}
+.application-form-surface .text-xs { font-size: 13px; line-height: 1.25rem; }
+.application-form-surface .text-sm { font-size: 15px; line-height: 1.5rem; }
 
-.application-form-surface .text-sm {
-  font-size: 15px;
-  line-height: 1.5rem;
-}
-
-/* Candidate pages always use the approved sage light palette. These explicit
-   surfaces also protect readability when a browser still has an old dark-theme
-   preference cached from an earlier version of the portal. */
-.candidate-side {
-  background: #ECF3EB;
-  color: #214740;
-  color-scheme: light;
-}
-
-.candidate-side header,
-.candidate-side header a,
-.candidate-side header button {
-  color: #214740;
-}
-
-.candidate-side .text-slate-400,
-.candidate-side .text-slate-500 {
-  color: #5A7B71;
-}
-
-.candidate-side input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-.candidate-side textarea,
-.candidate-side select {
-  border-color: #D2ECC9 !important;
-  background-color: #FBFBFD !important;
-  color: #214740 !important;
-}
-
-.candidate-side input::placeholder,
-.candidate-side textarea::placeholder {
-  color: #5A7B71 !important;
-  opacity: 1;
-}
-
-/* The account portal uses light surfaces even when the global dark preference
-   is active. Keep dark-mode utility text readable on those white cards. */
-.candidate-side .dark\:text-white,
-.candidate-side .dark\:text-slate-100,
-.candidate-side .dark\:text-slate-200,
-.candidate-side .dark\:text-slate-300 {
-  color: #214740 !important;
-}
-
-/* Filled controls intentionally invert their text. This must win over the
-   light-surface readability rule above. */
-.candidate-side label.bg-\[\#214740\],
-.candidate-side button.bg-\[\#214740\],
-.candidate-side a.bg-\[\#214740\] {
-  color: #FFFFFF !important;
-}
-
-/* Candidate account surfaces use sage/neutral status colors; avoid brown or
-   amber-looking accents in the persistent portal chrome. */
-.candidate-side .bg-amber-50,
-.candidate-side .bg-amber-100,
-.candidate-side .bg-amber-950\/40 {
-  background-color: #EAF9E1 !important;
-}
-
-.candidate-side .text-amber-700,
-.candidate-side .text-amber-800,
-.candidate-side .text-amber-900,
-.candidate-side .text-amber-300 {
-  color: #214740 !important;
-}
-
-.candidate-side .border-amber-200,
-.candidate-side .border-amber-300 {
-  border-color: #C1EBAD !important;
-}
-
-.candidate-side [role="alert"] .dark\:text-red-300,
-.candidate-side [role="alert"].dark\:text-red-300 {
-  color: #B42318 !important;
-}
-
-.candidate-side [role="alert"].dark\:bg-red-950\/40 {
-  background-color: #FDECEC !important;
-}
-
-/* Candidate dashboard: quiet surfaces, compact type, and one consistent visual
-   language for the information-dense home screen. */
+/* ── Candidate dashboard ────────────────────────────────── */
 .candidate-dashboard {
-  color: #2E2F2D;
-}
-
-.candidate-dashboard .bg-white,
-.candidate-dashboard .dark\:bg-white {
-  background-color: #FBFBFD !important;
-}
-
-.candidate-dashboard .border-slate-200 {
-  border-color: #DFE5DF;
+  color: var(--color-text);
 }
 
 .candidate-dashboard h1 {
-  color: #2E2F2D;
+  color: var(--color-text-strong);
   font-size: 24px;
   line-height: 1.25;
   font-weight: 700;
 }
 
 .candidate-dashboard h2 {
-  color: #2E2F2D;
+  color: var(--color-text-strong);
   font-size: 16px;
   line-height: 1.4;
   font-weight: 600;
@@ -383,53 +415,31 @@
   font-weight: 600;
 }
 
-.candidate-dashboard p.text-sm {
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.candidate-dashboard .text-xs {
-  font-size: 12px;
-  line-height: 1.4;
-}
+.candidate-dashboard p.text-sm { font-size: 13px; line-height: 1.5; }
+.candidate-dashboard .text-xs  { font-size: 12px; line-height: 1.4; }
 
 @media (max-width: 639px) {
-  .candidate-dashboard {
-    gap: 1.25rem;
-  }
-
-  .candidate-dashboard section.rounded-2xl {
-    border-radius: 12px;
-  }
+  .candidate-dashboard { gap: 1.25rem; }
+  .candidate-dashboard section.rounded-2xl { border-radius: 12px; }
 }
 
-.candidate-profile-page {
-  color: #214740;
-}
+/* ── Candidate profile page ─────────────────────────────── */
+.candidate-profile-page { color: var(--color-text); }
 
 .candidate-profile-page h2 {
-  color: #214740 !important;
+  color: var(--color-text-strong) !important;
   font-size: 1.25rem !important;
   line-height: 1.75rem !important;
 }
 
-.candidate-profile-page h3 {
-  font-size: 1.0625rem;
-  line-height: 1.5rem;
-}
-
-.candidate-profile-page p {
-  font-size: 0.875rem;
-  line-height: 1.45rem;
-}
-
+.candidate-profile-page h3 { font-size: 1.0625rem; line-height: 1.5rem; }
+.candidate-profile-page p  { font-size: 0.875rem; line-height: 1.45rem; }
 .candidate-profile-page button,
-.candidate-profile-page a {
-  font-size: 0.875rem;
-}
+.candidate-profile-page a  { font-size: 0.875rem; }
 
+/* ── Candidate personal tab (form inputs) ───────────────── */
 .candidate-personal-tab label {
-  color: #2E4F48 !important;
+  color: var(--color-text) !important;
   font-size: 0.875rem !important;
   line-height: 1.35rem !important;
 }
@@ -438,9 +448,9 @@
 .candidate-personal-tab textarea,
 .candidate-personal-tab select {
   min-height: 46px;
-  border-color: #D2ECC9 !important;
-  background: #FBFBFD !important;
-  color: #214740 !important;
+  border-color: var(--color-border-brand) !important;
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
   font-size: 0.9375rem !important;
   line-height: 1.5 !important;
 }
@@ -448,13 +458,13 @@
 .candidate-personal-tab input:disabled,
 .candidate-personal-tab textarea:disabled,
 .candidate-personal-tab select:disabled {
-  background: #ECF3EB !important;
-  color: #3B5D52 !important;
+  background: var(--color-canvas) !important;
+  color: var(--color-text-muted) !important;
   opacity: 1;
 }
 
 .candidate-personal-tab input::placeholder,
 .candidate-personal-tab textarea::placeholder {
-  color: #5A7B71 !important;
+  color: var(--color-text-faint) !important;
   opacity: 1;
 }

@@ -222,11 +222,11 @@ export default function ResumeManager() {
       )}
 
       {/* Upload Dropzone & Active Count Header */}
-      <section className="rounded-3xl border border-[#DFE5DF] bg-white p-6 shadow-soft dark:border-[#DFE5DF] dark:bg-white">
+      <section className="rounded-3xl border border-border bg-white p-6 shadow-soft dark:border-border dark:bg-white">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">Active Versions</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-500">
               You are using <strong className="text-slate-900 dark:text-white">{activeVersions.length}</strong> of{" "}
               <strong className="text-slate-900 dark:text-white">5</strong> active version slots.
             </p>
@@ -247,8 +247,8 @@ export default function ResumeManager() {
               onClick={() => setReplaceTarget(null)}
               className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold !text-white transition-all shadow-xs ${
                 activeVersions.length >= 5
-                  ? "cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
-                  : "cursor-pointer bg-[#214740] text-white hover:bg-[#2E4F48] dark:bg-[#214740] dark:text-white"
+                  ? "cursor-not-allowed bg-slate-100 text-slate-400 dark:text-slate-500"
+                  : "cursor-pointer bg-primary text-white hover:bg-primary-dark dark:bg-primary dark:text-white"
               }`}
             >
               {uploading ? (
@@ -270,14 +270,14 @@ export default function ResumeManager() {
         {loading ? (
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {[1, 2].map((i) => (
-              <div key={i} className="h-48 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+              <div key={i} className="h-48 animate-pulse rounded-2xl bg-slate-100" />
             ))}
           </div>
         ) : activeVersions.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-[#D2ECC9] bg-[#FBFBFD] p-8 text-center dark:border-[#D2ECC9] dark:bg-[#FBFBFD]">
+          <div className="mt-8 rounded-2xl border border-dashed border-brand-200 bg-surface p-8 text-center dark:border-brand-200 dark:bg-surface">
             <FileText className="mx-auto h-12 w-12 text-slate-400" />
             <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">No active resume versions yet</h3>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-500">
               Upload a targeted resume (e.g. Clinical, Engineering, Management) to unlock live match scoring.
             </p>
           </div>
@@ -299,10 +299,10 @@ export default function ResumeManager() {
 
       {/* Archived Versions Section */}
       {archivedVersions.length > 0 && (
-        <section className="rounded-3xl border border-[#DFE5DF] bg-white p-6 shadow-soft dark:border-[#DFE5DF] dark:bg-white">
+        <section className="rounded-3xl border border-border bg-white p-6 shadow-soft dark:border-border dark:bg-white">
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className="flex w-full items-center justify-between text-left text-sm font-bold text-slate-700 dark:text-slate-300"
+            className="flex w-full items-center justify-between text-left text-sm font-bold text-slate-700"
           >
             <span>Archived Versions ({archivedVersions.length})</span>
             {showArchived ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -333,33 +333,33 @@ export default function ResumeManager() {
 
       {/* Post-Upload Review Modal */}
       {reviewModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-3xl border border-[#DFE5DF] bg-white p-6 shadow-lift dark:border-[#DFE5DF] dark:bg-white">
-            <div className="flex items-center gap-2 text-brand-700 dark:text-brand-400">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas-deep/80 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-3xl border border-border bg-surface p-6 shadow-lift">
+            <div className="flex items-center gap-2 text-primary">
               <Sparkles className="h-5 w-5" />
-              <h3 className="font-display text-lg font-bold text-slate-900 dark:text-white">Review Extracted Version</h3>
+              <h3 className="font-display text-lg font-bold text-text-strong">Review Extracted Version</h3>
             </div>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-text-muted">
               Aptus AI parsed your document with <strong>94% confidence</strong>. Verify labels and tags before saving.
             </p>
 
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Version Label</label>
+                <label className="block text-xs font-bold text-text-strong">Version Label</label>
                 <input
                   type="text"
                   value={customLabel}
                   onChange={(e) => setCustomLabel(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                  className="mt-1 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text"
                   placeholder="e.g. Clinical_Psychology_v2.pdf"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Target Role Tags</label>
+                <label className="block text-xs font-bold text-text-strong">Target Role Tags</label>
                 <div className="mt-1 flex flex-wrap gap-1.5">
                   {tags.map((t) => (
-                    <span key={t} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    <span key={t} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
                       {t}
                       <button onClick={() => removeTag(t)} className="text-slate-400 hover:text-slate-600">&times;</button>
                     </span>
@@ -372,17 +372,17 @@ export default function ResumeManager() {
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
                     placeholder="Add tag (e.g. Frontend, Clinical)"
-                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-900 dark:text-white"
                   />
                   <Button size="sm" variant="secondary" onClick={addTag}>Add</Button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Extracted Skills ({extractedSkills.length})</label>
-                <div className="mt-1 max-h-28 overflow-y-auto flex flex-wrap gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 dark:border-slate-800 dark:bg-slate-800/50">
+                <label className="block text-xs font-bold text-slate-700">Extracted Skills ({extractedSkills.length})</label>
+                <div className="mt-1 max-h-28 overflow-y-auto flex flex-wrap gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5/50">
                   {extractedSkills.map((s) => (
-                    <span key={s} className="inline-flex items-center gap-1 rounded-full bg-[#EAF9E1] px-2.5 py-0.5 text-xs font-semibold text-[#3B5D52]">
+                    <span key={s} className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-primary">
                       {s}
                       <button onClick={() => removeSkill(s)} className="text-slate-400 hover:text-slate-600">&times;</button>
                     </span>
@@ -410,13 +410,13 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
   return (
     <div className={`relative flex flex-col justify-between rounded-2xl border p-5 transition-all shadow-xs ${
       version.isDefault
-        ? "border-[#C1EBAD] bg-[#FBFBFD] dark:border-[#C1EBAD] dark:bg-[#FBFBFD]"
-        : "border-[#DFE5DF] bg-white dark:border-[#DFE5DF] dark:bg-white"
+        ? "border-brand-200 bg-surface dark:border-brand-200 dark:bg-surface"
+        : "border-border bg-white dark:border-border dark:bg-white"
     }`}>
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
               <FileText className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -425,12 +425,12 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
                   {version.label}
                 </h3>
                 {version.isDefault && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#C1EBAD] px-2 py-0.5 text-[11px] font-extrabold text-[#214740] shadow-2xs">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#C1EBAD] px-2 py-0.5 text-[11px] font-extrabold text-primary shadow-2xs">
                     <Star className="h-3 w-3 fill-current" /> Default
                   </span>
                 )}
               </div>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-0.5 text-xs text-slate-500">
                 Uploaded {new Date(version.createdAt).toLocaleDateString()} · Used in {version.applyCount || 0} applications
               </p>
             </div>
@@ -441,7 +441,7 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
         {version.tags?.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {version.tags.map((tag) => (
-              <span key={tag} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              <span key={tag} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                 <Tag className="h-2.5 w-2.5" /> {tag}
               </span>
             ))}
@@ -451,7 +451,7 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
         {/* Extracted Skills Summary */}
         <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
           {skills.slice(0, 5).map((skill) => (
-            <span key={skill} className="rounded-full bg-[#EAF9E1] px-2 py-0.5 text-[11px] font-semibold text-[#3B5D52]">
+            <span key={skill} className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-primary">
               {skill}
             </span>
           ))}
@@ -461,12 +461,12 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
         </div>
       </div>
 
-      <div className="mt-5 border-t border-slate-100 pt-3 dark:border-slate-800">
+      <div className="mt-5 border-t border-slate-100 pt-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           {!version.isDefault ? (
             <button
               onClick={onSetDefault}
-              className="tap-target inline-flex items-center gap-1 text-xs font-bold text-[#3B5D52] hover:text-[#214740]"
+              className="tap-target inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary"
             >
               <Star className="h-3.5 w-3.5" /> Set as Default
             </button>
@@ -478,14 +478,14 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
             <button
               onClick={onReplace}
               title="Replace version"
-              className="tap-target rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="tap-target rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:text-slate-200"
             >
               <UploadCloud className="h-4 w-4" />
             </button>
             {shareLog.length > 0 && (
               <button
                 onClick={() => setShareLogOpen(!shareLogOpen)}
-                className="tap-target inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400"
+                className="tap-target inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800"
               >
                 <Share2 className="h-3.5 w-3.5" /> Shared ({shareLog.length})
               </button>
@@ -493,7 +493,7 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
             <button
               onClick={onArchive}
               title="Archive version"
-              className="tap-target rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="tap-target rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:text-slate-200"
             >
               <Archive className="h-4 w-4" />
             </button>
@@ -509,9 +509,9 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
 
         {/* Share log list */}
         {shareLogOpen && shareLog.length > 0 && (
-          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/60">
-            <p className="font-bold text-slate-700 dark:text-slate-300">Share History (Audit Log)</p>
-            <ul className="mt-1.5 space-y-1 text-slate-600 dark:text-slate-400">
+          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 text-xs/60">
+            <p className="font-bold text-slate-700">Share History (Audit Log)</p>
+            <ul className="mt-1.5 space-y-1 text-slate-600">
               {shareLog.map((log, idx) => (
                 <li key={idx} className="flex justify-between">
                   <span>{log.companyName} — {log.jobTitle}</span>

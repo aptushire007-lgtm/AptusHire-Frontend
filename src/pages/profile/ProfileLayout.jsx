@@ -97,7 +97,7 @@ export default function ProfileLayout() {
   // form state must be created from the saved server values on first render.
   if (loading) {
     return (
-      <div className="rounded-[14px] border border-[#D2ECC9] bg-white p-8 text-center text-base font-semibold text-[#214740] shadow-card">
+      <div className="rounded-[14px] border border-brand-200 bg-white p-8 text-center text-base font-semibold text-primary shadow-card">
         Loading your saved profile…
       </div>
     );
@@ -105,8 +105,8 @@ export default function ProfileLayout() {
 
   if (!profileData) {
     return (
-      <div role="alert" className="rounded-[14px] border border-[#DFE5DF] bg-white p-8 text-center shadow-card">
-        <p className="text-sm font-semibold text-[#2E2F2D]">{loadError || "Your profile could not be loaded."}</p>
+      <div role="alert" className="rounded-[14px] border border-border bg-white p-8 text-center shadow-card">
+        <p className="text-sm font-semibold text-text-strong">{loadError || "Your profile could not be loaded."}</p>
         <Button type="button" size="sm" className="mt-4" onClick={fetchFullProfile}>Try again</Button>
       </div>
     );
@@ -114,32 +114,32 @@ export default function ProfileLayout() {
 
   return (
     <div className="candidate-profile-page space-y-6">
-      <section className="rounded-2xl border border-[#DFE5DF] bg-white p-6 shadow-card sm:p-8">
+      <section className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#707E79]">Candidate profile</p>
-            <h1 className="mt-2 text-2xl font-bold text-[#2E2F2D]">Complete your profile</h1>
-            <p className="mt-2 max-w-xl text-sm text-[#707E79]">A complete profile helps AptusHire match you with the right opportunities.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Candidate profile</p>
+            <h1 className="mt-2 text-2xl font-bold text-text-strong">Complete your profile</h1>
+            <p className="mt-2 max-w-xl text-sm text-text-muted">A complete profile helps AptusHire match you with the right opportunities.</p>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-3xl font-bold text-[#214740]">{strength}%</p>
-            <p className="text-xs text-[#707E79]">profile complete</p>
+            <p className="text-3xl font-bold text-primary">{strength}%</p>
+            <p className="text-xs text-text-muted">profile complete</p>
           </div>
         </div>
-        <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#EAF9E1]" role="progressbar" aria-valuenow={strength} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion">
-          <div className="h-full rounded-full bg-[#214740] transition-[width] duration-500" style={{ width: `${strength}%` }} />
+        <div className="mt-5 h-2 overflow-hidden rounded-full bg-brand-50" role="progressbar" aria-valuenow={strength} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion">
+          <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${strength}%` }} />
         </div>
         <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
           {setupSections.map((section) => (
-            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#DFE5DF] bg-white text-[#214740] hover:border-[#C1EBAD]" : "border-[#DFE5DF] bg-[#FBFBFD] text-[#707E79] hover:border-[#C1EBAD]"}`}>
-              <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${section.done ? "bg-[#EAF9E1] text-[#214740]" : "text-[#8C9790]"}`}>{section.done ? "✓" : "○"}</span>
+            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-border bg-white text-primary hover:border-brand-200" : "border-border bg-surface text-text-muted hover:border-brand-200"}`}>
+              <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${section.done ? "bg-brand-50 text-primary" : "text-text-faint"}`}>{section.done ? "✓" : "○"}</span>
               <span>{section.label}</span>
             </button>
           ))}
         </div>
       </section>
       {/* Tab Header Bar (Horizontal on mobile, rail on desktop) */}
-      <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#DFE5DF] bg-white p-2 shadow-xs dark:border-[#DFE5DF] dark:bg-white">
+      <div className="flex gap-2 overflow-x-auto rounded-2xl border border-border bg-white p-2 shadow-xs dark:border-border dark:bg-white">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -149,8 +149,8 @@ export default function ProfileLayout() {
               onClick={() => handleTabChange(tab.id)}
               className={`tap-target flex shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
                 isActive
-                  ? "bg-[#214740] text-white shadow-xs dark:bg-[#214740] dark:text-white"
-                  : "bg-white text-[#5A7B71] hover:bg-[#EAF9E1] hover:text-[#214740] dark:bg-white dark:text-[#5A7B71] dark:hover:bg-[#EAF9E1] dark:hover:text-[#214740]"
+                  ? "bg-primary text-white shadow-xs dark:bg-primary dark:text-white"
+                  : "bg-white text-text-muted hover:bg-brand-50 hover:text-primary dark:bg-white dark:text-text-muted dark:hover:bg-brand-50 dark:hover:text-primary"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -163,7 +163,7 @@ export default function ProfileLayout() {
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Main Active Tab Content */}
         <div className="lg:col-span-8">
-          <Card className="rounded-3xl border border-[#DFE5DF] bg-white p-6 shadow-soft dark:border-[#DFE5DF] dark:bg-white sm:p-8">
+          <Card className="rounded-3xl border border-border bg-white p-6 shadow-soft dark:border-border dark:bg-white sm:p-8">
             {activeTab === "personal" && <PersonalTab profile={profile} onRefresh={fetchFullProfile} />}
             {activeTab === "education" && <EducationTab profile={profile} onRefresh={fetchFullProfile} />}
             {activeTab === "skills" && <SkillsTab profile={profile} onRefresh={fetchFullProfile} />}
@@ -177,23 +177,23 @@ export default function ProfileLayout() {
         {/* Right Rail Sticky Cards */}
         <div className="space-y-5 lg:col-span-4">
           {/* Profile Strength Card */}
-          <Card className="rounded-3xl border border-[#DFE5DF] bg-white p-5 shadow-soft dark:border-[#DFE5DF] dark:bg-white">
+          <Card className="rounded-3xl border border-border bg-white p-5 shadow-soft dark:border-border dark:bg-white">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#3B5D52]">Profile Strength</span>
-              <span className="font-display text-base font-extrabold text-[#214740]">
+              <span className="text-xs font-bold text-primary">Profile Strength</span>
+              <span className="font-display text-base font-extrabold text-primary">
                 {strength}%
               </span>
             </div>
 
             {/* Segmented Progress Bar */}
-            <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-[#EAF9E1]">
+            <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-brand-50">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-[#3B5D52] via-[#5A7B71] to-[#C1EBAD] transition-all duration-500"
                 style={{ width: `${strength}%` }}
               />
             </div>
 
-            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-[11px] text-slate-500">
               {strength >= 80 ? "Your profile is verified and ranks in top candidate searches." : "Complete remaining items to unlock 1-click apply and recruiter match priority."}
             </p>
 
@@ -203,7 +203,7 @@ export default function ProfileLayout() {
                 <div key={item.label} className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-2">
                     <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
-                      item.done ? "bg-[#EAF9E1] text-[#3B5D52]" : "bg-[#EDF1ED] text-[#8C9790]"
+                      item.done ? "bg-brand-50 text-primary" : "bg-border text-text-faint"
                     }`}>
                       {item.done ? "✓" : "•"}
                     </span>
@@ -211,14 +211,14 @@ export default function ProfileLayout() {
                       {item.label}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#214740]">{item.points}%</span>
+                  <span className="text-[11px] font-bold text-primary">{item.points}%</span>
                 </div>
               ))}
             </div>
           </Card>
 
           {/* Recruiter View Preview (Trust Badge) */}
-          <div className="rounded-3xl border border-[#2E4F48] bg-[#214740] p-5 text-white shadow-soft">
+          <div className="rounded-3xl border border-[#2E4F48] bg-primary p-5 text-white shadow-soft">
             <div className="flex items-center gap-2 text-[#D2ECC9]">
               <ShieldCheck className="h-4 w-4" />
               <span className="text-xs font-bold uppercase tracking-wider">Recruiter View Preview</span>
@@ -226,7 +226,7 @@ export default function ProfileLayout() {
 
             <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C1EBAD] font-bold text-[#214740]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C1EBAD] font-bold text-primary">
                   {(profile.personal?.firstName || "S")[0]}
                 </div>
                 <div>

@@ -36,24 +36,24 @@ export default function SkillsTab({ profile, onRefresh }) {
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">Skills</h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-slate-500">
           Add technical skills, soft skills, tools, and certifications as a comma-separated list.
         </p>
       </div>
 
-      {success && <p role="status" className="flex items-center gap-2 rounded-xl bg-[#EAF9E1] p-3 text-xs font-semibold text-[#214740]"><CheckCircle2 className="h-4 w-4" />{success}</p>}
+      {success && <p role="status" className="flex items-center gap-2 rounded-xl bg-brand-50 p-3 text-xs font-semibold text-primary"><CheckCircle2 className="h-4 w-4" />{success}</p>}
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700">{error}</p>}
 
       <form onSubmit={handleSave} className="space-y-4">
         <div>
-          <label htmlFor="profile-skills" className="block text-xs font-bold text-slate-700 dark:text-slate-300">Technical skills, soft skills, tools, and certifications</label>
+          <label htmlFor="profile-skills" className="block text-xs font-bold text-slate-700">Technical skills, soft skills, tools, and certifications</label>
           <textarea
             id="profile-skills"
             rows={5}
             value={skills}
             onChange={(event) => setSkills(event.target.value)}
             placeholder="React, SQL, communication, Figma, AWS Certified Cloud Practitioner"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
           />
           <p className="mt-1 text-[11px] text-slate-500">The existing profile API stores these as one searchable skills list.</p>
         </div>

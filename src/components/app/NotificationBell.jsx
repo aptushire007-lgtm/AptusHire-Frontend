@@ -96,7 +96,7 @@ export default function NotificationBell() {
                     markAllRead?.();
                     setOpen(false);
                   }}
-                  className="tap-target -m-1 flex items-center gap-1 rounded-lg p-1 text-xs font-semibold text-brand-700 transition-colors hover:bg-brand-50 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
+                  className="tap-target -m-1 flex items-center gap-1 rounded-lg p-1 text-xs font-semibold text-primary transition-colors hover:bg-brand-50 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
                 >
                   <CheckCheck className="h-3.5 w-3.5" aria-hidden="true" /> Mark all read
                 </button>
@@ -134,7 +134,7 @@ export default function NotificationBell() {
                   setOpen(false);
                   navigate("/notifications");
                 }}
-                className="block w-full rounded-b-xl bg-slate-50 px-4 py-2.5 text-center text-xs font-semibold text-brand-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-300"
+                className="block w-full rounded-b-xl bg-slate-50 px-4 py-2.5 text-center text-xs font-semibold text-primary transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-300"
               >
                 View all notifications
               </button>

@@ -56,13 +56,13 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">Documents &amp; Verification</h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-slate-500">
           Upload official government credentials and connect professional accounts to achieve verified candidate status.
         </p>
       </div>
 
       {error && (
-        <div role="alert" className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+        <div role="alert" className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700 dark:border-red-900/50">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -76,36 +76,36 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
       )}
 
       {/* Upload Gov Document Box */}
-      <section className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-850">
-        <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">Upload Government ID</h3>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+      <section className="rounded-2xl border border-border bg-canvas p-5">
+        <h3 className="font-display text-sm font-bold text-text-strong">Upload Government ID</h3>
+        <p className="mt-0.5 text-xs text-text-muted">
           AI OCR automatically verifies your name and date of birth in seconds. Your document number is always masked.
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Document Type</label>
+            <label className="block text-xs font-bold text-text-strong">Document Type</label>
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs text-text"
             >
               <option value="aadhaar">Aadhaar Card (India)</option>
               <option value="passport">Passport</option>
-              <option value="driving_license">Driver&apos;s License</option>
+              <option value="driving_license">Driver's License</option>
               <option value="pan">PAN Card</option>
               <option value="national_id">National ID Card</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Document Number (Optional)</label>
+            <label className="block text-xs font-bold text-text-strong">Document Number (Optional)</label>
             <input
               type="text"
               value={docNumber}
               onChange={(e) => setDocNumber(e.target.value)}
               placeholder="e.g. 1234 5678 9012"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs text-text"
             />
           </div>
 
@@ -120,7 +120,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
             />
             <label
               htmlFor="gov-doc-upload"
-              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#214740] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#2E4F48] dark:bg-[#214740] dark:text-white"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-primary-dark dark:bg-primary dark:text-white"
             >
               {uploading ? (
                 <>
@@ -144,7 +144,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
         {documents.length === 0 ? (
           <p className="text-xs text-slate-400">No documents uploaded yet. Upload a document above to verify your profile.</p>
         ) : (
-          <div className="divide-y divide-slate-100 rounded-2xl border border-slate-200/90 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
+          <div className="divide-y divide-slate-100 rounded-2xl border border-slate-200/90 bg-white dark:divide-slate-800">
             {documents.map((doc) => (
               <div key={doc._id} className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
@@ -156,11 +156,11 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
                       <p className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
                         {doc.docType.replace("_", " ")}
                       </p>
-                      <span className="rounded-full bg-[#EAF9E1] px-2 py-0.5 text-[10px] font-extrabold text-[#3B5D52]">
+                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-extrabold text-primary">
                         Verified via OCR
                       </span>
                     </div>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    <p className="mt-0.5 text-xs text-slate-500">
                       Masked No: <span className="font-mono">{doc.maskedNumber}</span> · Uploaded on {new Date(doc.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -172,7 +172,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
       </section>
 
       {/* LinkedIn Verification */}
-      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0077B5]/10 text-[#0077B5]">
@@ -180,7 +180,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
             </div>
             <div>
               <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">LinkedIn Account</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500">
                 Connect your LinkedIn profile to auto-verify career milestones (10% strength).
               </p>
             </div>
@@ -201,19 +201,19 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
       </section>
 
       {/* Consent Center */}
-      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-5">
         <div className="flex items-center gap-2">
-          <Shield className="h-4 w-4 text-brand-700 dark:text-accent-400" />
+          <Shield className="h-4 w-4 text-primary" />
           <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">Consent Center &amp; Privacy Audit</h3>
         </div>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           All consent actions are timestamped and cryptographically recorded for DPDP and GDPR compliance.
         </p>
 
         <div className="mt-4 space-y-3 divide-y divide-slate-100 text-xs dark:divide-slate-800">
           <div className="flex items-center justify-between pt-2">
             <div>
-              <p className="font-bold text-slate-800 dark:text-slate-200">AI Screening &amp; Evidence Processing</p>
+              <p className="font-bold text-slate-800">AI Screening &amp; Evidence Processing</p>
               <p className="text-slate-500">Allow Aptus AI algorithms to evaluate resume credentials against hiring rubrics.</p>
             </div>
             <span className="font-bold text-emerald-600 dark:text-emerald-400">Active</span>
@@ -221,7 +221,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
 
           <div className="flex items-center justify-between pt-3">
             <div>
-              <p className="font-bold text-slate-800 dark:text-slate-200">Candidate Data Retention</p>
+              <p className="font-bold text-slate-800">Candidate Data Retention</p>
               <p className="text-slate-500">Retain verified profile across multiple tenant applications.</p>
             </div>
             <span className="font-bold text-emerald-600 dark:text-emerald-400">Active</span>

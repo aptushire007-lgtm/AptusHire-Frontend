@@ -45,7 +45,7 @@ export default function EducationTab({ profile, onRefresh }) {
       <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
         <div>
           <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">Education History</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-500">
             List your academic degrees, certifications, and institutions.
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function EducationTab({ profile, onRefresh }) {
 
       <form onSubmit={handleSave} className="space-y-4">
         {education.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+          <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center">
             <GraduationCap className="mx-auto h-10 w-10 text-slate-400" />
             <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">No education added</p>
             <p className="mt-0.5 text-xs text-slate-500">Adding at least one education entry awards 10% profile strength.</p>
@@ -72,7 +72,7 @@ export default function EducationTab({ profile, onRefresh }) {
         ) : (
           <div className="space-y-4">
             {education.map((item, idx) => (
-              <div key={idx} className="relative rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <div key={idx} className="relative rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
                 <button
                   type="button"
                   onClick={() => removeEntry(idx)}
@@ -83,59 +83,59 @@ export default function EducationTab({ profile, onRefresh }) {
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Institution / University</label>
+                    <label className="block text-xs font-bold text-slate-700">Institution / University</label>
                     <input
                       type="text"
                       required
                       value={item.institution}
                       onChange={(e) => handleChange(idx, "institution", e.target.value)}
                       placeholder="e.g. National Institute of Mental Health and Neurosciences"
-                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Degree</label>
+                    <label className="block text-xs font-bold text-slate-700">Degree</label>
                     <input
                       type="text"
                       required
                       value={item.degree}
                       onChange={(e) => handleChange(idx, "degree", e.target.value)}
                       placeholder="e.g. M.Phil in Clinical Psychology"
-                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Specialization</label>
+                    <label className="block text-xs font-bold text-slate-700">Specialization</label>
                     <input
                       type="text"
                       value={item.fieldOfStudy || ""}
                       onChange={(e) => handleChange(idx, "fieldOfStudy", e.target.value)}
                       placeholder="e.g. Computer Science"
-                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Graduation Year</label>
+                    <label className="block text-xs font-bold text-slate-700">Graduation Year</label>
                     <input
                       type="text"
                       value={item.endYear}
                       onChange={(e) => handleChange(idx, "endYear", e.target.value)}
                       placeholder="e.g. 2022"
-                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Grade / GPA / Honors</label>
+                    <label className="block text-xs font-bold text-slate-700">Grade / GPA / Honors</label>
                     <input
                       type="text"
                       value={item.grade}
                       onChange={(e) => handleChange(idx, "grade", e.target.value)}
                       placeholder="e.g. First Class with Distinction"
-                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                      className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export default function EducationTab({ profile, onRefresh }) {
             ))}
 
             <div className="flex items-center justify-between pt-2">
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 ★ Claims may be explored in AI interviews — verified claims raise your evidence score.
               </p>
               <Button type="submit" disabled={saving}>

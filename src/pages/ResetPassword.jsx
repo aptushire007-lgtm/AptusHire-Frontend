@@ -32,7 +32,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#FAFCF8] px-5 py-12 transition-colors dark:bg-[#081210]">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-5 py-12 transition-colors">
       <div className="absolute right-6 top-6">
         <ThemeToggle />
       </div>
@@ -42,26 +42,26 @@ export default function ResetPassword() {
           <BrandLogo to="/welcome" size="lg" />
         </div>
 
-        <Card className="rounded-3xl border border-slate-200/90 bg-white p-6 text-center shadow-soft dark:border-slate-800/90 dark:bg-slate-900 sm:p-8">
+        <Card className="rounded-3xl border border-slate-200/90 bg-white p-6 text-center shadow-soft/90 sm:p-8">
           {done ? (
             <>
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Password Reset</h1>
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                Your password has been reset. Redirecting you to <Link to="/login" className="font-semibold text-brand-700 dark:text-brand-300">login</Link>…
+              <p className="mt-2 text-xs text-slate-500">
+                Your password has been reset. Redirecting you to <Link to="/login" className="font-semibold text-primary">login</Link>…
               </p>
             </>
           ) : (
             <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-brand-800 dark:bg-brand-950/60 dark:text-brand-300">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-primary/60">
                 <KeyRound className="h-6 w-6" />
               </div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Choose a New Password</h1>
               <form onSubmit={handleSubmit} className="mt-5 space-y-4 text-left">
                 {error && (
-                  <p className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300">{error}</p>
+                  <p className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700">{error}</p>
                 )}
                 <FormGroup>
                   <Label required>New Password</Label>

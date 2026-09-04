@@ -1,8 +1,11 @@
 import { createContext, forwardRef, useContext, useId, useMemo, useRef } from "react";
+import { Search as SearchIcon } from "lucide-react";
 
 /**
- * Form primitives with complete light/dark contrast compliance.
+ * AptusHire Form Primitives — light theme, green brand, charcoal text.
+ * White backgrounds, green focus rings, no dark-mode variants.
  */
+
 const FieldContext = createContext(null);
 
 function useControlId(explicitId) {
@@ -16,21 +19,32 @@ function useControlId(explicitId) {
 
 function useFieldA11y(explicitId, error) {
   const ctx = useContext(FieldContext);
-  const id = useControlId(explicitId);
+  const id  = useControlId(explicitId);
   return {
     id,
-    "aria-invalid": error ? "true" : undefined,
+    "aria-invalid":     error ? "true" : undefined,
     "aria-describedby": error && ctx ? ctx.errorId : undefined,
   };
 }
 
-const fieldClass =
-  "rounded-xl border border-[#D2ECC9] bg-[#FBFBFD] px-3.5 py-2.5 text-sm text-[#214740] placeholder:text-[#5A7B71] shadow-xs transition-colors duration-150 focus:border-[#3B5D52] focus:outline-none focus:ring-3 focus:ring-[#C1EBAD]/40 disabled:bg-[#ECF3EB] disabled:text-[#5A7B71] dark:border-[#D2ECC9] dark:bg-[#FBFBFD] dark:text-[#214740] dark:placeholder:text-[#5A7B71] dark:focus:border-[#3B5D52] dark:focus:ring-[#C1EBAD]/40 dark:disabled:bg-[#ECF3EB] dark:disabled:text-[#5A7B71]";
+// Base chrome — white bg, charcoal text, green focus ring
+const fieldChrome = [
+  "rounded-control border border-border bg-surface",
+  "text-sm text-text placeholder:text-text-faint",
+  "shadow-card transition-colors duration-150",
+  "focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/15",
+  "disabled:bg-canvas disabled:text-text-muted disabled:cursor-not-allowed",
+].join(" ");
+
+const fieldClass        = `${fieldChrome} px-3.5 py-2.5`;
+const fieldCompactClass = `${fieldChrome} px-2.5 py-1.5`;
 
 const HAS_WIDTH = /(?:^|\s)(?:[\w.[\]/-]+:)*(?:w-|size-)\S/;
-function withWidth(className) {
-  return HAS_WIDTH.test(className) ? "" : "w-full";
+function withWidth(cn) {
+  return HAS_WIDTH.test(cn) ? "" : "w-full";
 }
+
+const errorChrome = "border-verdict-negative focus:border-verdict-negative focus:ring-verdict-negative/15";
 
 export const Input = forwardRef(function Input({ className = "", error, id, ...props }, ref) {
   const a11y = useFieldA11y(id, error);
@@ -38,7 +52,7 @@ export const Input = forwardRef(function Input({ className = "", error, id, ...p
     <input
       ref={ref}
       {...a11y}
-      className={`${withWidth(className)} ${fieldClass} ${error ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600" : ""} ${className}`}
+      className={`${withWidth(className)} ${fieldClass} ${error ? errorChrome : ""} ${className}`}
       {...props}
     />
   );
@@ -50,19 +64,19 @@ export const Textarea = forwardRef(function Textarea({ className = "", error, id
     <textarea
       ref={ref}
       {...a11y}
-      className={`${withWidth(className)} ${fieldClass} resize-y ${error ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600" : ""} ${className}`}
+      className={`${withWidth(className)} ${fieldClass} resize-y ${error ? errorChrome : ""} ${className}`}
       {...props}
     />
   );
 });
 
-export const Select = forwardRef(function Select({ className = "", error, id, children, ...props }, ref) {
+export const Select = forwardRef(function Select({ className = "", error, id, compact = false, children, ...props }, ref) {
   const a11y = useFieldA11y(id, error);
   return (
     <select
       ref={ref}
       {...a11y}
-      className={`${withWidth(className)} ${fieldClass} ${error ? "border-red-400 dark:border-red-600" : ""} ${className}`}
+      className={`${withWidth(className)} ${compact ? fieldCompactClass : fieldClass} ${error ? errorChrome : ""} ${className}`}
       {...props}
     >
       {children}
@@ -70,14 +84,89 @@ export const Select = forwardRef(function Select({ className = "", error, id, ch
   );
 });
 
+export const Search = forwardRef(function Search({ className = "", id, ...props }, ref) {
+  return (
+    <div className="relative">
+      <SearchIcon
+        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-faint"
+        aria-hidden="true"
+      />
+      <Input ref={ref} id={id} type="search" className={`pl-10 ${className}`} {...props} />
+    </div>
+  );
+});
+
+export const DatePicker = forwardRef(function DatePicker({ className = "", id, ...props }, ref) {
+  return <Input ref={ref} id={id} type="date" className={className} {...props} />;
+});
+
+export const Checkbox = forwardRef(function Checkbox({ className = "", error, id, ...props }, ref) {
+  return (
+    <input
+      ref={ref}
+      {...useFieldA11y(id, error)}
+      type="checkbox"
+      className={`h-4 w-4 rounded border-border text-primary accent-primary focus:ring-2 focus:ring-primary/20 ${className}`}
+      {...props}
+    />
+  );
+});
+
+export const Radio = forwardRef(function Radio({ className = "", error, id, ...props }, ref) {
+  return (
+    <input
+      ref={ref}
+      {...useFieldA11y(id, error)}
+      type="radio"
+      className={`h-4 w-4 border-border text-primary accent-primary focus:ring-2 focus:ring-primary/20 ${className}`}
+      {...props}
+    />
+  );
+});
+
+export const Switch = forwardRef(function Switch(
+  { checked = false, onChange, className = "", disabled = false, ...props },
+  ref
+) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={() => onChange?.(!checked)}
+      className={[
+        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors",
+        "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/20",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        checked
+          ? "border-primary bg-primary"
+          : "border-border bg-canvas",
+        className,
+      ].join(" ")}
+      {...props}
+    >
+      <span
+        className={`h-4 w-4 rounded-full bg-white shadow-card transition-transform ${
+          checked ? "translate-x-6" : "translate-x-1"
+        }`}
+      />
+    </button>
+  );
+});
+
 export function Label({ children, required, htmlFor, className = "" }) {
   const ctx = useContext(FieldContext);
   return (
-    <label htmlFor={htmlFor || ctx?.id} className={`mb-1.5 block text-sm font-bold text-[#2E4F48] dark:text-[#2E4F48] ${className}`}>
+    <label
+      htmlFor={htmlFor || ctx?.id}
+      className={`mb-1.5 block text-xs font-semibold text-text-strong ${className}`}
+    >
       {children}
       {required && (
         <>
-          <span aria-hidden="true" className="text-red-500"> *</span>
+          <span aria-hidden="true" className="ml-0.5 text-verdict-negative"> *</span>
           <span className="sr-only"> (required)</span>
         </>
       )}
@@ -89,16 +178,19 @@ export function FieldError({ children, id }) {
   const ctx = useContext(FieldContext);
   if (!children) return null;
   return (
-    <p id={id || ctx?.errorId} className="mt-1 text-xs font-medium text-red-600 dark:text-red-400">
+    <p
+      id={id || ctx?.errorId}
+      className="mt-1 text-xs font-medium text-verdict-negative"
+    >
       {children}
     </p>
   );
 }
 
 export function FormGroup({ children, className = "" }) {
-  const id = useId();
+  const id      = useId();
   const claimed = useRef(null);
-  const value = useMemo(() => ({ id, errorId: `${id}-error`, claimed }), [id]);
+  const value   = useMemo(() => ({ id, errorId: `${id}-error`, claimed }), [id]);
   return (
     <FieldContext.Provider value={value}>
       <div className={`mb-4 ${className}`}>{children}</div>

@@ -37,27 +37,27 @@ export default function ActivityHeatmap({ applications = [], interviews = [] }) 
   }, [applications, interviews]);
 
   const getIntensityClass = (count) => {
-    if (count === 0) return "bg-[#EAF9E1]";
+    if (count === 0) return "bg-brand-50";
     if (count === 1) return "bg-[#D2ECC9]";
     if (count === 2) return "bg-[#5A7B71]";
-    return "bg-[#214740]";
+    return "bg-primary";
   };
 
   return (
-    <div className="rounded-[14px] border border-[#DFE5DF] bg-white p-5 text-[#214740] shadow-card dark:border-[#DFE5DF] dark:bg-white">
+    <div className="rounded-[14px] border border-border bg-white p-5 text-primary shadow-card dark:border-border dark:bg-white">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-[#3B5D52]" />
-          <h3 className="font-display text-sm font-bold text-[#214740]">
+          <Activity className="h-4 w-4 text-primary" />
+          <h3 className="font-display text-sm font-bold text-primary">
             Application &amp; Interview Activity
           </h3>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-[#5A7B71]">
+        <div className="flex items-center gap-1.5 text-xs text-text-muted">
           <span>Less</span>
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#EAF9E1]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-brand-50" />
           <span className="h-2.5 w-2.5 rounded-xs bg-[#D2ECC9]" />
           <span className="h-2.5 w-2.5 rounded-xs bg-[#5A7B71]" />
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#214740]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-primary" />
           <span>More</span>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function ActivityHeatmap({ applications = [], interviews = [] }) 
         </div>
       </div>
 
-      <p className="mt-3 text-sm text-[#5A7B71]">
+      <p className="mt-3 text-sm text-text-muted">
         12-week activity log across your verified applications and AI interview sessions.
       </p>
     </div>

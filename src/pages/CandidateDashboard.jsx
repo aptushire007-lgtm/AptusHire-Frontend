@@ -144,8 +144,8 @@ const TONE_STYLES = {
   },
   brand: {
     wrap: "border-brand-200 bg-brand-50",
-    icon: "bg-brand-100 text-brand-700",
-    text: "text-brand-700",
+    icon: "bg-brand-100 text-primary",
+    text: "text-primary",
   },
   slate: {
     wrap: "border-slate-200 bg-slate-50",
@@ -205,7 +205,7 @@ function ProgressBar({ value, label, className = "", trackClassName = "h-1.5" })
       className={`w-full overflow-hidden rounded-full bg-slate-100 ${trackClassName} ${className}`}
     >
       <div
-        className="h-full rounded-full bg-brand-600 transition-[width] duration-500 ease-out motion-reduce:transition-none"
+        className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out motion-reduce:transition-none"
         style={{ width: `${pct}%` }}
       />
     </div>
@@ -421,7 +421,7 @@ function ApplicationCard({ application, next, now, onOpen, openingId }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={trackId}
-        className={`${INLINE_ACTION} mt-3 text-brand-700 hover:bg-brand-50 hover:underline focus-visible:ring-brand-300`}
+        className={`${INLINE_ACTION} mt-3 text-primary hover:bg-brand-50 hover:underline focus-visible:ring-brand-300`}
       >
         <ChevronDown
           aria-hidden="true"
@@ -444,7 +444,7 @@ function ApplicationCard({ application, next, now, onOpen, openingId }) {
 // a level and leaves a screen-reader user's section list with a hole in it.
 function SectionCard({ title, icon: Icon, description, children, action, ...props }) {
   return (
-    <Card as="section" {...props} className="border-[#DFE5DF] !bg-[#FBFBFD] text-[#2E2F2D] dark:border-[#DFE5DF] dark:!bg-[#FBFBFD]">
+    <Card as="section" {...props} className="border-border !bg-surface text-text-strong dark:border-border dark:!bg-surface">
       {/* Composes <SectionHeader> rather than re-rolling a title row, so the
           icon chip, heading size, and action alignment match every other
           section in both apps instead of drifting one screen at a time. */}
@@ -726,16 +726,16 @@ export default function CandidateDashboard() {
   }));
 
   return (
-    <div className="candidate-dashboard space-y-6 text-[#214740]">
-      <section className="flex flex-col justify-between gap-4 rounded-2xl border border-[#DFE5DF] bg-white p-6 text-[#2E2F2D] shadow-card sm:flex-row sm:items-end sm:p-8">
+    <div className="candidate-dashboard space-y-6 text-primary">
+      <section className="flex flex-col justify-between gap-4 rounded-2xl border border-border bg-white p-6 text-text-strong shadow-card sm:flex-row sm:items-end sm:p-8">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707E79]">Candidate dashboard</p>
-          <h1 className="mt-2 text-2xl font-bold text-[#2E2F2D]">{greeting}, {user?.name || "Candidate"} <span aria-hidden="true">👋</span></h1>
-          <p className="mt-2 text-sm text-[#707E79]">Here's your hiring progress.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Candidate dashboard</p>
+          <h1 className="mt-2 text-2xl font-bold text-text-strong">{greeting}, {user?.name || "Candidate"} <span aria-hidden="true">👋</span></h1>
+          <p className="mt-2 text-sm text-text-muted">Here's your hiring progress.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link to="/profile" className="rounded-[9px] border border-[#D2ECC9] bg-[#EAF9E1] px-3 py-2 text-xs font-semibold text-[#214740] hover:bg-[#D2ECC9]">Profile completion: {pct}%</Link>
-          <button onClick={handleDownloadData} disabled={exporting} className="inline-flex items-center gap-2 rounded-[9px] bg-[#214740] px-4 py-2 text-xs font-semibold text-white shadow-card transition-colors hover:bg-[#2E4F48]"><Download className="h-4 w-4" /><span>{exporting ? "Exporting…" : "Download My Data"}</span></button>
+          <Link to="/profile" className="rounded-[9px] border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-primary hover:bg-[#D2ECC9]">Profile completion: {pct}%</Link>
+          <button onClick={handleDownloadData} disabled={exporting} className="inline-flex items-center gap-2 rounded-[9px] bg-primary px-4 py-2 text-xs font-semibold text-white shadow-card transition-colors hover:bg-primary-dark"><Download className="h-4 w-4" /><span>{exporting ? "Exporting…" : "Download My Data"}</span></button>
         </div>
       </section>
 
@@ -745,17 +745,17 @@ export default function CandidateDashboard() {
           { label: "Interviews", value: interviewCount, detail: "Scheduled or completed", icon: Video },
           { label: "Profile completion", value: pct, detail: "Profile strength", icon: UserRound },
         ].map(({ label, value, detail, icon: Icon }) => (
-          <Card key={label} className="border-[#DFE5DF] !bg-white p-5 text-[#2E2F2D] shadow-xs dark:border-[#DFE5DF] dark:!bg-white">
-            <div className="flex items-center justify-between gap-3"><span className="text-xs font-semibold text-[#707E79]">{label}</span><Icon className="h-4 w-4 text-[#214740]" aria-hidden="true" /></div>
-            <p className="mt-3 text-3xl font-bold text-[#214740]">{value}{label === "Profile completion" ? "%" : ""}</p>
-            <p className="mt-1 text-xs text-[#707E79]">{detail}</p>
+          <Card key={label} className="border-border !bg-white p-5 text-text-strong shadow-xs dark:border-border ">
+            <div className="flex items-center justify-between gap-3"><span className="text-xs font-semibold text-text-muted">{label}</span><Icon className="h-4 w-4 text-primary" aria-hidden="true" /></div>
+            <p className="mt-3 text-3xl font-bold text-primary">{value}{label === "Profile completion" ? "%" : ""}</p>
+            <p className="mt-1 text-xs text-text-muted">{detail}</p>
           </Card>
         ))}
       </section>
 
       <SectionCard id="pipeline" title="Application pipeline" icon={ListChecks} description="A current count of your applications by stage.">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {pipeline.map((stage) => <div key={stage.key} className="rounded-xl border border-[#DFE5DF] bg-white p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-[#707E79]">{stage.label}</p><p className="mt-2 text-2xl font-bold text-[#214740]">{stage.count}</p></div>)}
+          {pipeline.map((stage) => <div key={stage.key} className="rounded-xl border border-border bg-white p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">{stage.label}</p><p className="mt-2 text-2xl font-bold text-primary">{stage.count}</p></div>)}
         </div>
       </SectionCard>
 
@@ -928,7 +928,7 @@ export default function CandidateDashboard() {
                   <button
                     type="button"
                     onClick={() => markNotificationRead(n._id)}
-                    className={`${INLINE_ACTION} mt-1 text-brand-700 hover:bg-brand-50 hover:underline focus-visible:ring-brand-300`}
+                    className={`${INLINE_ACTION} mt-1 text-primary hover:bg-brand-50 hover:underline focus-visible:ring-brand-300`}
                   >
                     Mark as read
                     {/* Three notifications in a row all offering "Mark as read"
@@ -954,10 +954,10 @@ export default function CandidateDashboard() {
         ) : (
           <div className="space-y-3">
             {data.aiInterviewHistory.map((s) => (
-              <div key={s._id} className="flex items-center justify-between gap-2 rounded-xl border border-[#DFE5DF] !bg-white p-4 transition-colors hover:border-[#C1EBAD] dark:border-[#DFE5DF] dark:!bg-white">
+              <div key={s._id} className="flex items-center justify-between gap-2 rounded-xl border border-border !bg-white p-4 transition-colors hover:border-brand-200 dark:border-border ">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{s.job?.title}</p>
-                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">{formatAbsolute(s.interviewAt)}</p>
+                  <p className="truncate text-xs text-slate-500">{formatAbsolute(s.interviewAt)}</p>
                 </div>
                 <Badge tone={s.status === "completed" ? "green" : "slate"}>{sessionStatusLabel(s.status)}</Badge>
               </div>

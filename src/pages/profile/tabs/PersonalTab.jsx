@@ -78,7 +78,7 @@ export default function PersonalTab({ profile, onRefresh }) {
     <div className="candidate-personal-tab space-y-6">
       <div>
         <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">Personal Information</h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-slate-500">
           Core identity credentials with instant OCR &amp; OTP trust signals.
         </p>
       </div>
@@ -94,7 +94,7 @@ export default function PersonalTab({ profile, onRefresh }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">First Name</label>
+              <label className="text-xs font-bold text-slate-700">First Name</label>
               <VerificationTick
                 size="sm"
                 status={ver.nameMatch || "missing"}
@@ -107,13 +107,13 @@ export default function PersonalTab({ profile, onRefresh }) {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="e.g. Sankalp"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Last Name</label>
+              <label className="text-xs font-bold text-slate-700">Last Name</label>
               <VerificationTick
                 size="sm"
                 status={ver.nameMatch || "missing"}
@@ -126,7 +126,7 @@ export default function PersonalTab({ profile, onRefresh }) {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="e.g. Joshi"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
             />
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function PersonalTab({ profile, onRefresh }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Email Address</label>
+              <label className="text-xs font-bold text-slate-700">Email Address</label>
               <VerificationTick
                 size="sm"
                 status={ver.emailVerified ? "verified" : "missing"}
@@ -148,14 +148,14 @@ export default function PersonalTab({ profile, onRefresh }) {
                 type="email"
                 disabled
                 value={profile?.user?.email || "candidate@aptushire.com"}
-                className="w-full rounded-xl border border-slate-200 bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-400"
+                className="w-full rounded-xl border border-slate-200 bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-600/60"
               />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Phone Number</label>
+              <label className="text-xs font-bold text-slate-700">Phone Number</label>
               <VerificationTick
                 size="sm"
                 status={ver.phoneVerified ? "verified" : "missing"}
@@ -170,7 +170,7 @@ export default function PersonalTab({ profile, onRefresh }) {
               value={formData.phone}
               onChange={handleChange}
               placeholder="e.g. +91 98765 43210"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
             />
           </div>
         </div>
@@ -178,7 +178,7 @@ export default function PersonalTab({ profile, onRefresh }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Date of Birth</label>
+              <label className="text-xs font-bold text-slate-700">Date of Birth</label>
               <VerificationTick
                 size="sm"
                 status={ver.govDocVerified ? "verified" : "missing"}
@@ -190,44 +190,44 @@ export default function PersonalTab({ profile, onRefresh }) {
               name="dob"
               value={formData.dob}
               onChange={handleChange}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Location / City</label>
+            <label className="block text-xs font-bold text-slate-700">Location / City</label>
             <input
               type="text"
               name="locationCity"
               value={formData.locationCity}
               onChange={handleChange}
               placeholder="e.g. Bengaluru, India"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Professional Headline</label>
+          <label className="block text-xs font-bold text-slate-700">Professional Headline</label>
           <input
             type="text"
             name="headline"
             value={formData.headline}
             onChange={handleChange}
             placeholder="e.g. Senior Clinical Psychologist · 6+ yrs experience"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Short Bio</label>
+          <label className="block text-xs font-bold text-slate-700">Short Bio</label>
           <textarea
             name="bio"
             rows={3}
             value={formData.bio}
             onChange={handleChange}
             placeholder="Brief summary of your specialization, methodology, and career goals…"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
           />
         </div>
 
@@ -240,15 +240,15 @@ export default function PersonalTab({ profile, onRefresh }) {
 
       {/* OTP Verification Modal */}
       {otpModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 shadow-lift dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center gap-2 text-brand-700 dark:text-accent-400">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas-deep/80 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-sm rounded-3xl border border-border bg-surface p-6 shadow-lift">
+            <div className="flex items-center gap-2 text-primary">
               <ShieldCheck className="h-5 w-5" />
-              <h3 className="font-display text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="font-display text-base font-bold text-text-strong">
                 Verify {otpModal.channel === "email" ? "Email Address" : "Phone Number"}
               </h3>
             </div>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-text-muted">
               Enter the 6-digit verification code sent to your {otpModal.channel}.
             </p>
 
@@ -263,7 +263,7 @@ export default function PersonalTab({ profile, onRefresh }) {
                 value={otpModal.code}
                 onChange={(e) => setOtpModal({ ...otpModal, code: e.target.value })}
                 placeholder="6-digit OTP"
-                className="w-full text-center tracking-widest text-lg font-bold rounded-xl border border-slate-200 bg-slate-50 py-2.5 text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
+                className="w-full text-center tracking-widest text-lg font-bold rounded-xl border border-border bg-canvas py-2.5 text-text"
               />
             </div>
 

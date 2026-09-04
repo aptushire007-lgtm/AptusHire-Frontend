@@ -189,7 +189,7 @@ export default function NotificationCenter() {
                     <button
                       type="button"
                       onClick={() => markRead(n._id)}
-                      className="tap-target rounded-lg px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-50"
+                      className="tap-target rounded-lg px-2 py-1 text-xs font-semibold text-primary hover:bg-brand-50"
                     >
                       Mark read
                     </button>

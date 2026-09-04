@@ -49,7 +49,7 @@ export default function VerifyEmail() {
   }, [status, destination, navigate]);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#FAFCF8] px-5 py-12 transition-colors dark:bg-[#081210]">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-5 py-12 transition-colors">
       <div className="absolute right-6 top-6">
         <ThemeToggle />
       </div>
@@ -59,26 +59,26 @@ export default function VerifyEmail() {
           <BrandLogo to="/welcome" size="lg" />
         </div>
 
-        <Card className="rounded-3xl border border-slate-200/90 bg-white p-6 text-center shadow-soft dark:border-slate-800/90 dark:bg-slate-900 sm:p-8">
+        <Card className="rounded-3xl border border-border bg-surface p-6 text-center shadow-soft sm:p-8">
           {status === "verifying" && (
             <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-brand-800 dark:bg-brand-950/60 dark:text-brand-300">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-primary/60">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Verifying Your Email</h1>
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Please wait a moment…</p>
+              <h1 className="text-xl font-bold text-text-strong">Verifying Your Email</h1>
+              <p className="mt-2 text-xs text-text-muted">Please wait a moment…</p>
             </>
           )}
 
           {status === "failed" && (
             <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
                 <XCircle className="h-6 w-6" />
               </div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Verification Failed</h1>
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{error}</p>
+              <h1 className="text-xl font-bold text-text-strong">Verification Failed</h1>
+              <p className="mt-2 text-xs text-text-muted">{error}</p>
               <p className="mt-4 text-xs">
-                <Link to="/login" className="font-semibold text-brand-700 hover:underline dark:text-brand-300">
+                <Link to="/login" className="font-semibold text-primary hover:underline">
                   Request a new link from login
                 </Link>
               </p>
@@ -87,11 +87,11 @@ export default function VerifyEmail() {
 
           {status === "done" && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                 <CheckCircle2 className="h-7 w-7" />
               </div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Email Verified</h1>
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              <h1 className="text-xl font-bold text-text-strong">Email Verified</h1>
+              <p className="mt-2 text-xs text-text-muted">
                 Your email has been verified and you're now logged in. Redirecting you back…
               </p>
               <Button

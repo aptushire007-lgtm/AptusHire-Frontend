@@ -82,7 +82,7 @@ function statusOf(item, responses, marked) {
 // a colour means the same thing in all four places. The green/amber pairing is the
 // exam grammar candidates already arrive knowing; it predates this file and stays.
 const STATUS_STYLE = {
-  current: { chip: "bg-brand-600 text-white ring-brand-600", dot: "bg-brand-600", label: "Current question" },
+  current: { chip: "bg-primary text-white ring-brand-600", dot: "bg-primary", label: "Current question" },
   answered: { chip: "bg-emerald-500 text-white ring-emerald-500", dot: "bg-emerald-500", label: "Answered" },
   marked: { chip: "bg-amber-400 text-amber-950 ring-amber-400", dot: "bg-amber-400", label: "Marked for review" },
   seen: { chip: "bg-white text-slate-600 ring-slate-300", dot: "bg-white ring-1 ring-inset ring-slate-300", label: "Seen, not answered" },
@@ -549,7 +549,7 @@ export default function AssessmentRoom() {
         {/* Answered-so-far. A bar, not a ring: this counts work done, and it must
             never be mistaken for a score. */}
         <div className="h-1 w-full bg-slate-100" role="presentation">
-          <div className="h-full bg-brand-600 transition-[width] duration-300 ease-out" style={{ width: `${progressPct}%` }} />
+          <div className="h-full bg-primary transition-[width] duration-300 ease-out" style={{ width: `${progressPct}%` }} />
         </div>
       </header>
 
@@ -680,7 +680,7 @@ export default function AssessmentRoom() {
             type="button"
             aria-label="Close the question list"
             onClick={() => setSheetOpen(false)}
-            className="absolute inset-0 bg-slate-900/50"
+            className="absolute inset-0 bg-canvas-deep/70"
           />
           <div
             role="dialog"
@@ -705,7 +705,7 @@ export default function AssessmentRoom() {
       )}
 
       {timeUp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas-deep/80 px-6">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-soft">
             <Clock className="mx-auto mb-3 h-8 w-8 text-slate-400" />
             <h2 className="text-base font-semibold text-slate-900">Time is up</h2>
@@ -1098,7 +1098,7 @@ function AnswerWidget({ item, value, onChange }) {
               <span
                 aria-hidden="true"
                 className={`flex h-8 w-8 shrink-0 items-center justify-center text-xs font-bold ${multi ? "rounded-lg" : "rounded-full"} ${
-                  isSelected ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-500"
+                  isSelected ? "bg-primary text-white" : "bg-slate-100 text-slate-500"
                 }`}
               >
                 {isSelected && multi ? <Check className="h-4 w-4" /> : optionLabel(i)}
