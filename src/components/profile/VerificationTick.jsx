@@ -18,23 +18,23 @@ export default function VerificationTick({
 }) {
   const configs = {
     verified: {
-      bg: "bg-brand-50 dark:bg-brand-50",
-      text: "text-primary dark:text-primary",
-      border: "border-brand-200 dark:border-brand-200",
+      bg: "bg-[#FFE8DC] dark:bg-[#FFE8DC]",
+      text: "text-[#FF6B2C] dark:text-[#FF6B2C]",
+      border: "border-[#FFCAAF] dark:border-[#FFCAAF]",
       icon: CheckCircle2,
       label: "Verified",
     },
     pending: {
-      bg: "bg-brand-50 dark:bg-brand-50",
-      text: "text-primary dark:text-primary",
-      border: "border-brand-200 dark:border-brand-200",
+      bg: "bg-[#FFE8DC] dark:bg-[#FFE8DC]",
+      text: "text-[#FF6B2C] dark:text-[#FF6B2C]",
+      border: "border-[#FFCAAF] dark:border-[#FFCAAF]",
       icon: Clock,
       label: "Pending Verification",
     },
     missing: {
-      bg: "bg-canvas dark:bg-canvas",
-      text: "text-text-muted dark:text-text-muted",
-      border: "border-brand-200 dark:border-brand-200",
+      bg: "bg-[#F5F5F0] dark:bg-[#F5F5F0]",
+      text: "text-[#6B6B6B] dark:text-[#6B6B6B]",
+      border: "border-[#FFCAAF] dark:border-[#FFCAAF]",
       icon: Minus,
       label: "Not Verified",
     },
@@ -74,7 +74,7 @@ export default function VerificationTick({
         <button
           type="button"
           onClick={onFix}
-          className="text-sm font-bold text-primary hover:text-primary dark:text-primary"
+          className="text-sm font-bold text-[#FF6B2C] hover:text-[#FF6B2C] dark:text-[#FF6B2C]"
         >
           {fixLabel}
         </button>

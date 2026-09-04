@@ -76,19 +76,19 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
       )}
 
       {/* Upload Gov Document Box */}
-      <section className="rounded-2xl border border-border bg-canvas p-5">
-        <h3 className="font-display text-sm font-bold text-text-strong">Upload Government ID</h3>
-        <p className="mt-0.5 text-xs text-text-muted">
+      <section className="rounded-2xl border border-[#E8E8E4] bg-[#F5F5F0] p-5">
+        <h3 className="font-display text-sm font-bold text-[#1A1A1A]">Upload Government ID</h3>
+        <p className="mt-0.5 text-xs text-[#6B6B6B]">
           AI OCR automatically verifies your name and date of birth in seconds. Your document number is always masked.
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div>
-            <label className="block text-xs font-bold text-text-strong">Document Type</label>
+            <label className="block text-xs font-bold text-[#1A1A1A]">Document Type</label>
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs text-text"
+              className="mt-1 w-full rounded-xl border border-[#E8E8E4] bg-white px-3 py-2 text-xs text-[#1A1A1A]"
             >
               <option value="aadhaar">Aadhaar Card (India)</option>
               <option value="passport">Passport</option>
@@ -99,13 +99,13 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-text-strong">Document Number (Optional)</label>
+            <label className="block text-xs font-bold text-[#1A1A1A]">Document Number (Optional)</label>
             <input
               type="text"
               value={docNumber}
               onChange={(e) => setDocNumber(e.target.value)}
               placeholder="e.g. 1234 5678 9012"
-              className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs text-text"
+              className="mt-1 w-full rounded-xl border border-[#E8E8E4] bg-white px-3 py-2 text-xs text-[#1A1A1A]"
             />
           </div>
 
@@ -120,7 +120,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
             />
             <label
               htmlFor="gov-doc-upload"
-              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-primary-dark dark:bg-primary dark:text-white"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#FF6B2C] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#FF6B2C]-dark dark:bg-[#FF6B2C] dark:text-white"
             >
               {uploading ? (
                 <>
@@ -156,7 +156,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
                       <p className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
                         {doc.docType.replace("_", " ")}
                       </p>
-                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-extrabold text-primary">
+                      <span className="rounded-full bg-[#FFE8DC] px-2 py-0.5 text-[10px] font-extrabold text-[#FF6B2C]">
                         Verified via OCR
                       </span>
                     </div>
@@ -203,7 +203,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
       {/* Consent Center */}
       <section className="rounded-2xl border border-slate-200/90 bg-white p-5">
         <div className="flex items-center gap-2">
-          <Shield className="h-4 w-4 text-primary" />
+          <Shield className="h-4 w-4 text-[#FF6B2C]" />
           <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">Consent Center &amp; Privacy Audit</h3>
         </div>
         <p className="mt-1 text-xs text-slate-500">

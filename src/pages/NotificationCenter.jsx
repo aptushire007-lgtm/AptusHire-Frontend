@@ -106,7 +106,7 @@ export default function NotificationCenter() {
       <Card>
         {/* The filter bar reads as one control group rather than three loose
             fields dropped above the list. */}
-        <div className="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-canvas p-4 sm:grid-cols-3">
+        <div className="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-[#F5F5F0] p-4 sm:grid-cols-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
@@ -166,7 +166,7 @@ export default function NotificationCenter() {
               <li
                 key={n._id}
                 className={`flex items-start gap-3 rounded-xl border p-4 ${
-                  n.read ? "border-slate-200 bg-white" : "border-brand-200 bg-brand-50/50"
+                  n.read ? "border-slate-200 bg-white" : "border-[#FFCAAF] bg-[#FFE8DC]/50"
                 }`}
               >
                 <IconTile icon={Bell} size="sm" tone={n.read ? "slate" : "brand"} />
@@ -189,7 +189,7 @@ export default function NotificationCenter() {
                     <button
                       type="button"
                       onClick={() => markRead(n._id)}
-                      className="tap-target rounded-lg px-2 py-1 text-xs font-semibold text-primary hover:bg-brand-50"
+                      className="tap-target rounded-lg px-2 py-1 text-xs font-semibold text-[#FF6B2C] hover:bg-[#FFE8DC]"
                     >
                       Mark read
                     </button>

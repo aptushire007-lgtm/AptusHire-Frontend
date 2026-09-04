@@ -159,7 +159,7 @@ export default function AssessmentHub() {
             the session. What you answered has been recorded — a recruiter will review it before any decision is made.
           </p>
           {totals.items > 0 && (
-            <p className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-canvas px-4 py-2.5 text-xs text-slate-600">
+            <p className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-[#F5F5F0] px-4 py-2.5 text-xs text-slate-600">
               <Lock className="h-3.5 w-3.5" aria-hidden="true" />
               {totals.answered} of {totals.items} questions answered across {sections.length} section
               {sections.length === 1 ? "" : "s"}
@@ -170,7 +170,7 @@ export default function AssessmentHub() {
     }
     return (
       <Card className="py-10 text-center">
-        <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-verdict-positive-tint text-verdict-positive">
+        <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFE8DC] text-[#FF6B2C]">
           <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
         </span>
         <h1 className="font-display text-xl font-bold tracking-tight text-slate-900">Assessment submitted</h1>
@@ -179,7 +179,7 @@ export default function AssessmentHub() {
           email — keep an eye on your inbox.
         </p>
         {totals.items > 0 && (
-          <p className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-canvas px-4 py-2.5 text-xs text-slate-600">
+          <p className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-[#F5F5F0] px-4 py-2.5 text-xs text-slate-600">
             <Lock className="h-3.5 w-3.5" aria-hidden="true" />
             {totals.answered} of {totals.items} questions answered across {sections.length} section
             {sections.length === 1 ? "" : "s"}
@@ -208,7 +208,7 @@ export default function AssessmentHub() {
             to be the only one with an icon, which read as the only one that
             mattered — they are two different ways to lose the assessment. */}
         <dl className="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-2">
-          <div className="rounded-xl border border-slate-200 bg-canvas px-4 py-3">
+          <div className="rounded-xl border border-slate-200 bg-[#F5F5F0] px-4 py-3">
             <dt className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
               <Clock className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" /> Start by
             </dt>
@@ -216,7 +216,7 @@ export default function AssessmentHub() {
               {new Date(session.startDeadline).toLocaleString()}
             </dd>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-canvas px-4 py-3">
+          <div className="rounded-xl border border-slate-200 bg-[#F5F5F0] px-4 py-3">
             <dt className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
               <Lock className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" /> Link valid until
             </dt>
@@ -344,7 +344,7 @@ export default function AssessmentHub() {
                           <div
                             className={`h-full ${
                               status !== "completed"
-                                ? "bg-primary"
+                                ? "bg-[#FF6B2C]"
                                 : answered === total
                                   ? "bg-verdict-positive"
                                   : "bg-slate-400"

@@ -111,12 +111,12 @@ export default function InterviewDashboard() {
           {/* The device requirement is the single most expensive thing to
               discover late, so it sits in its own bordered row rather than
               blending into the paragraph stack above it. */}
-          <p className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-canvas px-4 py-3 text-slate-600">
+          <p className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-[#F5F5F0] px-4 py-3 text-slate-600">
             <Laptop className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
             Use a laptop or desktop with a camera and microphone — the interview can't run on most phones.
           </p>
           {session.instructions && (
-            <p className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-canvas px-4 py-3 text-slate-600">
+            <p className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-[#F5F5F0] px-4 py-3 text-slate-600">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
               <span>
                 <span className="font-semibold text-slate-800">Instructions:</span> {session.instructions}
@@ -133,7 +133,7 @@ export default function InterviewDashboard() {
           )}
           {session.status === "in_progress" && (
             <div className="space-y-3">
-              <p className="flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-verdict-positive-tint px-4 py-3 text-sm font-medium text-verdict-positive">
+              <p className="flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-[#FFE8DC] px-4 py-3 text-sm font-medium text-[#FF6B2C]">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                 Your interview is underway — you can pick up right where you left off.
               </p>
@@ -143,8 +143,8 @@ export default function InterviewDashboard() {
             </div>
           )}
           {session.status === "completed" && (
-            <div className="rounded-2xl border border-emerald-200 bg-verdict-positive-tint p-5 text-sm text-slate-700">
-              <p className="flex items-center gap-2 font-semibold text-verdict-positive">
+            <div className="rounded-2xl border border-emerald-200 bg-[#FFE8DC] p-5 text-sm text-slate-700">
+              <p className="flex items-center gap-2 font-semibold text-[#FF6B2C]">
                 <CheckCircle2 className="h-4.5 w-4.5" aria-hidden="true" /> Interview completed — thank you!
               </p>
               <p className="mt-2">
@@ -154,7 +154,7 @@ export default function InterviewDashboard() {
             </div>
           )}
           {(session.status === "expired" || session.status === "cancelled") && (
-            <p className="flex items-start gap-2.5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-verdict-negative">
+            <p className="flex items-start gap-2.5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-[#C0392B]">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               {session.status === "expired"
                 ? "This interview link has expired. If you still need to take (or finish) the interview, reply to your invitation email and the hiring team can send you a fresh link."

@@ -54,18 +54,18 @@ export function BrandLogo({
   className = "",
   onClick,
 }) {
-  let textColor = "text-primary dark:text-white";
-  let taglineColor = "text-text-muted";
-  let hireColor = "text-primary dark:text-lime";
+  let textColor = "text-[#FF6B2C] dark:text-white";
+  let taglineColor = "text-[#6B6B6B]";
+  let hireColor = "text-[#FF6B2C] dark:text-lime";
 
   if (theme === "dark") {
     textColor = "text-white";
     taglineColor = "text-slate-300";
     hireColor = "text-lime";
   } else if (theme === "light") {
-    textColor = "text-primary";
-    taglineColor = "text-text-muted";
-    hireColor = "text-primary";
+    textColor = "text-[#FF6B2C]";
+    taglineColor = "text-[#6B6B6B]";
+    hireColor = "text-[#FF6B2C]";
   }
 
   const iconSizes = {

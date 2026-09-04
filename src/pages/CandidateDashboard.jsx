@@ -134,18 +134,18 @@ function actionTone(action, now) {
 const TONE_STYLES = {
   red: {
     wrap: "border-red-200 bg-red-50",
-    icon: "bg-verdict-negative-tint text-verdict-negative",
-    text: "text-verdict-negative",
+    icon: "bg-[#FDECEA] text-[#C0392B]",
+    text: "text-[#C0392B]",
   },
   amber: {
     wrap: "border-amber-200 bg-amber-50",
-    icon: "bg-verdict-pending-tint text-verdict-pending",
-    text: "text-verdict-pending",
+    icon: "bg-[#FFE8DC] text-[#FF6B2C]",
+    text: "text-[#FF6B2C]",
   },
   brand: {
-    wrap: "border-brand-200 bg-brand-50",
-    icon: "bg-brand-100 text-primary",
-    text: "text-primary",
+    wrap: "border-[#FFCAAF] bg-[#FFE8DC]",
+    icon: "bg-[#FFE8DC] text-[#FF6B2C]",
+    text: "text-[#FF6B2C]",
   },
   slate: {
     wrap: "border-slate-200 bg-slate-50",
@@ -205,7 +205,7 @@ function ProgressBar({ value, label, className = "", trackClassName = "h-1.5" })
       className={`w-full overflow-hidden rounded-full bg-slate-100 ${trackClassName} ${className}`}
     >
       <div
-        className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out motion-reduce:transition-none"
+        className="h-full rounded-full bg-[#FF6B2C] transition-[width] duration-500 ease-out motion-reduce:transition-none"
         style={{ width: `${pct}%` }}
       />
     </div>
@@ -421,7 +421,7 @@ function ApplicationCard({ application, next, now, onOpen, openingId }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={trackId}
-        className={`${INLINE_ACTION} mt-3 text-primary hover:bg-brand-50 hover:underline focus-visible:ring-brand-300`}
+        className={`${INLINE_ACTION} mt-3 text-[#FF6B2C] hover:bg-[#FFE8DC] hover:underline focus-visible:ring-brand-300`}
       >
         <ChevronDown
           aria-hidden="true"
@@ -444,7 +444,7 @@ function ApplicationCard({ application, next, now, onOpen, openingId }) {
 // a level and leaves a screen-reader user's section list with a hole in it.
 function SectionCard({ title, icon: Icon, description, children, action, ...props }) {
   return (
-    <Card as="section" {...props} className="border-border !bg-surface text-text-strong dark:border-border dark:!bg-surface">
+    <Card as="section" {...props} className="border-[#E8E8E4] !bg-white text-[#1A1A1A] dark:border-[#E8E8E4] dark:!bg-white">
       {/* Composes <SectionHeader> rather than re-rolling a title row, so the
           icon chip, heading size, and action alignment match every other
           section in both apps instead of drifting one screen at a time. */}
@@ -657,7 +657,7 @@ export default function CandidateDashboard() {
       <div className="space-y-4">
         <h1 className="text-2xl font-bold text-slate-900">My Dashboard</h1>
         <Card role="alert" className="border-red-200 bg-red-50">
-          <p className="flex items-start gap-2.5 text-sm font-semibold text-verdict-negative">
+          <p className="flex items-start gap-2.5 text-sm font-semibold text-[#C0392B]">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             {error}
           </p>
@@ -726,16 +726,16 @@ export default function CandidateDashboard() {
   }));
 
   return (
-    <div className="candidate-dashboard space-y-6 text-primary">
-      <section className="flex flex-col justify-between gap-4 rounded-2xl border border-border bg-white p-6 text-text-strong shadow-card sm:flex-row sm:items-end sm:p-8">
+    <div className="candidate-dashboard space-y-6 text-[#FF6B2C]">
+      <section className="flex flex-col justify-between gap-4 rounded-2xl border border-[#E8E8E4] bg-white p-6 text-[#1A1A1A] shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:flex-row sm:items-end sm:p-8">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Candidate dashboard</p>
-          <h1 className="mt-2 text-2xl font-bold text-text-strong">{greeting}, {user?.name || "Candidate"} <span aria-hidden="true">👋</span></h1>
-          <p className="mt-2 text-sm text-text-muted">Here's your hiring progress.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6B6B6B]">Candidate dashboard</p>
+          <h1 className="mt-2 text-2xl font-bold text-[#1A1A1A]">{greeting}, {user?.name || "Candidate"} <span aria-hidden="true">👋</span></h1>
+          <p className="mt-2 text-sm text-[#6B6B6B]">Here's your hiring progress.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link to="/profile" className="rounded-[9px] border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-primary hover:bg-[#D2ECC9]">Profile completion: {pct}%</Link>
-          <button onClick={handleDownloadData} disabled={exporting} className="inline-flex items-center gap-2 rounded-[9px] bg-primary px-4 py-2 text-xs font-semibold text-white shadow-card transition-colors hover:bg-primary-dark"><Download className="h-4 w-4" /><span>{exporting ? "Exporting…" : "Download My Data"}</span></button>
+          <Link to="/profile" className="rounded-[9px] border border-[#FFCAAF] bg-[#FFE8DC] px-3 py-2 text-xs font-semibold text-[#FF6B2C] hover:bg-[#D2ECC9]">Profile completion: {pct}%</Link>
+          <button onClick={handleDownloadData} disabled={exporting} className="inline-flex items-center gap-2 rounded-[9px] bg-[#FF6B2C] px-4 py-2 text-xs font-semibold text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors hover:bg-[#FF6B2C]-dark"><Download className="h-4 w-4" /><span>{exporting ? "Exporting…" : "Download My Data"}</span></button>
         </div>
       </section>
 
@@ -745,17 +745,17 @@ export default function CandidateDashboard() {
           { label: "Interviews", value: interviewCount, detail: "Scheduled or completed", icon: Video },
           { label: "Profile completion", value: pct, detail: "Profile strength", icon: UserRound },
         ].map(({ label, value, detail, icon: Icon }) => (
-          <Card key={label} className="border-border !bg-white p-5 text-text-strong shadow-xs dark:border-border ">
-            <div className="flex items-center justify-between gap-3"><span className="text-xs font-semibold text-text-muted">{label}</span><Icon className="h-4 w-4 text-primary" aria-hidden="true" /></div>
-            <p className="mt-3 text-3xl font-bold text-primary">{value}{label === "Profile completion" ? "%" : ""}</p>
-            <p className="mt-1 text-xs text-text-muted">{detail}</p>
+          <Card key={label} className="border-[#E8E8E4] !bg-white p-5 text-[#1A1A1A] shadow-xs dark:border-[#E8E8E4] ">
+            <div className="flex items-center justify-between gap-3"><span className="text-xs font-semibold text-[#6B6B6B]">{label}</span><Icon className="h-4 w-4 text-[#FF6B2C]" aria-hidden="true" /></div>
+            <p className="mt-3 text-3xl font-bold text-[#FF6B2C]">{value}{label === "Profile completion" ? "%" : ""}</p>
+            <p className="mt-1 text-xs text-[#6B6B6B]">{detail}</p>
           </Card>
         ))}
       </section>
 
       <SectionCard id="pipeline" title="Application pipeline" icon={ListChecks} description="A current count of your applications by stage.">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {pipeline.map((stage) => <div key={stage.key} className="rounded-xl border border-border bg-white p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">{stage.label}</p><p className="mt-2 text-2xl font-bold text-primary">{stage.count}</p></div>)}
+          {pipeline.map((stage) => <div key={stage.key} className="rounded-xl border border-[#E8E8E4] bg-white p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-[#6B6B6B]">{stage.label}</p><p className="mt-2 text-2xl font-bold text-[#FF6B2C]">{stage.count}</p></div>)}
         </div>
       </SectionCard>
 
@@ -831,7 +831,7 @@ export default function CandidateDashboard() {
         data.appliedJobs.length > 0 && (
           <Card as="section" className="border-emerald-200 bg-emerald-50/50">
             <div className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-verdict-positive-tint text-verdict-positive">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FFE8DC] text-[#FF6B2C]">
                 <CircleCheck className="h-4.5 w-4.5" aria-hidden="true" />
               </span>
               <div>
@@ -892,7 +892,7 @@ export default function CandidateDashboard() {
           ) : (
             <div className="space-y-3">
               {[...data.upcomingInterviews, ...data.aiInterviewHistory].map((s) => (
-                <div key={s._id} className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-brand-200">
+                <div key={s._id} className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-[#FFCAAF]">
                   <div className="flex items-start justify-between gap-2">
                     <p className="min-w-0 truncate text-sm font-semibold text-slate-800">{s.job?.title}</p>
                     <Badge tone={s.status === "completed" ? "green" : s.status === "expired" ? "red" : "brand"}>
@@ -921,14 +921,14 @@ export default function CandidateDashboard() {
           {data.notifications.length === 0 && <p className="text-sm text-slate-500">No notifications yet.</p>}
           <div className="space-y-3">
             {data.notifications.slice(0, 5).map((n) => (
-              <div key={n._id} className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-brand-200">
+              <div key={n._id} className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-[#FFCAAF]">
                 <p className="text-sm font-semibold text-slate-800">{n.title}</p>
                 <p className="text-xs text-slate-500">{n.message}</p>
                 {!n.read && (
                   <button
                     type="button"
                     onClick={() => markNotificationRead(n._id)}
-                    className={`${INLINE_ACTION} mt-1 text-primary hover:bg-brand-50 hover:underline focus-visible:ring-brand-300`}
+                    className={`${INLINE_ACTION} mt-1 text-[#FF6B2C] hover:bg-[#FFE8DC] hover:underline focus-visible:ring-brand-300`}
                   >
                     Mark as read
                     {/* Three notifications in a row all offering "Mark as read"
@@ -954,7 +954,7 @@ export default function CandidateDashboard() {
         ) : (
           <div className="space-y-3">
             {data.aiInterviewHistory.map((s) => (
-              <div key={s._id} className="flex items-center justify-between gap-2 rounded-xl border border-border !bg-white p-4 transition-colors hover:border-brand-200 dark:border-border ">
+              <div key={s._id} className="flex items-center justify-between gap-2 rounded-xl border border-[#E8E8E4] !bg-white p-4 transition-colors hover:border-[#FFCAAF] dark:border-[#E8E8E4] ">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{s.job?.title}</p>
                   <p className="truncate text-xs text-slate-500">{formatAbsolute(s.interviewAt)}</p>

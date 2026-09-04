@@ -32,7 +32,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background px-5 py-12 transition-colors">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#F5F5F0] px-5 py-12 transition-colors">
       <div className="absolute right-6 top-6">
         <ThemeToggle />
       </div>
@@ -50,12 +50,12 @@ export default function ResetPassword() {
               </div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Password Reset</h1>
               <p className="mt-2 text-xs text-slate-500">
-                Your password has been reset. Redirecting you to <Link to="/login" className="font-semibold text-primary">login</Link>…
+                Your password has been reset. Redirecting you to <Link to="/login" className="font-semibold text-[#FF6B2C]">login</Link>…
               </p>
             </>
           ) : (
             <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-primary/60">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFE8DC] text-[#FF6B2C]/60">
                 <KeyRound className="h-6 w-6" />
               </div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Choose a New Password</h1>

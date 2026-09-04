@@ -64,8 +64,8 @@ export default function PreferencesTab({ profile, onRefresh }) {
   return (
     <div className="candidate-preferences-tab space-y-6">
       <div>
-        <h2 className="font-display text-xl font-bold text-primary dark:text-primary">Preferences &amp; Privacy</h2>
-        <p className="text-sm text-text-muted dark:text-text-muted">
+        <h2 className="font-display text-xl font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">Preferences &amp; Privacy</h2>
+        <p className="text-sm text-[#6B6B6B] dark:text-[#6B6B6B]">
           Configure notification channels, job alerts, and manage your data rights under GDPR &amp; DPDP regulations.
         </p>
       </div>
@@ -79,17 +79,17 @@ export default function PreferencesTab({ profile, onRefresh }) {
 
       <form onSubmit={handleSave} className="space-y-5">
         {/* Availability */}
-        <div className="rounded-2xl border border-brand-200 bg-white p-5 shadow-xs dark:border-brand-200 dark:bg-white">
-          <label className="block font-display text-base font-bold text-primary dark:text-primary">
+        <div className="rounded-2xl border border-[#FFCAAF] bg-white p-5 shadow-xs dark:border-[#FFCAAF] dark:bg-white">
+          <label className="block font-display text-base font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">
             Availability Notice Period
           </label>
-          <p className="text-sm text-text-muted dark:text-text-muted">
+          <p className="text-sm text-[#6B6B6B] dark:text-[#6B6B6B]">
             Let hiring teams know how quickly you can join if extended an offer.
           </p>
           <select
             value={preferences.availabilityWindow}
             onChange={(e) => setPreferences({ ...preferences, availabilityWindow: e.target.value })}
-            className="mt-3 w-full max-w-xs rounded-xl border border-brand-200 bg-surface px-3.5 py-2.5 text-sm font-bold text-primary dark:border-brand-200 dark:bg-surface dark:text-primary"
+            className="mt-3 w-full max-w-xs rounded-xl border border-[#FFCAAF] bg-white px-3.5 py-2.5 text-sm font-bold text-[#FF6B2C] dark:border-[#FFCAAF] dark:bg-white dark:text-[#FF6B2C]"
           >
             <option value="immediate">Immediate Joiner (0-7 days)</option>
             <option value="15_days">15 Days Notice Period</option>
@@ -99,45 +99,45 @@ export default function PreferencesTab({ profile, onRefresh }) {
         </div>
 
         {/* Notifications & Channels */}
-        <div className="rounded-2xl border border-brand-200 bg-white p-5 shadow-xs dark:border-brand-200 dark:bg-white">
-          <h3 className="font-display text-base font-bold text-primary dark:text-primary">Communication Channels</h3>
+        <div className="rounded-2xl border border-[#FFCAAF] bg-white p-5 shadow-xs dark:border-[#FFCAAF] dark:bg-white">
+          <h3 className="font-display text-base font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">Communication Channels</h3>
           <div className="mt-3 space-y-3 divide-y divide-[#EAF9E1] text-sm dark:divide-[#EAF9E1]">
             <label className="flex items-center justify-between pt-2 cursor-pointer">
               <div>
-                <p className="font-bold text-primary dark:text-primary">Recommended Job Alerts</p>
-                <p className="text-text-muted">Receive weekly emails with roles matching your resume version skills.</p>
+                <p className="font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">Recommended Job Alerts</p>
+                <p className="text-[#6B6B6B]">Receive weekly emails with roles matching your resume version skills.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.jobAlerts}
                 onChange={() => handleToggle("jobAlerts")}
-                className="h-4 w-4 rounded text-primary accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#FF6B2C] accent-[#214740] dark:accent-[#214740]"
               />
             </label>
 
             <label className="flex items-center justify-between pt-3 cursor-pointer">
               <div>
-                <p className="font-bold text-primary dark:text-primary">WhatsApp Interview Reminders</p>
-                <p className="text-text-muted">Get timely reminders before AI interviews and assessment deadlines.</p>
+                <p className="font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">WhatsApp Interview Reminders</p>
+                <p className="text-[#6B6B6B]">Get timely reminders before AI interviews and assessment deadlines.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.whatsappUpdates}
                 onChange={() => handleToggle("whatsappUpdates")}
-                className="h-4 w-4 rounded text-primary accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#FF6B2C] accent-[#214740] dark:accent-[#214740]"
               />
             </label>
 
             <label className="flex items-center justify-between pt-3 cursor-pointer">
               <div>
-                <p className="font-bold text-primary dark:text-primary">SMS Notifications</p>
-                <p className="text-text-muted">Critical stage alerts sent to your verified mobile number.</p>
+                <p className="font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">SMS Notifications</p>
+                <p className="text-[#6B6B6B]">Critical stage alerts sent to your verified mobile number.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.smsUpdates}
                 onChange={() => handleToggle("smsUpdates")}
-                className="h-4 w-4 rounded text-primary accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#FF6B2C] accent-[#214740] dark:accent-[#214740]"
               />
             </label>
           </div>
@@ -151,7 +151,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
       </form>
 
       {/* GDPR / DPDP Download My Data Box */}
-      <section className="rounded-3xl border border-[#2E4F48] bg-primary p-6 text-white shadow-soft">
+      <section className="rounded-3xl border border-[#2E4F48] bg-[#FF6B2C] p-6 text-white shadow-soft">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
             variant="secondary"
             onClick={handleDownloadData}
             disabled={exporting}
-            className="shrink-0 bg-white text-primary hover:bg-brand-50 font-bold"
+            className="shrink-0 bg-white text-[#FF6B2C] hover:bg-[#FFE8DC] font-bold"
           >
             {exporting ? (
               <>

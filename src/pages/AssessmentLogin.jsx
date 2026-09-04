@@ -54,7 +54,7 @@ export default function AssessmentLogin() {
 
   return (
     <Card className="text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-brand-600">
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFE8DC] text-brand-600">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
       <h1 className="text-lg font-semibold text-slate-900">Signing you in…</h1>

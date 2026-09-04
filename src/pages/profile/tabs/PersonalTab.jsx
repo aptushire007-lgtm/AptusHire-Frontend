@@ -240,15 +240,15 @@ export default function PersonalTab({ profile, onRefresh }) {
 
       {/* OTP Verification Modal */}
       {otpModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas-deep/80 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-sm rounded-3xl border border-border bg-surface p-6 shadow-lift">
-            <div className="flex items-center gap-2 text-primary">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F5F5F0]-deep/80 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-sm rounded-3xl border border-[#E8E8E4] bg-white p-6 shadow-lift">
+            <div className="flex items-center gap-2 text-[#FF6B2C]">
               <ShieldCheck className="h-5 w-5" />
-              <h3 className="font-display text-base font-bold text-text-strong">
+              <h3 className="font-display text-base font-bold text-[#1A1A1A]">
                 Verify {otpModal.channel === "email" ? "Email Address" : "Phone Number"}
               </h3>
             </div>
-            <p className="mt-1 text-xs text-text-muted">
+            <p className="mt-1 text-xs text-[#6B6B6B]">
               Enter the 6-digit verification code sent to your {otpModal.channel}.
             </p>
 
@@ -263,7 +263,7 @@ export default function PersonalTab({ profile, onRefresh }) {
                 value={otpModal.code}
                 onChange={(e) => setOtpModal({ ...otpModal, code: e.target.value })}
                 placeholder="6-digit OTP"
-                className="w-full text-center tracking-widest text-lg font-bold rounded-xl border border-border bg-canvas py-2.5 text-text"
+                className="w-full text-center tracking-widest text-lg font-bold rounded-xl border border-[#E8E8E4] bg-[#F5F5F0] py-2.5 text-[#1A1A1A]"
               />
             </div>
 

@@ -22,31 +22,31 @@ const DISABLED_FILL =
 
 const variants = {
   primary:
-    `bg-primary text-white shadow-card hover:bg-primary-dark active:bg-primary-dark focus-visible:ring-4 focus-visible:ring-primary/25 ${DISABLED_FILL}`,
+    `bg-[#FF6B2C] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#FF6B2C]-dark active:bg-[#FF6B2C]-dark focus-visible:ring-4 focus-visible:ring-primary/25 ${DISABLED_FILL}`,
 
   secondary:
-    `border border-primary bg-surface text-primary hover:bg-brand-50 active:bg-brand-100 focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100`,
+    `border border-[#FF6B2C] bg-white text-[#FF6B2C] hover:bg-[#FFE8DC] active:bg-[#FFE8DC] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100`,
 
   outline:
-    `border border-border bg-transparent text-text-muted hover:border-primary/40 hover:bg-brand-50 hover:text-primary focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100`,
+    `border border-[#E8E8E4] bg-transparent text-[#6B6B6B] hover:border-[#FF6B2C]/40 hover:bg-[#FFE8DC] hover:text-[#FF6B2C] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100`,
 
   ghost:
-    `bg-transparent text-text-muted hover:bg-brand-50 hover:text-primary focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100`,
+    `bg-transparent text-[#6B6B6B] hover:bg-[#FFE8DC] hover:text-[#FF6B2C] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100`,
 
   danger:
-    `bg-verdict-negative text-white shadow-card hover:bg-red-700 active:bg-red-800 focus-visible:ring-4 focus-visible:ring-red-400/30 ${DISABLED_FILL}`,
+    `bg-verdict-negative text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-red-700 active:bg-red-800 focus-visible:ring-4 focus-visible:ring-red-400/30 ${DISABLED_FILL}`,
 
   gold:
-    `bg-accent-gold text-white shadow-card hover:bg-accent-gold-dark active:bg-accent-gold-dark focus-visible:ring-4 focus-visible:ring-accent-gold/30 ${DISABLED_FILL}`,
+    `bg-[#FF6B2C] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#FF6B2C]-dark active:bg-[#FF6B2C]-dark focus-visible:ring-4 focus-visible:ring-accent-orange/30 ${DISABLED_FILL}`,
 
   /* backward-compat aliases */
   accent:
-    `bg-primary text-white shadow-card hover:bg-primary-dark focus-visible:ring-4 focus-visible:ring-primary/25 ${DISABLED_FILL}`,
+    `bg-[#FF6B2C] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#FF6B2C]-dark focus-visible:ring-4 focus-visible:ring-primary/25 ${DISABLED_FILL}`,
   orange:
-    `bg-accent-gold text-white shadow-card hover:bg-accent-gold-dark focus-visible:ring-4 focus-visible:ring-accent-gold/30 ${DISABLED_FILL}`,
+    `bg-[#FF6B2C] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#FF6B2C]-dark focus-visible:ring-4 focus-visible:ring-accent-orange/30 ${DISABLED_FILL}`,
 
   link:
-    `bg-transparent text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-40 disabled:cursor-not-allowed`,
+    `bg-transparent text-[#FF6B2C] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-40 disabled:cursor-not-allowed`,
 };
 
 const sizes = {

@@ -76,14 +76,14 @@ export default function Account() {
         </div>
 
         <dl className="mt-6 space-y-2.5 border-t border-slate-100 pt-6 text-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-canvas px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#F5F5F0] px-4 py-3">
             {/* Was `slate-400` — 2.5:1 on white. A definition term is a label,
                 not a watermark. */}
             <dt className="text-slate-600">Email</dt>
             <dd className="font-medium break-all text-slate-900">{profile.email}</dd>
           </div>
           {profile.phone && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-canvas px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#F5F5F0] px-4 py-3">
               <dt className="text-slate-600">Phone</dt>
               <dd className="font-medium text-slate-900">{profile.phone}</dd>
             </div>
