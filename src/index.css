@@ -1,113 +1,119 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lexend:wght@500;600;700;800&display=swap");
 @import "tailwindcss";
 
 /**
- * AptusHire Candidate Frontend — Design Tokens
- * Warm orange primary, bright green accent, warm cream canvas
+ * AptusHire Candidate Frontend — HiringAnt Design Token System
+ * Primary: #176B45 deep green | Canvas: #F8FAF9 | Cards: #FFFFFF
  */
 
 @theme {
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Inter", system-ui, sans-serif;
+  --font-display: "Lexend", Inter, system-ui, sans-serif;
 
   --text-xs:              0.75rem;
   --text-xs--line-height: 1.4;
   --text-sm:              0.875rem;
   --text-sm--line-height: 1.55;
   --text-base:            1rem;
-  --text-base--line-height: 1.65;
+  --text-base--line-height: 1.6;
 
-  /* PRIMARY — Warm Orange */
-  --color-primary:        #FF6B2C;
-  --color-primary-dark:   #E55A1F;
-  --color-primary-light:  #FFE8DC;
-  --color-brand-green:    #FF6B2C;
+  /* PRIMARY GREEN */
+  --color-primary:        #176B45;
+  --color-primary-dark:   #125638;
+  --color-primary-light:  #E8F2EC;
+  --color-brand-green:    #176B45;
 
-  /* ACCENT — Bright Green (success, positive) */
-  --color-accent-green:       #22C55E;
-  --color-accent-green-dark:  #16A34A;
-  --color-accent-green-light: #DCFCE7;
-  --color-accent-green-mid:   #86EFAC;
+  /* SECONDARY */
+  --color-secondary-green:  #5F9475;
+  --color-green-light:      #E8F2EC;
+  --color-green-muted:      #F1F7F3;
 
-  /* Legacy orange/gold → orange */
-  --color-accent-orange:       #FF6B2C;
-  --color-accent-orange-dark:  #E55A1F;
-  --color-accent-orange-soft:  #FFE8DC;
-  --color-accent-orange-mid:   #FFAC82;
-  --color-accent-gold:         #FF6B2C;
-  --color-accent-gold-dark:    #E55A1F;
-  --color-accent-gold-light:   #FFE8DC;
-  --color-accent-gold-mid:     #FFAC82;
+  /* LEGACY ALIASES → green */
+  --color-accent-orange:       #176B45;
+  --color-accent-orange-dark:  #125638;
+  --color-accent-orange-soft:  #E8F2EC;
+  --color-accent-orange-mid:   #9BBFAD;
+  --color-accent-gold:         #A88A45;
+  --color-accent-gold-dark:    #8A6E32;
+  --color-accent-gold-light:   #F5EDD8;
+  --color-accent-gold-mid:     #D4B877;
 
-  /* Orange scale */
-  --color-brand-50:  #FFF4EF;
-  --color-brand-100: #FFE8DC;
-  --color-brand-200: #FFCAAF;
-  --color-brand-300: #FFA47A;
-  --color-brand-400: #FF7D47;
-  --color-brand-500: #FF6B2C;
-  --color-brand-600: #E55A1F;
-  --color-brand-700: #C04A15;
-  --color-brand-800: #8A330E;
-  --color-brand-900: #4D1D07;
-  --color-brand-950: #280E03;
+  /* GREEN SCALE */
+  --color-brand-50:  #F1F7F3;
+  --color-brand-100: #E8F2EC;
+  --color-brand-200: #C7DDD1;
+  --color-brand-300: #9BBFAD;
+  --color-brand-400: #5F9475;
+  --color-brand-500: #176B45;
+  --color-brand-600: #125638;
+  --color-brand-700: #0E4028;
+  --color-brand-800: #092B1A;
+  --color-brand-900: #05180E;
+  --color-brand-950: #020D07;
 
-  /* Surfaces */
-  --color-canvas:       #F5F5F0;
-  --color-canvas-deep:  #EEEEE8;
-  --color-background:   #F5F5F0;
+  /* SURFACES */
+  --color-canvas:       #F8FAF9;
+  --color-canvas-deep:  #EFF4F1;
+  --color-background:   #F8FAF9;
   --color-surface:      #FFFFFF;
-  --color-surface-alt:  #FAFAF8;
-  --color-cream:        #FDFCF9;
-  --color-cream-mid:    #F0EFE9;
+  --color-surface-alt:  #FAFCFB;
+  --color-cream:        #FDFEFE;
+  --color-cream-mid:    #F4F8F5;
 
-  /* Text */
-  --color-text:         #3D3D3D;
-  --color-text-strong:  #1A1A1A;
-  --color-text-muted:   #6B6B6B;
-  --color-text-faint:   #9B9B9B;
+  /* TEXT */
+  --color-text:         #17221C;
+  --color-text-strong:  #17221C;
+  --color-text-muted:   #64736A;
+  --color-text-faint:   #9BAAA1;
   --color-text-on-fill: #FFFFFF;
 
-  /* Borders */
-  --color-border:       #E8E8E4;
-  --color-border-mid:   #D4D4CE;
-  --color-border-brand: #FFCAAF;
+  /* BORDERS */
+  --color-border:       #E5EBE7;
+  --color-border-mid:   #C7D4CC;
+  --color-border-brand: #C7DDD1;
 
-  /* Verdicts */
-  --color-verdict-positive:      #22C55E;
-  --color-verdict-positive-tint: #DCFCE7;
-  --color-verdict-pending:       #FF6B2C;
-  --color-verdict-pending-tint:  #FFE8DC;
-  --color-verdict-negative:      #EF4444;
-  --color-verdict-negative-tint: #FEE2E2;
+  /* HOVER */
+  --color-hover: #DDECE3;
 
-  /* Lime → green */
-  --color-lime:      #22C55E;
-  --color-lime-soft: #DCFCE7;
+  /* VERDICTS */
+  --color-verdict-positive:      #238653;
+  --color-verdict-positive-tint: #DDF1E5;
+  --color-verdict-pending:       #A88A45;
+  --color-verdict-pending-tint:  #F5EDD8;
+  --color-verdict-negative:      #C95C5C;
+  --color-verdict-negative-tint: #F8EAEA;
 
-  /* Greys */
+  /* LIME → success */
+  --color-lime:      #238653;
+  --color-lime-soft: #DDF1E5;
+
+  /* NEUTRALS */
   --color-slate-50:  #FFFFFF;
-  --color-slate-100: #F5F5F0;
-  --color-slate-200: #E8E8E4;
-  --color-slate-300: #D4D4CE;
-  --color-slate-400: #A8A8A2;
-  --color-slate-500: #6B6B6B;
-  --color-slate-600: #4D4D4D;
-  --color-slate-700: #3D3D3D;
-  --color-slate-800: #2A2A2A;
-  --color-slate-900: #1A1A1A;
-  --color-slate-950: #0A0A0A;
+  --color-slate-100: #F8FAF9;
+  --color-slate-200: #E5EBE7;
+  --color-slate-300: #C7D4CC;
+  --color-slate-400: #9BAAA1;
+  --color-slate-500: #64736A;
+  --color-slate-600: #445249;
+  --color-slate-700: #2D3B32;
+  --color-slate-800: #1A2520;
+  --color-slate-900: #17221C;
+  --color-slate-950: #0C1310;
 
-  /* Chart */
-  --color-chart-brand: #FFE8DC;
+  /* CHART */
+  --color-chart-brand:    #E8F2EC;
+  --color-chart-positive: #DDF1E5;
+  --color-chart-neutral:  #E5EBE7;
+  --color-chart-negative: #F8EAEA;
 
-  /* Shadows */
-  --shadow-card:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-soft:  0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lift:  0 8px 28px rgba(0,0,0,0.10);
-  --shadow-deep:  0 20px 48px -8px rgba(0,0,0,0.14);
-  --shadow-glow:  0 0 0 3px rgba(255,107,44,0.25);
+  /* SHADOWS */
+  --shadow-card: 0 1px 2px rgba(23,34,28,0.05), 0 1px 4px rgba(23,34,28,0.04);
+  --shadow-soft: 0 4px 16px rgba(23,34,28,0.07);
+  --shadow-lift: 0 8px 24px rgba(23,34,28,0.09);
+  --shadow-deep: 0 20px 48px -8px rgba(23,34,28,0.12);
+  --shadow-glow: 0 0 0 3px rgba(23,107,69,0.20);
 
-  /* Spacing */
+  /* SPACING */
   --spacing-page-x:       1.5rem;
   --spacing-page-y:       1.5rem;
   --spacing-card:         1.25rem;
@@ -115,47 +121,47 @@
   --spacing-table-cell-x: 0.875rem;
   --spacing-table-cell-y: 0.75rem;
 
-  /* Radius */
+  /* RADIUS */
   --radius-control: 0.5rem;
   --radius-card:    0.75rem;
   --radius-panel:   1rem;
   --radius-pill:    9999px;
 
-  /* Heights */
+  /* HEIGHTS */
   --control-height-sm: 2.125rem;
   --control-height-md: 2.5rem;
   --control-height-lg: 2.75rem;
   --input-height:      2.75rem;
 
-  /* Motion */
+  /* MOTION */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
-  /* Legacy aptus-* */
-  --aptus-ink:    #3D3D3D;
-  --aptus-cream:  #F5F5F0;
+  /* LEGACY aptus-* */
+  --aptus-ink:    #17221C;
+  --aptus-cream:  #F8FAF9;
   --aptus-paper:  #FFFFFF;
-  --aptus-forest: #FF6B2C;
-  --aptus-green:  #FF6B2C;
-  --aptus-lime:   #22C55E;
-  --aptus-body:   #3D3D3D;
+  --aptus-forest: #176B45;
+  --aptus-green:  #176B45;
+  --aptus-lime:   #238653;
+  --aptus-body:   #17221C;
 }
 
 :root {
-  --background:     #F5F5F0;
+  --background:     #F8FAF9;
   --surface:        #FFFFFF;
   --white:          #FFFFFF;
-  --text-primary:   #3D3D3D;
-  --text-secondary: #6B6B6B;
-  --text-muted:     #6B6B6B;
-  --border:         #E8E8E4;
-  --border-light:   #F0F0EB;
-  --green-900:      #16A34A;
-  --green-700:      #22C55E;
-  --green-500:      #4ADE80;
-  --lime-400:       #22C55E;
-  --lime-200:       #DCFCE7;
+  --text-primary:   #17221C;
+  --text-secondary: #64736A;
+  --text-muted:     #64736A;
+  --border:         #E5EBE7;
+  --border-light:   #F1F7F3;
+  --green-900:      #0E4028;
+  --green-700:      #176B45;
+  --green-500:      #5F9475;
+  --lime-400:       #238653;
+  --lime-200:       #E8F2EC;
   --font-family:    "Inter", sans-serif;
 }
 
@@ -167,15 +173,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    background-color: #F5F5F0;
-    color: #3D3D3D;
+    background-color: #F8FAF9;
+    color: #17221C;
     line-height: 1.6;
     overflow-x: clip;
     color-scheme: light;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    color: #1A1A1A;
+    color: #17221C;
     letter-spacing: -0.02em;
     line-height: 1.25;
   }
@@ -184,30 +190,28 @@
   input[type="url"], input[type="date"], select, textarea {
     min-height: var(--input-height);
     border-radius: var(--radius-control);
-    border: 1px solid #E8E8E4;
+    border: 1px solid #E5EBE7;
     background: #FFFFFF;
     padding: 0.625rem 0.875rem;
     font-size: 0.875rem;
-    color: #3D3D3D;
+    color: #17221C;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   input:focus, select:focus, textarea:focus {
-    border-color: #FF6B2C;
+    border-color: #176B45;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(255,107,44,0.18);
+    box-shadow: 0 0 0 3px rgba(23, 107, 69, 0.15);
   }
   ::selection {
-    background: #FFE8DC;
-    color: #E55A1F;
+    background: #E8F2EC;
+    color: #125638;
   }
 }
 
 @layer utilities {
   .tap-target {
-    @media (pointer: coarse) {
-      min-height: 44px;
-      min-width: 44px;
-    }
+    @media (pointer: coarse) { min-height: 44px; min-width: 44px; }
   }
   .candidate-side { color-scheme: light; }
+  .ring-brand { box-shadow: var(--shadow-glow); }
 }

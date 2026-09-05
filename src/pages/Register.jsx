@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, UserPlus, MailCheck } from "lucide-react";
 import api from "../api/client.js";
@@ -8,8 +8,8 @@ import Button from "../components/ui/Button.jsx";
 import BrandLogo from "../components/ui/BrandLogo.jsx";
 import GoogleButton from "../components/auth/GoogleButton.jsx";
 
-const labelClass = "mb-2 text-[15px] leading-5 font-semibold text-[#1A1A1A] dark:!text-[#1A1A1A]";
-const inputClass = "min-h-11 rounded-[9px] border-[#E8E8E4] bg-white px-3 text-[14px] text-[#1A1A1A] dark:!border-[#E8E8E4]  dark:!text-[#1A1A1A]";
+const labelClass = "mb-2 text-[15px] leading-5 font-semibold text-[#17221C] dark:!text-[#17221C]";
+const inputClass = "min-h-11 rounded-[9px] border-[#E5EBE7] bg-white px-3 text-[14px] text-[#17221C] dark:!border-[#E5EBE7]  dark:!text-[#17221C]";
 
 export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
@@ -47,23 +47,23 @@ export default function Register() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#F5F5F0] px-5 py-12">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#F8FAF9] px-5 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
           <BrandLogo to="/welcome" size="lg" textWeight="font-semibold" theme="light" className="uppercase" />
-          <h1 className="mt-7 text-[24px] leading-[30px] font-bold text-[#1A1A1A]">Create your account</h1>
+          <h1 className="mt-7 text-[24px] leading-[30px] font-bold text-[#17221C]">Create your account</h1>
         </div>
 
-        <Card className="rounded-2xl border border-[#E8E8E4] bg-white p-6 shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:p-8">
+        <Card className="rounded-2xl border border-[#E5EBE7] bg-white p-6 shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:p-8">
           {done ? (
             <div className="flex flex-col items-center py-4 text-center">
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
                 <MailCheck className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-bold text-[#1A1A1A]">Account Created</h3>
-              <p className="mt-2 text-[14px] text-[#6B6B6B]">
+              <h3 className="text-lg font-bold text-[#17221C]">Account Created</h3>
+              <p className="mt-2 text-[14px] text-[#64736A]">
                 Your account is ready —{" "}
-                <Link to="/login" className="font-semibold text-[#FF6B2C] hover:underline">
+                <Link to="/login" className="font-semibold text-[#176B45] hover:underline">
                   log in
                 </Link>{" "}
                 to continue.
@@ -91,28 +91,28 @@ export default function Register() {
                 <Label htmlFor="register-password" required className={labelClass}>Password</Label>
                 <div className="relative">
                   <Input id="register-password" className={`${inputClass} pr-11`} type={showPassword ? "text" : "password"} value={form.password} onChange={update("password")} minLength={8} required />
-                  <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[#6B6B6B] hover:bg-[#F5F5F0] hover:text-[#FF6B2C]">
+                  <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[#64736A] hover:bg-[#F8FAF9] hover:text-[#176B45]">
                     {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
               </FormGroup>
-              <p className="text-[13px] leading-5 text-[#6B6B6B]">
+              <p className="text-[13px] leading-5 text-[#64736A]">
                 At least 8 characters, with an uppercase letter, a lowercase letter, a number, and a special character.
               </p>
-              <Button type="submit" size="lg" loading={submitting} className="w-full dark:!bg-[#FF6B2C] dark:!text-white">
+              <Button type="submit" size="lg" loading={submitting} className="w-full dark:!bg-[#176B45] dark:!text-white">
                 <UserPlus className="h-4 w-4" /> Create Account
               </Button>
             </form>
-            <div className="my-6 flex items-center gap-3 text-[11px] text-[#6B6B6B]"><span className="h-px flex-1 bg-border" /><span>OR</span><span className="h-px flex-1 bg-border" /></div>
+            <div className="my-6 flex items-center gap-3 text-[11px] text-[#64736A]"><span className="h-px flex-1 bg-border" /><span>OR</span><span className="h-px flex-1 bg-border" /></div>
             <GoogleButton onError={setError} />
             </>
           )}
         </Card>
 
         {!done && (
-          <p className="mt-6 text-center text-[14px] text-[#6B6B6B]">
+          <p className="mt-6 text-center text-[14px] text-[#64736A]">
             Already have an account?{" "}
-            <Link to="/login" className="font-semibold text-[#FF6B2C] hover:underline">
+            <Link to="/login" className="font-semibold text-[#176B45] hover:underline">
               Log in
             </Link>
           </p>

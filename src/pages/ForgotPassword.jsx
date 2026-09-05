@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MailQuestion, CheckCircle2 } from "lucide-react";
 import api from "../api/client.js";
@@ -25,7 +25,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#F5F5F0] px-5 py-12 transition-colors">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#F8FAF9] px-5 py-12 transition-colors">
       <div className="absolute right-6 top-6">
         <ThemeToggle />
       </div>
@@ -45,13 +45,13 @@ export default function ForgotPassword() {
               <p className="mt-2 text-xs text-slate-500">
                 If an account exists for that email, a password reset link has been sent.
               </p>
-              <Link to="/login" className="mt-5 inline-block text-xs font-semibold text-[#FF6B2C] hover:underline">
+              <Link to="/login" className="mt-5 inline-block text-xs font-semibold text-[#176B45] hover:underline">
                 Back to login
               </Link>
             </>
           ) : (
             <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFE8DC] text-[#FF6B2C]/60">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F2EC] text-[#176B45]/60">
                 <MailQuestion className="h-6 w-6" />
               </div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Forgot Password</h1>
@@ -68,7 +68,7 @@ export default function ForgotPassword() {
                 </Button>
               </form>
               <p className="mt-5 text-center">
-                <Link to="/login" className="text-xs font-semibold text-[#FF6B2C] hover:underline">
+                <Link to="/login" className="text-xs font-semibold text-[#176B45] hover:underline">
                   Back to login
                 </Link>
               </p>

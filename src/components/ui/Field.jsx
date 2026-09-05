@@ -1,4 +1,4 @@
-import { createContext, forwardRef, useContext, useId, useMemo, useRef } from "react";
+﻿import { createContext, forwardRef, useContext, useId, useMemo, useRef } from "react";
 import { Search as SearchIcon } from "lucide-react";
 
 /**
@@ -29,11 +29,11 @@ function useFieldA11y(explicitId, error) {
 
 // Base chrome — white bg, charcoal text, green focus ring
 const fieldChrome = [
-  "rounded-control border border-[#E8E8E4] bg-white",
-  "text-sm text-[#1A1A1A] placeholder:text-[#9B9B9B]",
+  "rounded-control border border-[#E5EBE7] bg-white",
+  "text-sm text-[#17221C] placeholder:text-[#9BAAA1]",
   "shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors duration-150",
-  "focus:border-[#FF6B2C] focus:outline-none focus:ring-3 focus:ring-primary/15",
-  "disabled:bg-[#F5F5F0] disabled:text-[#6B6B6B] disabled:cursor-not-allowed",
+  "focus:border-[#176B45] focus:outline-none focus:ring-3 focus:ring-primary/15",
+  "disabled:bg-[#F8FAF9] disabled:text-[#64736A] disabled:cursor-not-allowed",
 ].join(" ");
 
 const fieldClass        = `${fieldChrome} px-3.5 py-2.5`;
@@ -88,7 +88,7 @@ export const Search = forwardRef(function Search({ className = "", id, ...props 
   return (
     <div className="relative">
       <SearchIcon
-        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9B9B9B]"
+        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9BAAA1]"
         aria-hidden="true"
       />
       <Input ref={ref} id={id} type="search" className={`pl-10 ${className}`} {...props} />
@@ -106,7 +106,7 @@ export const Checkbox = forwardRef(function Checkbox({ className = "", error, id
       ref={ref}
       {...useFieldA11y(id, error)}
       type="checkbox"
-      className={`h-4 w-4 rounded border-[#E8E8E4] text-[#FF6B2C] accent-primary focus:ring-2 focus:ring-primary/20 ${className}`}
+      className={`h-4 w-4 rounded border-[#E5EBE7] text-[#176B45] accent-primary focus:ring-2 focus:ring-primary/20 ${className}`}
       {...props}
     />
   );
@@ -118,7 +118,7 @@ export const Radio = forwardRef(function Radio({ className = "", error, id, ...p
       ref={ref}
       {...useFieldA11y(id, error)}
       type="radio"
-      className={`h-4 w-4 border-[#E8E8E4] text-[#FF6B2C] accent-primary focus:ring-2 focus:ring-primary/20 ${className}`}
+      className={`h-4 w-4 border-[#E5EBE7] text-[#176B45] accent-primary focus:ring-2 focus:ring-primary/20 ${className}`}
       {...props}
     />
   );
@@ -141,8 +141,8 @@ export const Switch = forwardRef(function Switch(
         "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/20",
         "disabled:cursor-not-allowed disabled:opacity-50",
         checked
-          ? "border-[#FF6B2C] bg-[#FF6B2C]"
-          : "border-[#E8E8E4] bg-[#F5F5F0]",
+          ? "border-[#176B45] bg-[#176B45]"
+          : "border-[#E5EBE7] bg-[#F8FAF9]",
         className,
       ].join(" ")}
       {...props}
@@ -161,12 +161,12 @@ export function Label({ children, required, htmlFor, className = "" }) {
   return (
     <label
       htmlFor={htmlFor || ctx?.id}
-      className={`mb-1.5 block text-xs font-semibold text-[#1A1A1A] ${className}`}
+      className={`mb-1.5 block text-xs font-semibold text-[#17221C] ${className}`}
     >
       {children}
       {required && (
         <>
-          <span aria-hidden="true" className="ml-0.5 text-[#C0392B]"> *</span>
+          <span aria-hidden="true" className="ml-0.5 text-[#C95C5C]"> *</span>
           <span className="sr-only"> (required)</span>
         </>
       )}
@@ -180,7 +180,7 @@ export function FieldError({ children, id }) {
   return (
     <p
       id={id || ctx?.errorId}
-      className="mt-1 text-xs font-medium text-[#C0392B]"
+      className="mt-1 text-xs font-medium text-[#C95C5C]"
     >
       {children}
     </p>

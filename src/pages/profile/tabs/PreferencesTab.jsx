@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Bell, ShieldCheck, Download, CheckCircle2, Globe, MessageSquare, Loader2 } from "lucide-react";
 import api from "../../../api/client";
 import { accountAuthHeader } from "../../../auth/accountAuth";
@@ -64,8 +64,8 @@ export default function PreferencesTab({ profile, onRefresh }) {
   return (
     <div className="candidate-preferences-tab space-y-6">
       <div>
-        <h2 className="font-display text-xl font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">Preferences &amp; Privacy</h2>
-        <p className="text-sm text-[#6B6B6B] dark:text-[#6B6B6B]">
+        <h2 className="font-display text-xl font-bold text-[#176B45] dark:text-[#176B45]">Preferences &amp; Privacy</h2>
+        <p className="text-sm text-[#64736A] dark:text-[#64736A]">
           Configure notification channels, job alerts, and manage your data rights under GDPR &amp; DPDP regulations.
         </p>
       </div>
@@ -79,17 +79,17 @@ export default function PreferencesTab({ profile, onRefresh }) {
 
       <form onSubmit={handleSave} className="space-y-5">
         {/* Availability */}
-        <div className="rounded-2xl border border-[#FFCAAF] bg-white p-5 shadow-xs dark:border-[#FFCAAF] dark:bg-white">
-          <label className="block font-display text-base font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">
+        <div className="rounded-2xl border border-[#C7DDD1] bg-white p-5 shadow-xs dark:border-[#C7DDD1] dark:bg-white">
+          <label className="block font-display text-base font-bold text-[#176B45] dark:text-[#176B45]">
             Availability Notice Period
           </label>
-          <p className="text-sm text-[#6B6B6B] dark:text-[#6B6B6B]">
+          <p className="text-sm text-[#64736A] dark:text-[#64736A]">
             Let hiring teams know how quickly you can join if extended an offer.
           </p>
           <select
             value={preferences.availabilityWindow}
             onChange={(e) => setPreferences({ ...preferences, availabilityWindow: e.target.value })}
-            className="mt-3 w-full max-w-xs rounded-xl border border-[#FFCAAF] bg-white px-3.5 py-2.5 text-sm font-bold text-[#FF6B2C] dark:border-[#FFCAAF] dark:bg-white dark:text-[#FF6B2C]"
+            className="mt-3 w-full max-w-xs rounded-xl border border-[#C7DDD1] bg-white px-3.5 py-2.5 text-sm font-bold text-[#176B45] dark:border-[#C7DDD1] dark:bg-white dark:text-[#176B45]"
           >
             <option value="immediate">Immediate Joiner (0-7 days)</option>
             <option value="15_days">15 Days Notice Period</option>
@@ -99,45 +99,45 @@ export default function PreferencesTab({ profile, onRefresh }) {
         </div>
 
         {/* Notifications & Channels */}
-        <div className="rounded-2xl border border-[#FFCAAF] bg-white p-5 shadow-xs dark:border-[#FFCAAF] dark:bg-white">
-          <h3 className="font-display text-base font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">Communication Channels</h3>
+        <div className="rounded-2xl border border-[#C7DDD1] bg-white p-5 shadow-xs dark:border-[#C7DDD1] dark:bg-white">
+          <h3 className="font-display text-base font-bold text-[#176B45] dark:text-[#176B45]">Communication Channels</h3>
           <div className="mt-3 space-y-3 divide-y divide-[#EAF9E1] text-sm dark:divide-[#EAF9E1]">
             <label className="flex items-center justify-between pt-2 cursor-pointer">
               <div>
-                <p className="font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">Recommended Job Alerts</p>
-                <p className="text-[#6B6B6B]">Receive weekly emails with roles matching your resume version skills.</p>
+                <p className="font-bold text-[#176B45] dark:text-[#176B45]">Recommended Job Alerts</p>
+                <p className="text-[#64736A]">Receive weekly emails with roles matching your resume version skills.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.jobAlerts}
                 onChange={() => handleToggle("jobAlerts")}
-                className="h-4 w-4 rounded text-[#FF6B2C] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#176B45] accent-[#214740] dark:accent-[#214740]"
               />
             </label>
 
             <label className="flex items-center justify-between pt-3 cursor-pointer">
               <div>
-                <p className="font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">WhatsApp Interview Reminders</p>
-                <p className="text-[#6B6B6B]">Get timely reminders before AI interviews and assessment deadlines.</p>
+                <p className="font-bold text-[#176B45] dark:text-[#176B45]">WhatsApp Interview Reminders</p>
+                <p className="text-[#64736A]">Get timely reminders before AI interviews and assessment deadlines.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.whatsappUpdates}
                 onChange={() => handleToggle("whatsappUpdates")}
-                className="h-4 w-4 rounded text-[#FF6B2C] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#176B45] accent-[#214740] dark:accent-[#214740]"
               />
             </label>
 
             <label className="flex items-center justify-between pt-3 cursor-pointer">
               <div>
-                <p className="font-bold text-[#FF6B2C] dark:text-[#FF6B2C]">SMS Notifications</p>
-                <p className="text-[#6B6B6B]">Critical stage alerts sent to your verified mobile number.</p>
+                <p className="font-bold text-[#176B45] dark:text-[#176B45]">SMS Notifications</p>
+                <p className="text-[#64736A]">Critical stage alerts sent to your verified mobile number.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.smsUpdates}
                 onChange={() => handleToggle("smsUpdates")}
-                className="h-4 w-4 rounded text-[#FF6B2C] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#176B45] accent-[#214740] dark:accent-[#214740]"
               />
             </label>
           </div>
@@ -151,7 +151,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
       </form>
 
       {/* GDPR / DPDP Download My Data Box */}
-      <section className="rounded-3xl border border-[#2E4F48] bg-[#FF6B2C] p-6 text-white shadow-soft">
+      <section className="rounded-3xl border border-[#2E4F48] bg-[#176B45] p-6 text-white shadow-soft">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
             variant="secondary"
             onClick={handleDownloadData}
             disabled={exporting}
-            className="shrink-0 bg-white text-[#FF6B2C] hover:bg-[#FFE8DC] font-bold"
+            className="shrink-0 bg-white text-[#176B45] hover:bg-[#DDECE3] font-bold"
           >
             {exporting ? (
               <>

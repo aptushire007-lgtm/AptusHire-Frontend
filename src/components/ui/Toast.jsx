@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+﻿import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, XCircle, Info, X } from "lucide-react";
 
@@ -12,9 +12,9 @@ const ICONS = {
 
 // Light, on-brand toast surfaces
 const TONES = {
-  success: "border-[#FFCAAF] bg-[#FFE8DC] text-[#FF6B2C]",
-  error:   "border-verdict-negative/20 bg-[#FDECEA] text-[#C0392B]",
-  info:    "border-[#E8E8E4] bg-white text-[#1A1A1A]",
+  success: "border-[#C7DDD1] bg-[#E8F2EC] text-[#176B45]",
+  error:   "border-verdict-negative/20 bg-[#F8EAEA] text-[#C95C5C]",
+  info:    "border-[#E5EBE7] bg-white text-[#17221C]",
 };
 
 export function ToastProvider({ children }) {

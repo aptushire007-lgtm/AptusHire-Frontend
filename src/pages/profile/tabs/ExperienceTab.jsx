@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Briefcase, Plus, Trash2, CheckCircle2, Sparkles, Tag } from "lucide-react";
 import api from "../../../api/client";
 import { accountAuthHeader } from "../../../auth/accountAuth";
@@ -157,7 +157,7 @@ export default function ExperienceTab({ profile, onRefresh }) {
                   {item.skills?.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {item.skills.map((s) => (
-                        <span key={s} className="rounded-full bg-[#FFE8DC] px-2 py-0.5 text-[11px] font-semibold text-[#FF6B2C]">
+                        <span key={s} className="rounded-full bg-[#E8F2EC] px-2 py-0.5 text-[11px] font-semibold text-[#176B45]">
                           {s}
                         </span>
                       ))}

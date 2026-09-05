@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   User,
@@ -97,7 +97,7 @@ export default function ProfileLayout() {
   // form state must be created from the saved server values on first render.
   if (loading) {
     return (
-      <div className="rounded-[14px] border border-[#FFCAAF] bg-white p-8 text-center text-base font-semibold text-[#FF6B2C] shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
+      <div className="rounded-[14px] border border-[#C7DDD1] bg-white p-8 text-center text-base font-semibold text-[#176B45] shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
         Loading your saved profile…
       </div>
     );
@@ -105,8 +105,8 @@ export default function ProfileLayout() {
 
   if (!profileData) {
     return (
-      <div role="alert" className="rounded-[14px] border border-[#E8E8E4] bg-white p-8 text-center shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
-        <p className="text-sm font-semibold text-[#1A1A1A]">{loadError || "Your profile could not be loaded."}</p>
+      <div role="alert" className="rounded-[14px] border border-[#E5EBE7] bg-white p-8 text-center shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
+        <p className="text-sm font-semibold text-[#17221C]">{loadError || "Your profile could not be loaded."}</p>
         <Button type="button" size="sm" className="mt-4" onClick={fetchFullProfile}>Try again</Button>
       </div>
     );
@@ -114,32 +114,32 @@ export default function ProfileLayout() {
 
   return (
     <div className="candidate-profile-page space-y-6">
-      <section className="rounded-2xl border border-[#E8E8E4] bg-white p-6 shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:p-8">
+      <section className="rounded-2xl border border-[#E5EBE7] bg-white p-6 shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:p-8">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B6B6B]">Candidate profile</p>
-            <h1 className="mt-2 text-2xl font-bold text-[#1A1A1A]">Complete your profile</h1>
-            <p className="mt-2 max-w-xl text-sm text-[#6B6B6B]">A complete profile helps AptusHire match you with the right opportunities.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64736A]">Candidate profile</p>
+            <h1 className="mt-2 text-2xl font-bold text-[#17221C]">Complete your profile</h1>
+            <p className="mt-2 max-w-xl text-sm text-[#64736A]">A complete profile helps AptusHire match you with the right opportunities.</p>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-3xl font-bold text-[#FF6B2C]">{strength}%</p>
-            <p className="text-xs text-[#6B6B6B]">profile complete</p>
+            <p className="text-3xl font-bold text-[#176B45]">{strength}%</p>
+            <p className="text-xs text-[#64736A]">profile complete</p>
           </div>
         </div>
-        <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#FFE8DC]" role="progressbar" aria-valuenow={strength} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion">
-          <div className="h-full rounded-full bg-[#FF6B2C] transition-[width] duration-500" style={{ width: `${strength}%` }} />
+        <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#E8F2EC]" role="progressbar" aria-valuenow={strength} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion">
+          <div className="h-full rounded-full bg-[#176B45] transition-[width] duration-500" style={{ width: `${strength}%` }} />
         </div>
         <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
           {setupSections.map((section) => (
-            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#E8E8E4] bg-white text-[#FF6B2C] hover:border-[#FFCAAF]" : "border-[#E8E8E4] bg-white text-[#6B6B6B] hover:border-[#FFCAAF]"}`}>
-              <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${section.done ? "bg-[#FFE8DC] text-[#FF6B2C]" : "text-[#9B9B9B]"}`}>{section.done ? "✓" : "○"}</span>
+            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#E5EBE7] bg-white text-[#176B45] hover:border-[#C7DDD1]" : "border-[#E5EBE7] bg-white text-[#64736A] hover:border-[#C7DDD1]"}`}>
+              <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${section.done ? "bg-[#E8F2EC] text-[#176B45]" : "text-[#9BAAA1]"}`}>{section.done ? "✓" : "○"}</span>
               <span>{section.label}</span>
             </button>
           ))}
         </div>
       </section>
       {/* Tab Header Bar (Horizontal on mobile, rail on desktop) */}
-      <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#E8E8E4] bg-white p-2 shadow-xs dark:border-[#E8E8E4] dark:bg-white">
+      <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#E5EBE7] bg-white p-2 shadow-xs dark:border-[#E5EBE7] dark:bg-white">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -149,8 +149,8 @@ export default function ProfileLayout() {
               onClick={() => handleTabChange(tab.id)}
               className={`tap-target flex shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
                 isActive
-                  ? "bg-[#FF6B2C] text-white shadow-xs dark:bg-[#FF6B2C] dark:text-white"
-                  : "bg-white text-[#6B6B6B] hover:bg-[#FFE8DC] hover:text-[#FF6B2C] dark:bg-white dark:text-[#6B6B6B] dark:hover:bg-[#FFE8DC] dark:hover:text-[#FF6B2C]"
+                  ? "bg-[#176B45] text-white shadow-xs dark:bg-[#176B45] dark:text-white"
+                  : "bg-white text-[#64736A] hover:bg-[#DDECE3] hover:text-[#176B45] dark:bg-white dark:text-[#64736A] dark:hover:bg-[#DDECE3] dark:hover:text-[#176B45]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -163,7 +163,7 @@ export default function ProfileLayout() {
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Main Active Tab Content */}
         <div className="lg:col-span-8">
-          <Card className="rounded-3xl border border-[#E8E8E4] bg-white p-6 shadow-soft dark:border-[#E8E8E4] dark:bg-white sm:p-8">
+          <Card className="rounded-3xl border border-[#E5EBE7] bg-white p-6 shadow-soft dark:border-[#E5EBE7] dark:bg-white sm:p-8">
             {activeTab === "personal" && <PersonalTab profile={profile} onRefresh={fetchFullProfile} />}
             {activeTab === "education" && <EducationTab profile={profile} onRefresh={fetchFullProfile} />}
             {activeTab === "skills" && <SkillsTab profile={profile} onRefresh={fetchFullProfile} />}
@@ -177,16 +177,16 @@ export default function ProfileLayout() {
         {/* Right Rail Sticky Cards */}
         <div className="space-y-5 lg:col-span-4">
           {/* Profile Strength Card */}
-          <Card className="rounded-3xl border border-[#E8E8E4] bg-white p-5 shadow-soft dark:border-[#E8E8E4] dark:bg-white">
+          <Card className="rounded-3xl border border-[#E5EBE7] bg-white p-5 shadow-soft dark:border-[#E5EBE7] dark:bg-white">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#FF6B2C]">Profile Strength</span>
-              <span className="font-display text-base font-extrabold text-[#FF6B2C]">
+              <span className="text-xs font-bold text-[#176B45]">Profile Strength</span>
+              <span className="font-display text-base font-extrabold text-[#176B45]">
                 {strength}%
               </span>
             </div>
 
             {/* Segmented Progress Bar */}
-            <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-[#FFE8DC]">
+            <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-[#E8F2EC]">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-[#3B5D52] via-[#5A7B71] to-[#C1EBAD] transition-all duration-500"
                 style={{ width: `${strength}%` }}
@@ -203,7 +203,7 @@ export default function ProfileLayout() {
                 <div key={item.label} className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-2">
                     <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
-                      item.done ? "bg-[#FFE8DC] text-[#FF6B2C]" : "bg-border text-[#9B9B9B]"
+                      item.done ? "bg-[#E8F2EC] text-[#176B45]" : "bg-border text-[#9BAAA1]"
                     }`}>
                       {item.done ? "✓" : "•"}
                     </span>
@@ -211,14 +211,14 @@ export default function ProfileLayout() {
                       {item.label}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#FF6B2C]">{item.points}%</span>
+                  <span className="text-[11px] font-bold text-[#176B45]">{item.points}%</span>
                 </div>
               ))}
             </div>
           </Card>
 
           {/* Recruiter View Preview (Trust Badge) */}
-          <div className="rounded-3xl border border-[#2E4F48] bg-[#FF6B2C] p-5 text-white shadow-soft">
+          <div className="rounded-3xl border border-[#2E4F48] bg-[#176B45] p-5 text-white shadow-soft">
             <div className="flex items-center gap-2 text-[#D2ECC9]">
               <ShieldCheck className="h-4 w-4" />
               <span className="text-xs font-bold uppercase tracking-wider">Recruiter View Preview</span>
@@ -226,7 +226,7 @@ export default function ProfileLayout() {
 
             <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C1EBAD] font-bold text-[#FF6B2C]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C1EBAD] font-bold text-[#176B45]">
                   {(profile.personal?.firstName || "S")[0]}
                 </div>
                 <div>

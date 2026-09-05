@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Eye, LogOut } from "lucide-react";
 import Button from "../ui/Button.jsx";
@@ -47,19 +47,19 @@ function ExitConfirmDialog({ onStay, onLeave }) {
   }, [onStay]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#F5F5F0]-deep/80 px-4 py-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#F8FAF9]-deep/80 px-4 py-8">
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="exit-dialog-title"
         aria-describedby="exit-dialog-description"
-        className="w-full max-w-sm rounded-2xl border border-[#E8E8E4] bg-white p-6 shadow-soft"
+        className="w-full max-w-sm rounded-2xl border border-[#E5EBE7] bg-white p-6 shadow-soft"
       >
-        <h2 id="exit-dialog-title" className="text-base font-semibold text-[#1A1A1A]">
+        <h2 id="exit-dialog-title" className="text-base font-semibold text-[#17221C]">
           Leave this interview?
         </h2>
-        <p id="exit-dialog-description" className="mt-2 text-sm text-[#6B6B6B]">
+        <p id="exit-dialog-description" className="mt-2 text-sm text-[#64736A]">
           Your answers so far are saved. You can come back and continue before your interview link
           expires, but leaving now ends this monitored session.
         </p>
@@ -93,11 +93,11 @@ export default function InterviewShell({ stage = "live", wide = false, children 
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0]">
-      <header className="sticky top-0 z-30 border-b border-[#E8E8E4] bg-white/95 backdrop-blur">
+    <div className="min-h-screen bg-[#F8FAF9]">
+      <header className="sticky top-0 z-30 border-b border-[#E5EBE7] bg-white/95 backdrop-blur">
         <div className={`mx-auto flex h-16 items-center justify-between gap-4 px-5 ${measure}`}>
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FF6B2C] text-white">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#176B45] text-white">
               <Sparkles className="h-4 w-4" />
             </span>
             <span className="truncate text-base font-semibold text-slate-700">

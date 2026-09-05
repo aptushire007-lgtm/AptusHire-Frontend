@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+﻿import { forwardRef } from "react";
 import { Loader2 } from "lucide-react";
 
 /**
@@ -22,31 +22,31 @@ const DISABLED_FILL =
 
 const variants = {
   primary:
-    `bg-[#FF6B2C] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#FF6B2C]-dark active:bg-[#FF6B2C]-dark focus-visible:ring-4 focus-visible:ring-primary/25 ${DISABLED_FILL}`,
+    `bg-[#176B45] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#176B45]-dark active:bg-[#176B45]-dark focus-visible:ring-4 focus-visible:ring-primary/25 ${DISABLED_FILL}`,
 
   secondary:
-    `border border-[#FF6B2C] bg-white text-[#FF6B2C] hover:bg-[#FFE8DC] active:bg-[#FFE8DC] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100`,
+    `border border-[#176B45] bg-white text-[#176B45] hover:bg-[#DDECE3] active:bg-[#E8F2EC] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100`,
 
   outline:
-    `border border-[#E8E8E4] bg-transparent text-[#6B6B6B] hover:border-[#FF6B2C]/40 hover:bg-[#FFE8DC] hover:text-[#FF6B2C] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100`,
+    `border border-[#E5EBE7] bg-transparent text-[#64736A] hover:border-[#C7DDD1] hover:bg-[#DDECE3] hover:text-[#176B45] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100`,
 
   ghost:
-    `bg-transparent text-[#6B6B6B] hover:bg-[#FFE8DC] hover:text-[#FF6B2C] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100`,
+    `bg-transparent text-[#64736A] hover:bg-[#DDECE3] hover:text-[#176B45] focus-visible:ring-4 focus-visible:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100`,
 
   danger:
     `bg-verdict-negative text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-red-700 active:bg-red-800 focus-visible:ring-4 focus-visible:ring-red-400/30 ${DISABLED_FILL}`,
 
   gold:
-    `bg-[#FF6B2C] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#FF6B2C]-dark active:bg-[#FF6B2C]-dark focus-visible:ring-4 focus-visible:ring-accent-orange/30 ${DISABLED_FILL}`,
+    `bg-[#176B45] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#176B45]-dark active:bg-[#176B45]-dark focus-visible:ring-4 focus-visible:ring-accent-orange/30 ${DISABLED_FILL}`,
 
   /* backward-compat aliases */
   accent:
-    `bg-[#FF6B2C] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#FF6B2C]-dark focus-visible:ring-4 focus-visible:ring-primary/25 ${DISABLED_FILL}`,
+    `bg-[#176B45] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#176B45]-dark focus-visible:ring-4 focus-visible:ring-primary/25 ${DISABLED_FILL}`,
   orange:
-    `bg-[#FF6B2C] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#FF6B2C]-dark focus-visible:ring-4 focus-visible:ring-accent-orange/30 ${DISABLED_FILL}`,
+    `bg-[#176B45] text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] hover:bg-[#176B45]-dark focus-visible:ring-4 focus-visible:ring-accent-orange/30 ${DISABLED_FILL}`,
 
   link:
-    `bg-transparent text-[#FF6B2C] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-40 disabled:cursor-not-allowed`,
+    `bg-transparent text-[#176B45] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-40 disabled:cursor-not-allowed`,
 };
 
 const sizes = {

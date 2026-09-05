@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import api from "../api/client.js";
@@ -66,14 +66,14 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F5F5F0] px-5 py-12 sm:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-[#F8FAF9] px-5 py-12 sm:px-8">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
           <BrandLogo to="/welcome" size="lg" textWeight="font-semibold" theme="light" className="uppercase" />
-          <h1 className="mt-7 text-[24px] leading-[30px] font-bold text-[#1A1A1A]">Find the right opportunity.</h1>
+          <h1 className="mt-7 text-[24px] leading-[30px] font-bold text-[#17221C]">Find the right opportunity.</h1>
         </div>
 
-        <Card padding="none" className="rounded-2xl border border-[#E8E8E4] bg-white p-6 shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:p-8">
+        <Card padding="none" className="rounded-2xl border border-[#E5EBE7] bg-white p-6 shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:p-8">
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {(error || validationError) && (
               <p role="alert" className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700">
@@ -92,21 +92,21 @@ export default function Login() {
               </p>
             )}
             <FormGroup>
-              <Label htmlFor="login-email" required className="mb-2 text-[13px] leading-5 font-semibold text-[#1A1A1A] dark:!text-[#1A1A1A]">Email</Label>
+              <Label htmlFor="login-email" required className="mb-2 text-[13px] leading-5 font-semibold text-[#17221C] dark:!text-[#17221C]">Email</Label>
               <Input
                 id="login-email"
                 type="email"
                 autoComplete="email"
                 value={form.email}
                 onChange={update("email")}
-                className="min-h-11 rounded-[9px] border-[#E8E8E4] bg-white px-3 text-[13px] text-[#1A1A1A] dark:!border-[#E8E8E4]  dark:!text-[#1A1A1A]"
+                className="min-h-11 rounded-[9px] border-[#E5EBE7] bg-white px-3 text-[13px] text-[#17221C] dark:!border-[#E5EBE7]  dark:!text-[#17221C]"
                 required
               />
             </FormGroup>
             <FormGroup>
               <div className="flex items-center justify-between">
-                <Label htmlFor="login-password" required className="mb-2 text-[13px] leading-5 font-semibold text-[#1A1A1A] dark:!text-[#1A1A1A]">Password</Label>
-                <Link to="/forgot-password" className="mb-2 text-[12px] font-semibold text-[#FF6B2C] hover:underline">Forgot password?</Link>
+                <Label htmlFor="login-password" required className="mb-2 text-[13px] leading-5 font-semibold text-[#17221C] dark:!text-[#17221C]">Password</Label>
+                <Link to="/forgot-password" className="mb-2 text-[12px] font-semibold text-[#176B45] hover:underline">Forgot password?</Link>
               </div>
               <div className="relative">
                 <Input
@@ -115,20 +115,20 @@ export default function Login() {
                   autoComplete="current-password"
                   value={form.password}
                   onChange={update("password")}
-                  className="min-h-11 rounded-[9px] border-[#E8E8E4] bg-white px-3 pr-11 text-[13px] text-[#1A1A1A] dark:!border-[#E8E8E4]  dark:!text-[#1A1A1A]"
+                  className="min-h-11 rounded-[9px] border-[#E5EBE7] bg-white px-3 pr-11 text-[13px] text-[#17221C] dark:!border-[#E5EBE7]  dark:!text-[#17221C]"
                   required
                 />
-                <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[#6B6B6B] hover:bg-[#F5F5F0] hover:text-[#FF6B2C]">
+                <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[#64736A] hover:bg-[#F8FAF9] hover:text-[#176B45]">
                   {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                 </button>
               </div>
             </FormGroup>
-            <label className="flex cursor-pointer items-center gap-2 text-[12px] font-medium text-[#6B6B6B]">
+            <label className="flex cursor-pointer items-center gap-2 text-[12px] font-medium text-[#64736A]">
               <input
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="h-5 w-5 rounded-md border-[#E8E8E4] text-[#FF6B2C] accent-primary"
+                className="h-5 w-5 rounded-md border-[#E5EBE7] text-[#176B45] accent-primary"
               />
               Remember me
             </label>
@@ -141,13 +141,13 @@ export default function Login() {
               <LogIn className="h-4 w-4" /> Login
             </Button>
           </form>
-          <div className="my-6 flex items-center gap-3 text-[11px] text-[#6B6B6B]"><span className="h-px flex-1 bg-border" /><span>OR</span><span className="h-px flex-1 bg-border" /></div>
+          <div className="my-6 flex items-center gap-3 text-[11px] text-[#64736A]"><span className="h-px flex-1 bg-border" /><span>OR</span><span className="h-px flex-1 bg-border" /></div>
           <GoogleButton onError={setError} />
         </Card>
 
-        <p className="mt-6 text-center text-[13px] text-[#6B6B6B]">
+        <p className="mt-6 text-center text-[13px] text-[#64736A]">
           Don't have an account?{" "}
-          <Link to="/register" className="font-semibold text-[#FF6B2C] hover:underline">
+          <Link to="/register" className="font-semibold text-[#176B45] hover:underline">
             Sign up
           </Link>
         </p>

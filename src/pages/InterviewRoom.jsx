@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+﻿import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bot,
@@ -38,7 +38,7 @@ function Bubble({ role, text, muted }) {
         aria-hidden="true"
         className={
           "flex h-8 w-8 shrink-0 items-center justify-center rounded-full " +
-          (isAi ? "bg-[#FFE8DC] text-[#FF6B2C]" : "bg-slate-200 text-slate-600")
+          (isAi ? "bg-[#E8F2EC] text-[#176B45]" : "bg-slate-200 text-slate-600")
         }
       >
         {isAi ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
@@ -46,7 +46,7 @@ function Bubble({ role, text, muted }) {
       <div
         className={
           "max-w-[80%] rounded-2xl px-4 py-3 text-base " +
-          (isAi ? "bg-white text-slate-700 shadow-[0_1px_4px_rgba(27,67,50,0.07)]" : "bg-[#FF6B2C] text-white") +
+          (isAi ? "bg-white text-slate-700 shadow-[0_1px_4px_rgba(27,67,50,0.07)]" : "bg-[#176B45] text-white") +
           (muted ? " opacity-70" : "")
         }
       >
@@ -1105,7 +1105,7 @@ export default function InterviewRoom() {
       {fullscreenLost && (
         <div
           role="alert"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#FFCAAF] bg-[#FFE8DC] px-3 py-2 text-sm font-medium text-[#FF6B2C]"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#C7DDD1] bg-[#E8F2EC] px-3 py-2 text-sm font-medium text-[#176B45]"
         >
           <span className="flex items-center gap-2">
             <Info className="h-4 w-4 shrink-0" /> You've exited fullscreen — please return to continue your interview.
@@ -1117,7 +1117,7 @@ export default function InterviewRoom() {
       {warning && (
         <div
           role="alert"
-          className="flex items-center gap-2 rounded-lg border border-[#FFCAAF] bg-[#FFE8DC] px-3 py-2 text-sm font-medium text-[#FF6B2C]"
+          className="flex items-center gap-2 rounded-lg border border-[#C7DDD1] bg-[#E8F2EC] px-3 py-2 text-sm font-medium text-[#176B45]"
         >
           <Info className="h-4 w-4 shrink-0" /> {warning}
         </div>
@@ -1150,7 +1150,7 @@ export default function InterviewRoom() {
               : "Answer each question in your own words. There's no time pressure — take a moment to think."}
           </p>
         </div>
-        <span className="rounded-full bg-[#FFE8DC] px-3.5 py-1.5 text-sm font-semibold text-[#FF6B2C]">
+        <span className="rounded-full bg-[#E8F2EC] px-3.5 py-1.5 text-sm font-semibold text-[#176B45]">
           {/* The opening self-introduction is not one of the counted questions, so it is named
               rather than numbered — "Question 0 / 8" reads like something has gone wrong. */}
           {state.currentIsWarmup
@@ -1309,7 +1309,7 @@ export default function InterviewRoom() {
                     <span className="font-semibold text-slate-700">&ldquo;Done, that&apos;s it&rdquo;</span> and the
                     interviewer will submit your answer immediately instead of waiting.
                   </p>
-                  <p className="max-w-md text-xs text-[#9B9B9B]">
+                  <p className="max-w-md text-xs text-[#9BAAA1]">
                     By starting, you consent to your voice being captured and processed in real time by third-party
                     speech services (Deepgram, carried over LiveKit&apos;s real-time infrastructure) to conduct this
                     interview. Audio is streamed and not stored by this platform — only the text transcript is kept. If
@@ -1335,7 +1335,7 @@ export default function InterviewRoom() {
                   <button
                     type="button"
                     onClick={declineVoiceConsent}
-                    className="tap-target rounded py-1 text-xs font-medium text-[#6B6B6B] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
+                    className="tap-target rounded py-1 text-xs font-medium text-[#64736A] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
                   >
                     no thanks — I&apos;ll type my answers instead
                   </button>
@@ -1361,7 +1361,7 @@ export default function InterviewRoom() {
                           <ThinkingDots className="text-slate-400" />
                         </p>
                       ) : agentState === "speaking" ? (
-                        <p className="flex items-center gap-2 text-sm font-medium text-[#FF6B2C]">
+                        <p className="flex items-center gap-2 text-sm font-medium text-[#176B45]">
                           <Volume2 className="h-4 w-4 animate-pulse" aria-hidden="true" />
                           {interviewerName ? `${interviewerName} is speaking` : "Interviewer is speaking"} — cut in
                           whenever you like
@@ -1390,7 +1390,7 @@ export default function InterviewRoom() {
                         <button
                           type="button"
                           onClick={() => void lk.rejoin()}
-                          className="rounded-lg bg-[#FF6B2C] px-4 py-2 text-sm font-medium text-white hover:bg-[#FF6B2C]-dark"
+                          className="rounded-lg bg-[#176B45] px-4 py-2 text-sm font-medium text-white hover:bg-[#176B45]-dark"
                         >
                           Rejoin the interview
                         </button>
@@ -1407,7 +1407,7 @@ export default function InterviewRoom() {
                       await lk.disconnect();
                       switchToTyping();
                     }}
-                    className="tap-target rounded py-1 text-xs font-medium text-[#6B6B6B] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
+                    className="tap-target rounded py-1 text-xs font-medium text-[#64736A] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
                   >
                     <Keyboard className="mr-1 inline h-3 w-3" /> Switch to typing
                   </button>
@@ -1416,14 +1416,14 @@ export default function InterviewRoom() {
             ) : voiceMode ? (
               !started ? (
                 <div className="flex flex-col items-center gap-3 py-2 text-center">
-                  <p className="text-sm text-[#6B6B6B]">
+                  <p className="text-sm text-[#64736A]">
                     This is a spoken interview — each question will be read aloud. You can switch to typing at any point;
                     it won't affect your evaluation.
                   </p>
                   {/* Voice consent notice (Phase 9.5) — shown BEFORE the mic ever opens.
                       Starting is the explicit consent action; the server refuses a
                       streaming token until consent is recorded. */}
-                  <p className="max-w-md text-xs text-[#9B9B9B]">
+                  <p className="max-w-md text-xs text-[#9BAAA1]">
                     By starting, you consent to your voice being captured and transcribed in real time by a third-party
                     speech service (Deepgram) to record your answers. Your recorded answers are also saved, so the hiring
                     team can review how the interview actually sounded and check the AI interviewer&apos;s own
@@ -1437,7 +1437,7 @@ export default function InterviewRoom() {
                   <button
                     type="button"
                     onClick={declineVoiceConsent}
-                    className="tap-target rounded py-1 text-xs font-medium text-[#6B6B6B] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
+                    className="tap-target rounded py-1 text-xs font-medium text-[#64736A] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
                   >
                     no thanks — I&apos;ll type my answers instead
                   </button>
@@ -1447,7 +1447,7 @@ export default function InterviewRoom() {
                   <div role="status" aria-live="polite" className="flex flex-col items-center gap-3">
                     {phase === "speaking" && (
                       <>
-                        <p className="flex items-center gap-2 text-sm font-medium text-[#FF6B2C]">
+                        <p className="flex items-center gap-2 text-sm font-medium text-[#176B45]">
                           <Volume2 className="h-4 w-4 animate-pulse" />{" "}
                           {personaName ? `${personaName} is speaking…` : "Interviewer is speaking…"}
                         </p>
@@ -1462,14 +1462,14 @@ export default function InterviewRoom() {
                         deliberately NOT as a chat bubble: a backchannel is not a question and must
                         never be mistakable for one in the transcript. */}
                     {backchannel && (
-                      <p className="flex items-center gap-2 text-sm font-medium text-[#FF6B2C]">
+                      <p className="flex items-center gap-2 text-sm font-medium text-[#176B45]">
                         <Volume2 className="h-4 w-4 animate-pulse" /> &ldquo;{backchannel}&rdquo;
                       </p>
                     )}
                     {phase === "listening" && !backchannel && (
                       <p
                         className={`flex items-center gap-2 text-sm font-medium ${
-                          endingSoon ? "text-[#FF6B2C]" : "text-emerald-700"
+                          endingSoon ? "text-[#176B45]" : "text-emerald-700"
                         }`}
                       >
                         <span className="relative flex h-2.5 w-2.5">
@@ -1522,7 +1522,7 @@ export default function InterviewRoom() {
                   <button
                     type="button"
                     onClick={switchToTyping}
-                    className="tap-target rounded py-1 text-xs font-medium text-[#6B6B6B] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
+                    className="tap-target rounded py-1 text-xs font-medium text-[#64736A] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
                   >
                     <Keyboard className="mr-1 inline h-3 w-3" /> Switch to typing
                   </button>
@@ -1559,7 +1559,7 @@ export default function InterviewRoom() {
                       <button
                         type="button"
                         onClick={switchToVoice}
-                        className="tap-target rounded py-1 text-xs font-medium text-brand-600 hover:text-[#FF6B2C] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
+                        className="tap-target rounded py-1 text-xs font-medium text-brand-600 hover:text-[#176B45] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
                       >
                         <Mic className="mr-1 inline h-3 w-3" /> Use voice instead
                       </button>
@@ -1682,7 +1682,7 @@ export default function InterviewRoom() {
                   <button
                     type="button"
                     onClick={keepListening}
-                    className="tap-target rounded-full border border-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-700 hover:border-brand-400 hover:text-[#FF6B2C]"
+                    className="tap-target rounded-full border border-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-700 hover:border-brand-400 hover:text-[#176B45]"
                   >
                     I'm still thinking
                   </button>
@@ -1759,7 +1759,7 @@ export default function InterviewRoom() {
                 <button
                   type="button"
                   onClick={() => submitAnswer(pending.payload)}
-                  className="tap-target flex items-center gap-1 rounded py-1 font-semibold text-brand-600 hover:text-[#FF6B2C] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
+                  className="tap-target flex items-center gap-1 rounded py-1 font-semibold text-brand-600 hover:text-[#176B45] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
                 >
                   <RotateCcw className="h-3 w-3" /> Retry
                 </button>

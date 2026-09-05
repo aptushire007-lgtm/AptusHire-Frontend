@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { CheckCircle2, Save } from "lucide-react";
 import api from "../../../api/client";
 import { accountAuthHeader } from "../../../auth/accountAuth";
@@ -41,7 +41,7 @@ export default function SkillsTab({ profile, onRefresh }) {
         </p>
       </div>
 
-      {success && <p role="status" className="flex items-center gap-2 rounded-xl bg-[#FFE8DC] p-3 text-xs font-semibold text-[#FF6B2C]"><CheckCircle2 className="h-4 w-4" />{success}</p>}
+      {success && <p role="status" className="flex items-center gap-2 rounded-xl bg-[#E8F2EC] p-3 text-xs font-semibold text-[#176B45]"><CheckCircle2 className="h-4 w-4" />{success}</p>}
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700">{error}</p>}
 
       <form onSubmit={handleSave} className="space-y-4">

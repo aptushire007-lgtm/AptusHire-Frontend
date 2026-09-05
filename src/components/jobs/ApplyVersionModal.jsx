@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   FileText,
   Star,
@@ -107,8 +107,8 @@ export default function ApplyVersionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F5F5F0]-deep/80 p-4 backdrop-blur-xs">
-      <div className="relative w-full max-w-xl rounded-3xl border border-[#E8E8E4] bg-white p-6 shadow-lift sm:p-7">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F8FAF9]-deep/80 p-4 backdrop-blur-xs">
+      <div className="relative w-full max-w-xl rounded-3xl border border-[#E5EBE7] bg-white p-6 shadow-lift sm:p-7">
         <button
           onClick={onClose}
           aria-label="Close"
@@ -118,7 +118,7 @@ export default function ApplyVersionModal({
         </button>
 
         <div className="pr-8">
-          <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#FF6B2C]">
+          <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#176B45]">
             <Sparkles className="h-3.5 w-3.5" /> Target Resume Selector
           </span>
           <h2 className="mt-1 font-display text-xl font-bold tracking-tight text-slate-900 ">
@@ -138,7 +138,7 @@ export default function ApplyVersionModal({
 
         {loading ? (
           <div className="my-8 flex flex-col items-center justify-center gap-2 text-center text-xs text-slate-500">
-            <Loader2 className="h-6 w-6 animate-spin text-[#FF6B2C]" />
+            <Loader2 className="h-6 w-6 animate-spin text-[#176B45]" />
             <span>Calculating live match scores across your resume versions…</span>
           </div>
         ) : versionsData.length === 0 ? (
@@ -162,7 +162,7 @@ export default function ApplyVersionModal({
                     onClick={() => setSelectedVersionId(v._id)}
                     className={`cursor-pointer rounded-2xl border p-3.5 transition-all ${
                       isSelected
-                        ? "border-[#FF6B2C] bg-white ring-2 ring-primary/15"
+                        ? "border-[#176B45] bg-white ring-2 ring-primary/15"
                         : "border-slate-200/90 bg-white hover:border-slate-300   dark:hover:border-slate-700"
                     }`}
                   >
@@ -173,7 +173,7 @@ export default function ApplyVersionModal({
                           name="resume_version"
                           checked={isSelected}
                           onChange={() => setSelectedVersionId(v._id)}
-                          className="h-4 w-4 text-[#FF6B2C] accent-primary"
+                          className="h-4 w-4 text-[#176B45] accent-primary"
                         />
                         <div>
                           <div className="flex items-center gap-2">
@@ -196,11 +196,11 @@ export default function ApplyVersionModal({
 
                       <div className="flex items-center gap-2">
                         {v.isBestFit && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-lime px-2.5 py-0.5 text-[11px] font-extrabold text-[#FF6B2C] shadow-2xs">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-lime px-2.5 py-0.5 text-[11px] font-extrabold text-[#176B45] shadow-2xs">
                             <Sparkles className="h-3 w-3" /> Best Fit
                           </span>
                         )}
-                        <span className="rounded-full bg-[#FFE8DC] px-2.5 py-0.5 text-xs font-extrabold text-[#FF6B2C]">
+                        <span className="rounded-full bg-[#E8F2EC] px-2.5 py-0.5 text-xs font-extrabold text-[#176B45]">
                           {v.matchScore}% match
                         </span>
                       </div>
@@ -217,11 +217,11 @@ export default function ApplyVersionModal({
                   type="checkbox"
                   checked={consentAi}
                   onChange={(e) => setConsentAi(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded text-[#FF6B2C] accent-primary"
+                  className="mt-0.5 h-4 w-4 rounded text-[#176B45] accent-primary"
                 />
                 <span className="text-slate-600 ">
                   I consent to AI screening and evidence evaluation in accordance with the{" "}
-                  <a href="/welcome" target="_blank" rel="noreferrer" className="font-semibold text-[#FF6B2C] underline">
+                  <a href="/welcome" target="_blank" rel="noreferrer" className="font-semibold text-[#176B45] underline">
                     NYC LL144 &amp; DPDP Algorithmic Transparency Disclosure
                   </a>.
                 </span>
@@ -232,7 +232,7 @@ export default function ApplyVersionModal({
                   type="checkbox"
                   checked={consentData}
                   onChange={(e) => setConsentData(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded text-[#FF6B2C] accent-primary"
+                  className="mt-0.5 h-4 w-4 rounded text-[#176B45] accent-primary"
                 />
                 <span className="text-slate-600 ">
                   I consent to sharing my selected resume snapshot and verified profile credentials with the hiring team.

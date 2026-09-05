@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { FileText, UploadCloud, Download, Layers, CircleCheck, AlertTriangle, Trash2 } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
@@ -152,7 +152,7 @@ export default function ResumeUpload() {
           {error && (
             <p
               role="alert"
-              className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm font-medium text-[#C0392B]"
+              className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm font-medium text-[#C95C5C]"
             >
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               {error}
@@ -161,7 +161,7 @@ export default function ResumeUpload() {
           {status === "uploaded" && (
             <p
               role="status"
-              className="mb-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-[#FFE8DC] px-3.5 py-2.5 text-sm font-medium text-[#FF6B2C]"
+              className="mb-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-[#E8F2EC] px-3.5 py-2.5 text-sm font-medium text-[#176B45]"
             >
               <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               {alreadyThere
@@ -174,7 +174,7 @@ export default function ResumeUpload() {
             {/* A taller dashed target than a form row: this is the primary act
                 on the page, and at input height it read as one more field in a
                 stack rather than as the thing to drop a file on. */}
-            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-[#F5F5F0] px-4 py-8 text-center text-sm text-slate-600 transition-colors hover:border-brand-400 hover:bg-[#FFE8DC]/50">
+            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-[#F8FAF9] px-4 py-8 text-center text-sm text-slate-600 transition-colors hover:border-brand-400 hover:bg-[#DDECE3]/50">
               <IconTile icon={UploadCloud} />
               <span className="font-medium break-all text-slate-700">
                 {file ? file.name : "Choose a PDF or DOCX file"}
@@ -231,7 +231,7 @@ export default function ResumeUpload() {
                     // `min-w-0`: this <li> is the grid item, not the card inside
                     // it, so it carries its own minimum. See DESIGN.md
                     // § The Shrinkable-Item Rule.
-                    className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 transition-colors hover:border-[#FFCAAF]"
+                    className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 transition-colors hover:border-[#C7DDD1]"
                   >
                     <div className="flex items-start gap-3">
                       <IconTile icon={FileText} size="sm" />
@@ -253,7 +253,7 @@ export default function ResumeUpload() {
                     {/* The inset fact block from the reference: a quiet ground
                         under the label/value pairs so they read as data about
                         the file rather than as more prose about it. */}
-                    <dl className="mt-4 space-y-2 rounded-xl bg-[#F5F5F0] px-4 py-3 text-xs">
+                    <dl className="mt-4 space-y-2 rounded-xl bg-[#F8FAF9] px-4 py-3 text-xs">
                       <div className="flex items-baseline justify-between gap-3">
                         <dt className="text-slate-600">File size</dt>
                         <dd className="font-semibold tabular-nums text-slate-900">{formatSize(r.sizeBytes)}</dd>
@@ -279,7 +279,7 @@ export default function ResumeUpload() {
                         size="sm"
                         loading={deleting === r._id}
                         onClick={() => handleDelete(r)}
-                        className="shrink-0 border-red-200 text-[#C0392B] hover:border-red-300 hover:bg-red-50"
+                        className="shrink-0 border-red-200 text-[#C95C5C] hover:border-red-300 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4" aria-hidden="true" />
                         <span className="sr-only">Remove {r.originalName}</span>

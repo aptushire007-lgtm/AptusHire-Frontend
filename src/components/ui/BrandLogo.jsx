@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 
 export function AptusMark({ size = 32, className = "" }) {
   return (
@@ -13,7 +13,7 @@ export function AptusMark({ size = 32, className = "" }) {
     >
       <defs>
         <linearGradient id="aptusGradComponent" x1="15%" y1="0%" x2="85%" y2="100%">
-          <stop offset="0%" stopColor="#8BD83A" />
+          <stop offset="0%" stopColor="#5F9475" />
           <stop offset="55%" stopColor="#3E7C59" />
           <stop offset="100%" stopColor="#2F6B4F" />
         </linearGradient>
@@ -22,7 +22,7 @@ export function AptusMark({ size = 32, className = "" }) {
           <stop offset="100%" stopColor="#2F6B4F" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="aptusPersonComponent" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#8BD83A" />
+          <stop offset="0%" stopColor="#5F9475" />
           <stop offset="100%" stopColor="#3E7C59" />
         </linearGradient>
       </defs>
@@ -54,18 +54,18 @@ export function BrandLogo({
   className = "",
   onClick,
 }) {
-  let textColor = "text-[#FF6B2C] dark:text-white";
-  let taglineColor = "text-[#6B6B6B]";
-  let hireColor = "text-[#FF6B2C] dark:text-lime";
+  let textColor = "text-[#176B45] dark:text-white";
+  let taglineColor = "text-[#64736A]";
+  let hireColor = "text-[#176B45] dark:text-lime";
 
   if (theme === "dark") {
     textColor = "text-white";
     taglineColor = "text-slate-300";
     hireColor = "text-lime";
   } else if (theme === "light") {
-    textColor = "text-[#FF6B2C]";
-    taglineColor = "text-[#6B6B6B]";
-    hireColor = "text-[#FF6B2C]";
+    textColor = "text-[#176B45]";
+    taglineColor = "text-[#64736A]";
+    hireColor = "text-[#176B45]";
   }
 
   const iconSizes = {

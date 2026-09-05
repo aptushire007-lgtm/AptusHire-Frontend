@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock, Minus, AlertCircle } from "lucide-react";
+﻿import { CheckCircle2, Clock, Minus, AlertCircle } from "lucide-react";
 
 /**
  * VerificationTick component
@@ -18,23 +18,23 @@ export default function VerificationTick({
 }) {
   const configs = {
     verified: {
-      bg: "bg-[#FFE8DC] dark:bg-[#FFE8DC]",
-      text: "text-[#FF6B2C] dark:text-[#FF6B2C]",
-      border: "border-[#FFCAAF] dark:border-[#FFCAAF]",
+      bg: "bg-[#E8F2EC] dark:bg-[#E8F2EC]",
+      text: "text-[#176B45] dark:text-[#176B45]",
+      border: "border-[#C7DDD1] dark:border-[#C7DDD1]",
       icon: CheckCircle2,
       label: "Verified",
     },
     pending: {
-      bg: "bg-[#FFE8DC] dark:bg-[#FFE8DC]",
-      text: "text-[#FF6B2C] dark:text-[#FF6B2C]",
-      border: "border-[#FFCAAF] dark:border-[#FFCAAF]",
+      bg: "bg-[#E8F2EC] dark:bg-[#E8F2EC]",
+      text: "text-[#176B45] dark:text-[#176B45]",
+      border: "border-[#C7DDD1] dark:border-[#C7DDD1]",
       icon: Clock,
       label: "Pending Verification",
     },
     missing: {
-      bg: "bg-[#F5F5F0] dark:bg-[#F5F5F0]",
-      text: "text-[#6B6B6B] dark:text-[#6B6B6B]",
-      border: "border-[#FFCAAF] dark:border-[#FFCAAF]",
+      bg: "bg-[#F8FAF9] dark:bg-[#F8FAF9]",
+      text: "text-[#64736A] dark:text-[#64736A]",
+      border: "border-[#C7DDD1] dark:border-[#C7DDD1]",
       icon: Minus,
       label: "Not Verified",
     },
@@ -74,7 +74,7 @@ export default function VerificationTick({
         <button
           type="button"
           onClick={onFix}
-          className="text-sm font-bold text-[#FF6B2C] hover:text-[#FF6B2C] dark:text-[#FF6B2C]"
+          className="text-sm font-bold text-[#176B45] hover:text-[#176B45] dark:text-[#176B45]"
         >
           {fixLabel}
         </button>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
@@ -49,7 +49,7 @@ export default function VerifyEmail() {
   }, [status, destination, navigate]);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#F5F5F0] px-5 py-12 transition-colors">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#F8FAF9] px-5 py-12 transition-colors">
       <div className="absolute right-6 top-6">
         <ThemeToggle />
       </div>
@@ -59,14 +59,14 @@ export default function VerifyEmail() {
           <BrandLogo to="/welcome" size="lg" />
         </div>
 
-        <Card className="rounded-3xl border border-[#E8E8E4] bg-white p-6 text-center shadow-soft sm:p-8">
+        <Card className="rounded-3xl border border-[#E5EBE7] bg-white p-6 text-center shadow-soft sm:p-8">
           {status === "verifying" && (
             <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFE8DC] text-[#FF6B2C]/60">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F2EC] text-[#176B45]/60">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-              <h1 className="text-xl font-bold text-[#1A1A1A]">Verifying Your Email</h1>
-              <p className="mt-2 text-xs text-[#6B6B6B]">Please wait a moment…</p>
+              <h1 className="text-xl font-bold text-[#17221C]">Verifying Your Email</h1>
+              <p className="mt-2 text-xs text-[#64736A]">Please wait a moment…</p>
             </>
           )}
 
@@ -75,10 +75,10 @@ export default function VerifyEmail() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
                 <XCircle className="h-6 w-6" />
               </div>
-              <h1 className="text-xl font-bold text-[#1A1A1A]">Verification Failed</h1>
-              <p className="mt-2 text-xs text-[#6B6B6B]">{error}</p>
+              <h1 className="text-xl font-bold text-[#17221C]">Verification Failed</h1>
+              <p className="mt-2 text-xs text-[#64736A]">{error}</p>
               <p className="mt-4 text-xs">
-                <Link to="/login" className="font-semibold text-[#FF6B2C] hover:underline">
+                <Link to="/login" className="font-semibold text-[#176B45] hover:underline">
                   Request a new link from login
                 </Link>
               </p>
@@ -90,8 +90,8 @@ export default function VerifyEmail() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                 <CheckCircle2 className="h-7 w-7" />
               </div>
-              <h1 className="text-xl font-bold text-[#1A1A1A]">Email Verified</h1>
-              <p className="mt-2 text-xs text-[#6B6B6B]">
+              <h1 className="text-xl font-bold text-[#17221C]">Email Verified</h1>
+              <p className="mt-2 text-xs text-[#64736A]">
                 Your email has been verified and you're now logged in. Redirecting you back…
               </p>
               <Button

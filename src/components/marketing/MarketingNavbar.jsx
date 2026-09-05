@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import Button from "../ui/Button.jsx";
@@ -29,20 +29,20 @@ export default function MarketingNavbar() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#E8E8E4] bg-white/95 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-50 border-b border-[#E5EBE7] bg-white/95 backdrop-blur-md transition-colors">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
         <BrandLogo to="/welcome" size="lg" textWeight="font-medium" theme="light" />
 
         <nav className="hidden items-center gap-9 md:flex">
           {LINKS.map((link) => (
-            <a key={link.label} href={link.href} className="text-[15px] font-semibold text-[#1A1A1A] transition-colors hover:text-[#FF6B2C]">
+            <a key={link.label} href={link.href} className="text-[15px] font-semibold text-[#17221C] transition-colors hover:text-[#176B45]">
               {link.label}
             </a>
           ))}
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="ghost" size="sm" className="rounded-full px-4 text-[15px] text-[#FF6B2C]" onClick={() => navigate("/login")}>
+          <Button variant="ghost" size="sm" className="rounded-full px-4 text-[15px] text-[#176B45]" onClick={() => navigate("/login")}>
             Log In
           </Button>
           <Button size="sm" className="rounded-full px-5 py-2.5 text-[15px] shadow-[0_8px_20px_rgba(33,71,64,0.16)]" onClick={() => navigate("/register")}>
@@ -53,7 +53,7 @@ export default function MarketingNavbar() {
         <button
           ref={menuButtonRef}
           type="button"
-          className="tap-target -mr-2 inline-flex items-center justify-center rounded-lg p-2 text-[#FF6B2C] hover:bg-[#FFE8DC] md:hidden"
+          className="tap-target -mr-2 inline-flex items-center justify-center rounded-lg p-2 text-[#176B45] hover:bg-[#DDECE3] md:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
           aria-expanded={open}
@@ -63,10 +63,10 @@ export default function MarketingNavbar() {
       </div>
 
       {open && (
-        <div className="border-t border-[#E8E8E4] bg-white px-5 pb-5 pt-3 md:hidden">
+        <div className="border-t border-[#E5EBE7] bg-white px-5 pb-5 pt-3 md:hidden">
           <nav className="flex flex-col gap-3">
             {LINKS.map((link) => (
-              <a key={link.label} href={link.href} className="tap-target flex items-center py-1 text-[15px] font-semibold text-[#1A1A1A]" onClick={() => setOpen(false)}>
+              <a key={link.label} href={link.href} className="tap-target flex items-center py-1 text-[15px] font-semibold text-[#17221C]" onClick={() => setOpen(false)}>
                 {link.label}
               </a>
             ))}

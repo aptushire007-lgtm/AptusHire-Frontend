@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Sparkles,
@@ -111,7 +111,7 @@ function SidebarNav({ collapsed, onNavigate, label }) {
       {groups.map((group) => (
         <div key={group.label || "public"} className="mb-4 last:mb-0">
           {group.label && !collapsed && (
-            <p className="mb-1 px-3 pt-2 text-[10px] font-semibold uppercase tracking-widest text-[#9B9B9B]">
+            <p className="mb-1 px-3 pt-2 text-[10px] font-semibold uppercase tracking-widest text-[#9BAAA1]">
               {group.label}
             </p>
           )}
@@ -134,8 +134,8 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                     "transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                     collapsed ? "justify-center px-2" : "px-3",
                     active
-                      ? "before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-[#FF6B2C] bg-[#FFE8DC] font-semibold text-[#FF6B2C]"
-                      : "text-[#6B6B6B] hover:bg-[#FFE8DC] hover:text-text",
+                      ? "before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-[#176B45] bg-[#E8F2EC] font-semibold text-[#176B45]"
+                      : "text-[#64736A] hover:bg-[#DDECE3] hover:text-text",
                   ].join(" ");
                 }}
               >
@@ -144,12 +144,12 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                   return (
                     <>
                       <item.icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#FF6B2C]" : "text-[#9B9B9B]"}`}
+                        className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#176B45]" : "text-[#9BAAA1]"}`}
                         aria-hidden="true"
                       />
                       <span className={collapsed ? "sr-only" : "truncate"}>{item.label}</span>
                       {item.badgeKey && !collapsed && counts[item.badgeKey] > 0 && (
-                        <span className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#FF6B2C] text-[10px] font-bold text-white px-1.5 py-0.5">
+                        <span className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#176B45] text-[10px] font-bold text-white px-1.5 py-0.5">
                           {counts[item.badgeKey]}
                         </span>
                       )}
@@ -175,7 +175,7 @@ function SidebarBrand({ collapsed, onNavigate }) {
         to="/"
         onClick={onNavigate}
         title="AptusHire"
-        className="flex h-16 shrink-0 items-center justify-center border-b border-[#E8E8E4] px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="flex h-16 shrink-0 items-center justify-center border-b border-[#E5EBE7] px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <AptusMark size={32} />
         <span className="sr-only">AptusHire, home</span>
@@ -183,7 +183,7 @@ function SidebarBrand({ collapsed, onNavigate }) {
     );
   }
   return (
-    <div className="flex h-16 shrink-0 items-center border-b border-[#E8E8E4] px-5">
+    <div className="flex h-16 shrink-0 items-center border-b border-[#E5EBE7] px-5">
       <BrandLogo to="/" size="lg" textWeight="font-semibold" theme="light" onClick={onNavigate} />
     </div>
   );
@@ -206,14 +206,14 @@ function HeaderActions({ onNavigate }) {
           <Link
             to="/login"
             onClick={onNavigate}
-            className={`${baseAction} text-[#1A1A1A] hover:bg-[#FFE8DC]`}
+            className={`${baseAction} text-[#17221C] hover:bg-[#DDECE3]`}
           >
             Log In
           </Link>
           <Link
             to="/register"
             onClick={onNavigate}
-            className="tap-target inline-flex items-center justify-center rounded-full bg-[#FF6B2C] px-5 py-2.5 text-[14px] font-semibold text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors hover:bg-[#FF6B2C]-dark focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/25"
+            className="tap-target inline-flex items-center justify-center rounded-full bg-[#176B45] px-5 py-2.5 text-[14px] font-semibold text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors hover:bg-[#176B45]-dark focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/25"
           >
             Register
           </Link>
@@ -224,7 +224,7 @@ function HeaderActions({ onNavigate }) {
           <Link
             to="/account"
             onClick={onNavigate}
-            className={`${baseAction} text-[#1A1A1A] hover:bg-[#FFE8DC]`}
+            className={`${baseAction} text-[#17221C] hover:bg-[#DDECE3]`}
           >
             <UserRound className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden max-w-[10rem] truncate sm:inline">
@@ -234,7 +234,7 @@ function HeaderActions({ onNavigate }) {
           <button
             type="button"
             onClick={() => { logoutAccount(); onNavigate?.(); navigate("/login"); }}
-            className={`${baseAction} text-[#6B6B6B] hover:bg-[#FFE8DC] hover:text-text`}
+            className={`${baseAction} text-[#64736A] hover:bg-[#DDECE3] hover:text-text`}
           >
             <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">Log Out</span>
@@ -312,11 +312,11 @@ function ShellInner({ children }) {
   }, [drawerOpen]);
 
   return (
-    <div className="candidate-side flex min-h-screen bg-[#F5F5F0] text-[#1A1A1A]">
+    <div className="candidate-side flex min-h-screen bg-[#F8FAF9] text-[#17221C]">
       {/* Skip link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-card focus:bg-[#FF6B2C] focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-soft"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-card focus:bg-[#176B45] focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-soft"
       >
         Skip to main content
       </a>
@@ -324,19 +324,19 @@ function ShellInner({ children }) {
       {/* ── Desktop persistent sidebar ──────────────────────────── */}
       <aside
         id={SIDEBAR_ID}
-        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#E8E8E4] bg-white transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#E5EBE7] bg-white transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
           collapsed ? "w-[4.5rem]" : "w-64"
         }`}
       >
         <SidebarBrand collapsed={collapsed} />
         <SidebarNav collapsed={collapsed} label="Main" />
         {/* Collapse toggle */}
-        <div className="border-t border-[#E8E8E4] p-3">
+        <div className="border-t border-[#E5EBE7] p-3">
           <button
             type="button"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="flex w-full items-center justify-center gap-2 rounded-control py-2 text-xs font-medium text-[#9B9B9B] transition-colors hover:bg-[#FFE8DC] hover:text-[#6B6B6B]"
+            className="flex w-full items-center justify-center gap-2 rounded-control py-2 text-xs font-medium text-[#9BAAA1] transition-colors hover:bg-[#DDECE3] hover:text-[#64736A]"
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             {!collapsed && <span>Collapse</span>}
@@ -358,14 +358,14 @@ function ShellInner({ children }) {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#E8E8E4] bg-white shadow-lift"
+            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#E5EBE7] bg-white shadow-lift"
           >
             <button
               ref={closeRef}
               type="button"
               onClick={() => setDrawerOpen(false)}
               aria-label="Close menu"
-              className="tap-target absolute right-3 top-4 inline-flex h-9 w-9 items-center justify-center rounded-control text-[#6B6B6B] transition-colors hover:bg-[#FFE8DC] hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="tap-target absolute right-3 top-4 inline-flex h-9 w-9 items-center justify-center rounded-control text-[#64736A] transition-colors hover:bg-[#DDECE3] hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -378,7 +378,7 @@ function ShellInner({ children }) {
       {/* ── Main content column ──────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Sticky header */}
-        <header className="sticky top-0 z-40 flex h-[68px] items-center justify-between gap-3 border-b border-[#E8E8E4] bg-white/95 px-5 shadow-[0_1px_4px_rgba(27,67,50,0.07)] backdrop-blur-md sm:px-8">
+        <header className="sticky top-0 z-40 flex h-[68px] items-center justify-between gap-3 border-b border-[#E5EBE7] bg-white/95 px-5 shadow-[0_1px_4px_rgba(27,67,50,0.07)] backdrop-blur-md sm:px-8">
           <div className="flex min-w-0 items-center gap-2">
             {/* Mobile: open drawer */}
             <button
@@ -387,7 +387,7 @@ function ShellInner({ children }) {
               aria-label="Open menu"
               aria-expanded={drawerOpen}
               aria-controls={drawerOpen ? DRAWER_ID : undefined}
-              className="tap-target -ml-1.5 inline-flex items-center justify-center rounded-control p-1.5 text-[#6B6B6B] transition-colors hover:bg-[#FFE8DC] hover:text-[#FF6B2C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 lg:hidden"
+              className="tap-target -ml-1.5 inline-flex items-center justify-center rounded-control p-1.5 text-[#64736A] transition-colors hover:bg-[#DDECE3] hover:text-[#176B45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 lg:hidden"
             >
               <Menu className="h-6 w-6" aria-hidden="true" />
             </button>

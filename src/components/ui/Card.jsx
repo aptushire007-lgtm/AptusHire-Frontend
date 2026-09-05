@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AptusHire shared surface primitives.
  * Premium light theme: white cards, green brand, gold accent, charcoal text.
  * No dark surfaces, no black boxes.
@@ -6,13 +6,13 @@
 
 // ── Card tone system ────────────────────────────────────────────────────────
 const cardTones = {
-  default:       { border: "border-[#E8E8E4]",        surface: "bg-white" },
-  brand:         { border: "border-[#FFCAAF]",      surface: "bg-white" },
-  ember:         { border: "border-accent-orange/30", surface: "bg-[#FFE8DC]" },
-  "filled-brand":{ border: "border-transparent",    surface: "bg-[#FF6B2C] text-white" },
-  "filled-gold": { border: "border-transparent",    surface: "bg-[#FF6B2C] text-white" },
+  default:       { border: "border-[#E5EBE7]",        surface: "bg-white" },
+  brand:         { border: "border-[#C7DDD1]",      surface: "bg-white" },
+  ember:         { border: "border-accent-orange/30", surface: "bg-[#E8F2EC]" },
+  "filled-brand":{ border: "border-transparent",    surface: "bg-[#176B45] text-white" },
+  "filled-gold": { border: "border-transparent",    surface: "bg-[#176B45] text-white" },
   // backward-compat alias
-  "filled-ember":{ border: "border-transparent",    surface: "bg-[#FF6B2C] text-white" },
+  "filled-ember":{ border: "border-transparent",    surface: "bg-[#176B45] text-white" },
 };
 
 const OWN_SURFACE  = /(^|\s)(bg-|surface-|fill-)/;
@@ -30,9 +30,9 @@ export function toneText(tone) {
   if (tone === "filled-brand") return { strong: "text-white",         soft: "text-white/80",    tile: "on-fill" };
   if (tone === "filled-gold")  return { strong: "text-white",         soft: "text-white/80",    tile: "on-fill" };
   if (tone === "filled-ember") return { strong: "text-white",         soft: "text-white/80",    tile: "on-fill" };
-  if (tone === "ember")        return { strong: "text-[#1A1A1A]",   soft: "text-[#6B6B6B]",  tile: "ember" };
-  if (tone === "brand")        return { strong: "text-[#1A1A1A]",   soft: "text-[#6B6B6B]",  tile: "brand" };
-  return                              { strong: "text-[#1A1A1A]",   soft: "text-[#6B6B6B]",  tile: "brand" };
+  if (tone === "ember")        return { strong: "text-[#17221C]",   soft: "text-[#64736A]",  tile: "ember" };
+  if (tone === "brand")        return { strong: "text-[#17221C]",   soft: "text-[#64736A]",  tile: "brand" };
+  return                              { strong: "text-[#17221C]",   soft: "text-[#64736A]",  tile: "brand" };
 }
 
 const cardPadding = { default: "p-6", compact: "p-4", none: "p-0" };
@@ -70,12 +70,12 @@ export function Card({
 
 // ── Icon Tile ───────────────────────────────────────────────────────────────
 const tileTones = {
-  brand:        "bg-[#FFE8DC] text-[#FF6B2C]",
-  ember:        "bg-[#FF6B2C]-light text-[#FF6B2C]",
-  slate:        "bg-[#F5F5F0] text-[#6B6B6B]",
-  positive:     "bg-[#FFE8DC] text-[#FF6B2C]",
-  pending:      "bg-[#FF6B2C]-light text-[#FF6B2C]",
-  negative:     "bg-[#FDECEA] text-[#C0392B]",
+  brand:        "bg-[#E8F2EC] text-[#176B45]",
+  ember:        "bg-[#176B45]-light text-[#176B45]",
+  slate:        "bg-[#F8FAF9] text-[#64736A]",
+  positive:     "bg-[#E8F2EC] text-[#176B45]",
+  pending:      "bg-[#176B45]-light text-[#176B45]",
+  negative:     "bg-[#F8EAEA] text-[#C95C5C]",
   "on-fill":    "bg-white/20 text-white",
   "on-fill-ink":"bg-slate-950/10 text-slate-900",
 };
@@ -123,7 +123,7 @@ export function Avatar({ name, size = "md", className = "" }) {
     <span
       aria-hidden="true"
       className={[
-        "inline-flex shrink-0 items-center justify-center rounded-full bg-[#FFE8DC] font-semibold text-[#FF6B2C]",
+        "inline-flex shrink-0 items-center justify-center rounded-full bg-[#E8F2EC] font-semibold text-[#176B45]",
         sizes[size] ?? sizes.md,
         className,
       ].join(" ")}
@@ -136,12 +136,12 @@ export function Avatar({ name, size = "md", className = "" }) {
 // ── Badge ───────────────────────────────────────────────────────────────────
 export function Badge({ children, tone = "slate", className = "" }) {
   const tones = {
-    slate:  "bg-[#F5F5F0] text-[#6B6B6B] border border-[#E8E8E4]",
-    green:  "bg-[#FFE8DC] text-[#FF6B2C]",
-    amber:  "bg-[#FFE8DC] text-[#FF6B2C]",
-    red:    "bg-[#FDECEA] text-[#C0392B]",
-    brand:  "bg-[#FFE8DC] text-[#FF6B2C]",
-    gold:   "bg-[#FF6B2C]-light text-[#FF6B2C]",
+    slate:  "bg-[#F8FAF9] text-[#64736A] border border-[#E5EBE7]",
+    green:  "bg-[#E8F2EC] text-[#176B45]",
+    amber:  "bg-[#E8F2EC] text-[#176B45]",
+    red:    "bg-[#F8EAEA] text-[#C95C5C]",
+    brand:  "bg-[#E8F2EC] text-[#176B45]",
+    gold:   "bg-[#176B45]-light text-[#176B45]",
   };
   return (
     <span
@@ -183,8 +183,8 @@ export function SectionHeader({ title, description, action, icon: Icon, classNam
       <div className="flex min-w-0 items-start gap-3">
         {Icon && <IconTile icon={Icon} size="sm" />}
         <div className="min-w-0">
-          <h2 className="text-base font-bold text-[#1A1A1A]">{title}</h2>
-          {description && <p className="mt-1 max-w-prose text-sm text-[#6B6B6B]">{description}</p>}
+          <h2 className="text-base font-bold text-[#17221C]">{title}</h2>
+          {description && <p className="mt-1 max-w-prose text-sm text-[#64736A]">{description}</p>}
         </div>
       </div>
       {action && <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div>}
@@ -202,14 +202,14 @@ export function Skeleton({ className = "" }) {
 // ── EmptyState ───────────────────────────────────────────────────────────────
 export function EmptyState({ icon: Icon, title, description, action }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-card border border-dashed border-[#E8E8E4] bg-white px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center rounded-card border border-dashed border-[#E5EBE7] bg-white px-6 py-14 text-center">
       {Icon && (
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFE8DC] text-[#FF6B2C]">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#E8F2EC] text-[#176B45]">
           <Icon className="h-6 w-6" aria-hidden="true" />
         </div>
       )}
-      <h3 className="text-base font-bold text-[#1A1A1A]">{title}</h3>
-      {description && <p className="mt-1.5 max-w-sm text-sm text-[#6B6B6B]">{description}</p>}
+      <h3 className="text-base font-bold text-[#17221C]">{title}</h3>
+      {description && <p className="mt-1.5 max-w-sm text-sm text-[#64736A]">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );

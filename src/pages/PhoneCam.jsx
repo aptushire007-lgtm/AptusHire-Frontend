@@ -1,4 +1,4 @@
-// Phone companion camera (BUILD-PLAN Phase 14.6). Opened by scanning the QR on
+﻿// Phone companion camera (BUILD-PLAN Phase 14.6). Opened by scanning the QR on
 // the pre-check screen. The phone NEVER streams video: it exchanges the scanned
 // single-purpose pairing token for a phone-session token (sessionStorage only),
 // runs the same in-browser face model as the laptop, sends a presence heartbeat
@@ -286,12 +286,12 @@ export default function PhoneCam() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#F5F5F0] px-6 py-10 text-center text-[#1A1A1A]">
-      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFE8DC]">
-        <Smartphone className="h-7 w-7 text-[#FF6B2C]" />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#F8FAF9] px-6 py-10 text-center text-[#17221C]">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E8F2EC]">
+        <Smartphone className="h-7 w-7 text-[#176B45]" />
       </div>
 
-      {state === "connecting" && <p className="text-sm text-[#6B6B6B]">Connecting your phone as a second camera…</p>}
+      {state === "connecting" && <p className="text-sm text-[#64736A]">Connecting your phone as a second camera…</p>}
 
       {/* The heading states what this phone is actually doing. It used to read
           "Second camera active" even when getUserMedia had been refused outright,
@@ -318,12 +318,12 @@ export default function PhoneCam() {
         playsInline
         muted
         className={
-          state === "live" && capability.camera ? "mt-5 w-full max-w-xs rounded-xl bg-[#F5F5F0]" : "hidden"
+          state === "live" && capability.camera ? "mt-5 w-full max-w-xs rounded-xl bg-[#F8FAF9]" : "hidden"
         }
       />
 
       {state === "live" && (
-        <p className="mt-5 max-w-sm text-sm text-[#6B6B6B]">
+        <p className="mt-5 max-w-sm text-sm text-[#64736A]">
           {capability.camera && capability.vision ? (
             <>
               Keep this page open and the phone propped up with you in view. Nothing is streamed — this page only sends

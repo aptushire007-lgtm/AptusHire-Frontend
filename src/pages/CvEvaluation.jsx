@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, FileSearch, Info, ShieldCheck, UploadCloud } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
@@ -186,19 +186,19 @@ export default function CvEvaluation() {
           <p className="mt-1 text-sm text-[#77807D]">A clear view of what your CV communicates to hiring teams.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {versions.length > 0 && <select aria-label="Select CV for evaluation" value={resume?._id || ""} onChange={(event) => setResume(versions.find((version) => String(version._id) === event.target.value) || null)} className="min-h-11 max-w-full rounded-full border border-[#DDE8DE] bg-white px-3 text-sm text-[#FF6B2C]">
+          {versions.length > 0 && <select aria-label="Select CV for evaluation" value={resume?._id || ""} onChange={(event) => setResume(versions.find((version) => String(version._id) === event.target.value) || null)} className="min-h-11 max-w-full rounded-full border border-[#DDE8DE] bg-white px-3 text-sm text-[#176B45]">
             {versions.map((version) => <option key={version._id} value={version._id}>{version.label || "Saved CV"}</option>)}
           </select>}
           <input ref={fileInputRef} type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleUpload} className="hidden" />
-          <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#FF6B2C] px-5 text-sm font-semibold text-white shadow-[0_7px_16px_rgba(33,71,64,.15)] hover:bg-[#FF6B2C]-dark disabled:opacity-60"><UploadCloud className="h-4 w-4" /> {uploading ? "Uploading…" : "Upload CV"}</button>
+          <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#176B45] px-5 text-sm font-semibold text-white shadow-[0_7px_16px_rgba(33,71,64,.15)] hover:bg-[#176B45]-dark disabled:opacity-60"><UploadCloud className="h-4 w-4" /> {uploading ? "Uploading…" : "Upload CV"}</button>
         </div>
       </div>
 
       {error && <p role="alert" className="rounded-[14px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>}
 
-      <div className="flex flex-wrap items-center gap-3 rounded-[14px] border border-[#DDE8DE] bg-[#F5FAF2] px-4 py-3 text-sm text-[#6B6B6B]">
-        <ShieldCheck className="h-5 w-5 text-[#FF6B2C]" />
-        <span>{resume ? <>Evaluating <strong className="text-[#FF6B2C]">{resume.label || "your default CV"}</strong></> : "Add a CV to generate your evaluation"}</span>
+      <div className="flex flex-wrap items-center gap-3 rounded-[14px] border border-[#DDE8DE] bg-[#F5FAF2] px-4 py-3 text-sm text-[#64736A]">
+        <ShieldCheck className="h-5 w-5 text-[#176B45]" />
+        <span>{resume ? <>Evaluating <strong className="text-[#176B45]">{resume.label || "your default CV"}</strong></> : "Add a CV to generate your evaluation"}</span>
         <span className="inline-flex items-center gap-1 text-xs text-[#7B8782]"><Info className="h-3.5 w-3.5" /> Evidence-based review</span>
       </div>
 
@@ -209,7 +209,7 @@ export default function CvEvaluation() {
           </div>
 
           <section className="rounded-[18px] border border-[#DFE5E4] bg-white p-5 shadow-[0_5px_18px_rgba(33,71,64,.06)] sm:p-6">
-            <div className="mb-4 flex items-center gap-2"><FileSearch className="h-5 w-5 text-[#FF6B2C]" /><h2 className="text-[20px] font-semibold text-[#252B29]">Professional Profile Analysis</h2></div>
+            <div className="mb-4 flex items-center gap-2"><FileSearch className="h-5 w-5 text-[#176B45]" /><h2 className="text-[20px] font-semibold text-[#252B29]">Professional Profile Analysis</h2></div>
             <div className="grid items-center gap-8 lg:grid-cols-[1fr_1.2fr]">
               <RadarChart profile={analysis.profile} />
               <div className="space-y-2">
