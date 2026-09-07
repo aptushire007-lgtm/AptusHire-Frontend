@@ -300,7 +300,7 @@ export default function JobListings() {
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-[13px] text-[#64736A]"><span className="font-semibold text-[#17221C]">{filteredJobs.length}</span>{" "}{query ? `matching ${query}` : `${filteredJobs.length === 1 ? "role is" : "roles are"} open right now`}.</p>
-            <label className="flex items-center gap-2 text-[12px] font-semibold text-[#64736A]">Sort by<select value={sort} onChange={(event) => setSort(event.target.value)} className="h-9 rounded-[9px] border border-[#E5EBE7] bg-white px-2 text-[12px] font-semibold text-[#17221C]"><option value="match">Best Match</option><option value="newest">Newest</option><option value="salary" disabled>Salary unavailable</option></select></label>
+            <label className="flex min-w-0 flex-wrap items-center gap-2 text-[12px] font-semibold text-[#64736A]">Sort by<select value={sort} onChange={(event) => setSort(event.target.value)} className="box-border min-w-[8.5rem] max-w-full h-9 rounded-[9px] border border-[#E5EBE7] bg-white px-2 text-[12px] font-semibold text-[#17221C]"><option value="match">Best Match</option><option value="newest">Newest</option><option value="salary" disabled>Salary unavailable</option></select></label>
           </div>
           {filteredJobs.length === 0 ? (
             <EmptyState

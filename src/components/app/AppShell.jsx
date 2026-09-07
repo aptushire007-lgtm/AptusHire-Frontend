@@ -147,7 +147,7 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                         className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#176B45]" : "text-[#9BAAA1]"}`}
                         aria-hidden="true"
                       />
-                      <span className={collapsed ? "sr-only" : "truncate"}>{item.label}</span>
+                      <span className={collapsed ? "sr-only" : "min-w-0 flex-1 whitespace-normal wrap-break-word"}>{item.label}</span>
                       {item.badgeKey && !collapsed && counts[item.badgeKey] > 0 && (
                         <span className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#176B45] text-[10px] font-bold text-white px-1.5 py-0.5">
                           {counts[item.badgeKey]}

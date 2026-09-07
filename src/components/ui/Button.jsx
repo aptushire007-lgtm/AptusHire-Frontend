@@ -74,7 +74,7 @@ const Button = forwardRef(function Button(
       ref={ref}
       disabled={disabled || loading}
       className={[
-        "tap-target inline-flex items-center justify-center gap-2 rounded-control font-semibold",
+        "tap-target inline-flex min-w-0 max-w-full items-center justify-center gap-2 rounded-control font-semibold whitespace-normal break-words text-center",
         "transition-[background-color,border-color,color,box-shadow,transform] duration-150",
         "focus-visible:outline-none active:scale-[0.98]",
         variants[variant] ?? variants.primary,

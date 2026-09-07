@@ -29,7 +29,7 @@ function useFieldA11y(explicitId, error) {
 
 // Base chrome — white bg, charcoal text, green focus ring
 const fieldChrome = [
-  "rounded-control border border-[#E5EBE7] bg-white",
+  "box-border min-w-0 max-w-full rounded-control border border-[#E5EBE7] bg-white",
   "text-sm text-[#17221C] placeholder:text-[#9BAAA1]",
   "shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors duration-150",
   "focus:border-[#176B45] focus:outline-none focus:ring-3 focus:ring-primary/15",
@@ -76,7 +76,7 @@ export const Select = forwardRef(function Select({ className = "", error, id, co
     <select
       ref={ref}
       {...a11y}
-      className={`${withWidth(className)} ${compact ? fieldCompactClass : fieldClass} ${error ? errorChrome : ""} ${className}`}
+      className={`${withWidth(className)} ${compact ? fieldCompactClass : fieldClass} whitespace-normal ${error ? errorChrome : ""} ${className}`}
       {...props}
     >
       {children}

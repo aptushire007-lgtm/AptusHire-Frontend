@@ -97,7 +97,7 @@ export default function ProfileLayout() {
   // form state must be created from the saved server values on first render.
   if (loading) {
     return (
-      <div className="rounded-[14px] border border-[#C7DDD1] bg-white p-8 text-center text-base font-semibold text-[#176B45] shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
+      <div className="rounded-[14px] border border-[#C7DDD1] bg-white p-8 text-center text-base font-semibold text-[#145B40] shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
         Loading your saved profile…
       </div>
     );
@@ -122,24 +122,24 @@ export default function ProfileLayout() {
             <p className="mt-2 max-w-xl text-sm text-[#64736A]">A complete profile helps AptusHire match you with the right opportunities.</p>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-3xl font-bold text-[#176B45]">{strength}%</p>
+            <p className="text-3xl font-bold text-[#145B40]">{strength}%</p>
             <p className="text-xs text-[#64736A]">profile complete</p>
           </div>
         </div>
         <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#E8F2EC]" role="progressbar" aria-valuenow={strength} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion">
-          <div className="h-full rounded-full bg-[#176B45] transition-[width] duration-500" style={{ width: `${strength}%` }} />
+          <div className="h-full rounded-full bg-[#145B40] transition-[width] duration-500" style={{ width: `${strength}%` }} />
         </div>
         <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
           {setupSections.map((section) => (
-            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#E5EBE7] bg-white text-[#176B45] hover:border-[#C7DDD1]" : "border-[#E5EBE7] bg-white text-[#64736A] hover:border-[#C7DDD1]"}`}>
-              <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${section.done ? "bg-[#E8F2EC] text-[#176B45]" : "text-[#9BAAA1]"}`}>{section.done ? "✓" : "○"}</span>
+            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#E5EBE7] bg-white text-[#145B40] hover:border-[#C7DDD1]" : "border-[#E5EBE7] bg-white text-[#64736A] hover:border-[#C7DDD1]"}`}>
+              <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${section.done ? "bg-[#E8F2EC] text-[#145B40]" : "text-[#9BAAA1]"}`}>{section.done ? "✓" : "○"}</span>
               <span>{section.label}</span>
             </button>
           ))}
         </div>
       </section>
       {/* Tab Header Bar (Horizontal on mobile, rail on desktop) */}
-      <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#E5EBE7] bg-white p-2 shadow-xs dark:border-[#E5EBE7] dark:bg-white">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-[#E5EBE7] bg-white p-2 shadow-xs dark:border-[#E5EBE7] dark:bg-white">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -147,10 +147,10 @@ export default function ProfileLayout() {
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`tap-target flex shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+              className={`tap-target flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-center text-xs font-bold transition-all sm:flex-none sm:px-4 ${
                 isActive
-                  ? "bg-[#176B45] text-white shadow-xs dark:bg-[#176B45] dark:text-white"
-                  : "bg-white text-[#64736A] hover:bg-[#DDECE3] hover:text-[#176B45] dark:bg-white dark:text-[#64736A] dark:hover:bg-[#DDECE3] dark:hover:text-[#176B45]"
+                  ? "bg-[#145B40] text-white shadow-xs dark:bg-[#145B40] dark:text-white"
+                  : "bg-white text-[#64736A] hover:bg-[#DDECE3] hover:text-[#145B40] dark:bg-white dark:text-[#64736A] dark:hover:bg-[#DDECE3] dark:hover:text-[#145B40]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -179,8 +179,8 @@ export default function ProfileLayout() {
           {/* Profile Strength Card */}
           <Card className="rounded-3xl border border-[#E5EBE7] bg-white p-5 shadow-soft dark:border-[#E5EBE7] dark:bg-white">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#176B45]">Profile Strength</span>
-              <span className="font-display text-base font-extrabold text-[#176B45]">
+              <span className="text-xs font-bold text-[#145B40]">Profile Strength</span>
+              <span className="font-display text-base font-extrabold text-[#145B40]">
                 {strength}%
               </span>
             </div>
@@ -188,7 +188,7 @@ export default function ProfileLayout() {
             {/* Segmented Progress Bar */}
             <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-[#E8F2EC]">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#3B5D52] via-[#5A7B71] to-[#C1EBAD] transition-all duration-500"
+                className="h-full rounded-full bg-gradient-to-r from-[#2F574A] via-[#4E7567] to-[#C1EBAD] transition-all duration-500"
                 style={{ width: `${strength}%` }}
               />
             </div>
@@ -203,7 +203,7 @@ export default function ProfileLayout() {
                 <div key={item.label} className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-2">
                     <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
-                      item.done ? "bg-[#E8F2EC] text-[#176B45]" : "bg-border text-[#9BAAA1]"
+                      item.done ? "bg-[#E8F2EC] text-[#145B40]" : "bg-border text-[#9BAAA1]"
                     }`}>
                       {item.done ? "✓" : "•"}
                     </span>
@@ -211,14 +211,14 @@ export default function ProfileLayout() {
                       {item.label}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#176B45]">{item.points}%</span>
+                  <span className="text-[11px] font-bold text-[#145B40]">{item.points}%</span>
                 </div>
               ))}
             </div>
           </Card>
 
           {/* Recruiter View Preview (Trust Badge) */}
-          <div className="rounded-3xl border border-[#2E4F48] bg-[#176B45] p-5 text-white shadow-soft">
+          <div className="rounded-3xl border border-[#244B3F] bg-[#145B40] p-5 text-white shadow-soft">
             <div className="flex items-center gap-2 text-[#D2ECC9]">
               <ShieldCheck className="h-4 w-4" />
               <span className="text-xs font-bold uppercase tracking-wider">Recruiter View Preview</span>
@@ -226,7 +226,7 @@ export default function ProfileLayout() {
 
             <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C1EBAD] font-bold text-[#176B45]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C1EBAD] font-bold text-[#145B40]">
                   {(profile.personal?.firstName || "S")[0]}
                 </div>
                 <div>

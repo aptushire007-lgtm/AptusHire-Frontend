@@ -73,7 +73,7 @@ function SourceQuote({ spans }) {
 function Repeatable({ title, items, setItems, empty, renderFields, addLabel }) {
   function update(index, field, value) {
     const next = items.slice();
-    next[index] = { ...next[index], [field]: value };
+    next[index] = { ...next[index], [field]: value, _state: "confirmed" };
     setItems(next);
   }
 
@@ -435,12 +435,15 @@ export default function ApplyForm() {
 
     const data = new FormData();
     Object.entries(basicDetails).forEach(([key, value]) => data.append(key, value));
-    // Prefer the library reference: the file is already stored and parsed. The
-    // raw upload stays supported for the case where that upload failed.
-    if (resumeId) {
+    // A file selected in this form is the freshest source and avoids depending
+    // on a possibly stale library copy. Saved versions still use their stored
+    // reference when no local file is attached.
+    if (resume) {
+      data.append("resume", resume);
+    } else if (resumeId) {
       const selectedVersion = savedResumes.find((version) => String(version._id) === String(resumeId));
       data.append(selectedVersion ? "resumeVersionId" : "resumeId", resumeId);
-    } else data.append("resume", resume);
+    }
     data.append("experience", JSON.stringify(experience.map(stripMeta)));
     data.append("education", JSON.stringify(education.map(stripMeta)));
     data.append("skills", JSON.stringify(skills));
