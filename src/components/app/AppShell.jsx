@@ -15,7 +15,6 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
-  ScanSearch,
 } from "lucide-react";
 import { useAccountAuth } from "../../auth/useAccountAuth.js";
 import { logoutAccount } from "../../auth/logout.js";
@@ -43,7 +42,6 @@ const ACCOUNT_NAV_GROUPS = [
       { to: "/?recommended=1", label: "Recommended", icon: Sparkles, recommendedOnly: true },
       { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
       { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
-      { to: "/cv-evaluation", label: "CV Evaluation", icon: ScanSearch },
     ],
   },
   {
@@ -111,7 +109,7 @@ function SidebarNav({ collapsed, onNavigate, label }) {
       {groups.map((group) => (
         <div key={group.label || "public"} className="mb-4 last:mb-0">
           {group.label && !collapsed && (
-            <p className="mb-1 px-3 pt-2 text-[10px] font-semibold uppercase tracking-widest text-[#9BAAA1]">
+            <p className="mb-1 px-3 pt-2 text-[14px] font-semibold uppercase tracking-widest text-[#9BAAA1]">
               {group.label}
             </p>
           )}
@@ -130,7 +128,7 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                 className={({ isActive }) => {
                   const active = isActive && !isHidden;
                   return [
-                    "relative flex items-center gap-3 rounded-control py-2.5 text-[13px] font-medium whitespace-nowrap",
+                    "relative flex items-center gap-3 rounded-control py-2.5 text-[16px] font-medium whitespace-nowrap",
                     "transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                     collapsed ? "justify-center px-2" : "px-3",
                     active

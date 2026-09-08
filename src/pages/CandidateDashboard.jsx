@@ -182,6 +182,19 @@ function sessionStatusLabel(status) {
   return SESSION_STATUS_LABELS[status] || String(status).replace(/_/g, " ");
 }
 
+// Short badge text for an application that left the pipeline because the role
+// itself went away (Phase 17 pipelineExit) — a closed state, like rejected, but
+// not a decision about the candidate.
+const PIPELINE_EXIT_LABELS = {
+  hired_for_other_role: "Hired elsewhere",
+  job_filled: "Role filled",
+  job_closed: "Role closed",
+  job_deleted: "Role removed",
+};
+function exitLabel(exit) {
+  return (exit && (PIPELINE_EXIT_LABELS[exit.reason] || "Closed")) || "Closed";
+}
+
 function applicationPipelineBucket(status) {
   if (isRejected(status)) return "rejected";
   if (["shortlisted"].includes(status)) return "shortlisted";
@@ -349,8 +362,11 @@ function StageTrack({ status, stageHistory }) {
 function ApplicationCard({ application, next, now, onOpen, openingId }) {
   const [open, setOpen] = useState(false);
   const trackId = useId();
-  const { job, status, stageHistory = [], offer } = application;
-  const rejected = isRejected(status);
+  const { job, status, stageHistory = [], offer, pipelineExit } = application;
+  // A closed application, whether by a recruiter decision (rejected) or because
+  // the role was removed/filled (pipelineExit): no live progress, no actions.
+  const exited = Boolean(pipelineExit);
+  const rejected = isRejected(status) || exited;
   const pct = Math.round(stageProgress(status) * 100);
   const primary = next?.primary;
 
@@ -378,7 +394,11 @@ function ApplicationCard({ application, next, now, onOpen, openingId }) {
             <p className="truncate text-xs text-slate-500">{job?.company?.name}</p>
           </div>
         </div>
-        <Badge tone={stageTone(status)}>{stageLabel(status)}</Badge>
+        {exited ? (
+          <Badge tone="slate">{exitLabel(pipelineExit)}</Badge>
+        ) : (
+          <Badge tone={stageTone(status)}>{stageLabel(status)}</Badge>
+        )}
       </div>
 
       {!rejected && (
@@ -712,7 +732,9 @@ export default function CandidateDashboard() {
 
   const pct = data.profile.profileCompletionPercent;
   const applications = data.appliedJobs || [];
-  const activeApplications = applications.filter((a) => !isRejected(a.status));
+  // "Open" excludes both a recruiter decision and a role that was removed/filled
+  // (Phase 17 pipelineExit) — a closed application in either case.
+  const activeApplications = applications.filter((a) => !isRejected(a.status) && !a.pipelineExit);
   const interviewCount = (data.upcomingInterviews?.length || 0) + (data.aiInterviewHistory?.length || 0);
   const pipeline = [
     { key: "applied", label: "Applied" },
@@ -722,7 +744,11 @@ export default function CandidateDashboard() {
     { key: "rejected", label: "Rejected" },
   ].map((stage) => ({
     ...stage,
-    count: applications.filter((application) => applicationPipelineBucket(application.status) === stage.key).length,
+    // A role that was removed/filled (pipelineExit) is off the pipeline — it
+    // must not still be counted under "Interview" or "Applied".
+    count: applications.filter(
+      (application) => !application.pipelineExit && applicationPipelineBucket(application.status) === stage.key
+    ).length,
   }));
 
   return (

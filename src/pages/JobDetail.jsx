@@ -1,7 +1,8 @@
 ﻿import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BriefcaseBusiness, CalendarDays, Clock3, GraduationCap, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, CalendarDays, CheckCircle2, Clock3, GraduationCap, MapPin } from "lucide-react";
 import api from "../api/client.js";
+import { accountAuthHeader } from "../auth/accountAuth.js";
 import { Card, Skeleton } from "../components/ui/Card.jsx";
 import Button from "../components/ui/Button.jsx";
 
@@ -60,7 +61,10 @@ export default function JobDetail() {
     let cancelled = false;
     setError("");
     setJob(null);
-    api.get(`/jobs/${id}`).then((res) => {
+    // Signed-in fetch so the payload tells us whether this person already
+    // applied — one application per role, so the Apply button then becomes a
+    // link to the application they already have.
+    api.get(`/jobs/${id}`, { headers: accountAuthHeader() }).then((res) => {
       if (!cancelled) setJob(res.data);
     }).catch((err) => {
       if (cancelled) return;
@@ -97,6 +101,18 @@ export default function JobDetail() {
   }
 
   const applyTo = `/jobs/${job.slug || id}/apply${window.location.search}`;
+  // One application per role. Once this person has applied, the CTA stops being
+  // "Apply" and becomes a way back to the application they already have.
+  const applyCta = ({ size = "lg", className = "" }) =>
+    job.alreadyApplied ? (
+      <Button as={Link} to="/applied-jobs" size={size} variant="outline" className={className}>
+        <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Already applied — track it
+      </Button>
+    ) : (
+      <Button as={Link} to={applyTo} size={size} className={className}>
+        Apply Now <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </Button>
+    );
   const experience = job.minExperienceYears > 0 ? `${job.minExperienceYears}+ years experience` : "No minimum experience";
   const jobType = job.jobType || job.employmentType || "Not specified";
   const salary = job.salary || job.salaryRange || job.compensation;
@@ -130,7 +146,7 @@ export default function JobDetail() {
             <MetaFact icon={CalendarDays}>{postedLabel(job.publishedAt || job.createdAt)}</MetaFact>
           </div>
 
-          <Button as={Link} to={applyTo} size="lg" className="mt-6 w-full px-8 text-[14px] sm:w-auto">Apply Now <ArrowRight className="h-4 w-4" aria-hidden="true" /></Button>
+          {applyCta({ className: "mt-6 w-full px-8 text-[14px] sm:w-auto" })}
         </div>
       </Card>
 
@@ -169,8 +185,12 @@ export default function JobDetail() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3 border-t border-[#E5EBE6] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="max-w-xl text-[13px] leading-5 text-[#64736A]">You'll be asked for your details and a resume. Screening starts as soon as you submit.</p>
-          <Button as={Link} to={applyTo} size="lg" className="w-full px-8 text-[14px] sm:w-auto">Apply Now <ArrowRight className="h-4 w-4" aria-hidden="true" /></Button>
+          <p className="max-w-xl text-[13px] leading-5 text-[#64736A]">
+            {job.alreadyApplied
+              ? "You've already applied to this role. You can only apply once — track it from Applied Jobs."
+              : "You'll be asked for your details and a resume. Screening starts as soon as you submit."}
+          </p>
+          {applyCta({ className: "w-full px-8 text-[14px] sm:w-auto" })}
         </div>
       </Card>
     </div>

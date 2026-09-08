@@ -46,7 +46,6 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword.jsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.jsx"));
 const Account = lazy(() => import("./pages/Account.jsx"));
 const CandidateDashboard = lazy(() => import("./pages/CandidateDashboard.jsx"));
-const CvEvaluation = lazy(() => import("./pages/CvEvaluation.jsx"));
 const SavedJobs = lazy(() => import("./pages/SavedJobs.jsx"));
 const AppliedJobs = lazy(() => import("./pages/AppliedJobs.jsx"));
 const ImprovementPlan = lazy(() => import("./pages/ImprovementPlan.jsx"));
@@ -170,14 +169,6 @@ export default function App() {
                     element={
                       <RequireAccount>
                         <CandidateDashboard />
-                      </RequireAccount>
-                    }
-                  />
-                  <Route
-                    path="/cv-evaluation"
-                    element={
-                      <RequireAccount>
-                        <CvEvaluation />
                       </RequireAccount>
                     }
                   />

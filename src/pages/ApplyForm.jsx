@@ -212,7 +212,9 @@ export default function ApplyForm() {
     let cancelled = false;
     setJobLoadFailed(false);
     api
-      .get(`/jobs/${id}`)
+      // Signed-in fetch so the payload carries `alreadyApplied` — one
+      // application per job per person, so the form must refuse a repeat.
+      .get(`/jobs/${id}`, { headers: accountAuthHeader() })
       .then((res) => {
         if (!cancelled) setJob(res.data);
       })
@@ -492,6 +494,32 @@ export default function ApplyForm() {
   }
 
   if (!job) return <p className="text-sm text-slate-400">Loading…</p>;
+
+  // Already applied to this exact role: the server enforces one application per
+  // job per person (409 + unique index), so there is no form to show — send them
+  // to the application they already have.
+  if (job.alreadyApplied) {
+    return (
+      <Card className="py-10 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E8F2EC] text-[#176B45]">
+          <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
+        </div>
+        <h1 className="font-display text-xl font-bold tracking-tight text-slate-900">You&apos;ve already applied</h1>
+        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+          Your application for {job.title}{job.company?.name ? ` at ${job.company.name}` : ""} is already in. You can only
+          apply to a role once — track this one from your dashboard.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Button as={Link} to="/dashboard" size="sm">
+            Track application
+          </Button>
+          <Button as={Link} to="/" size="sm" variant="outline">
+            Browse other roles
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   if (status === "submitted") {
     return (

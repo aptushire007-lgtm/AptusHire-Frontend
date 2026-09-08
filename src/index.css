@@ -10,9 +10,13 @@
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Lexend", Inter, system-ui, sans-serif;
 
-  --text-xs:              0.75rem;
-  --text-xs--line-height: 1.4;
-  --text-sm:              0.875rem;
+  /* Portal-wide readable scale, bumped +1px so nothing reads as fine print.
+     0.875rem = 14px is the minimum: `text-xs` sits here, and every hard-coded
+     size at or below 14px is floored to it in the utilities layer below.
+     `text-sm` (the default body size) is 15px. */
+  --text-xs:              0.875rem;
+  --text-xs--line-height: 1.5;
+  --text-sm:              0.9375rem;
   --text-sm--line-height: 1.55;
   --text-base:            1rem;
   --text-base--line-height: 1.6;
@@ -214,4 +218,22 @@
   }
   .candidate-side { color-scheme: light; }
   .ring-brand { box-shadow: var(--shadow-glow); }
+
+  /* 14px font-size floor for the whole portal. Every hard-coded size at or
+     below 14px is raised to it; line-height is left to each call site.
+     `text-xs` / `sm:text-xs` / `text-sm` are handled by the tokens above. */
+  .text-\[8px\],
+  .text-\[9px\],
+  .text-\[10px\],
+  .text-\[11px\],
+  .text-\[12px\],
+  .text-\[13px\],
+  .text-\[14px\],
+  .text-\[0\.625rem\],
+  .text-\[0\.6875rem\],
+  .text-\[0\.75rem\],
+  .text-\[0\.8125rem\],
+  .text-\[0\.875rem\] {
+    font-size: 0.875rem;
+  }
 }

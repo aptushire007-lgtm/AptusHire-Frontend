@@ -162,16 +162,19 @@ export function HeroStat({
   return (
     <Card tone={tone} className={`p-7 ${className}`} {...props}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="text-xs font-semibold text-[#64736A]">{label}</p>
+        <p className="text-sm font-medium text-[#64736A]">{label}</p>
         {badge}
       </div>
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
         <div className="min-w-0">
-          <p className="font-display text-4xl font-extrabold tabular-nums tracking-tight text-[#17221C] sm:text-5xl">
+          {/* shadcn stat convention: a restrained 2xl semibold figure, not a
+              display-weight banner number — the label and basis carry meaning,
+              the digit just anchors it. */}
+          <p className="text-2xl font-semibold tabular-nums tracking-tight text-[#17221C]">
             {value}
           </p>
-          <p className="mt-1.5 max-w-prose text-xs text-[#64736A]">{basis}</p>
+          <p className="mt-1.5 max-w-prose text-sm text-[#64736A]">{basis}</p>
           {action && <div className="mt-5">{action}</div>}
         </div>
 
