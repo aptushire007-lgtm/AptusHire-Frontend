@@ -6,10 +6,23 @@ import {
   clearAccountAuth,
 } from "../auth/accountAuth.js";
 
-// Set at BUILD time by Vite (inlined). Production value must be the backend
+// Set at BUILD time by Vite (inlined). Intended production value is the backend
 // origin PLUS the "/api" path, no trailing slash — e.g.
 // https://aptushire-backend-production.up.railway.app/api
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:9000/api";
+function normalizeApiBase(value) {
+  let v = String(value || "").trim();
+  if (!v) return "http://localhost:9000/api";
+  // A relative base ("/api") is a deliberate dev-proxy setup — leave it alone.
+  if (v.startsWith("/")) return v.replace(/\/+$/, "");
+  // A bare hostname pasted from a hosting dashboard ("host.up.railway.app") —
+  // add the scheme so axios treats it as an absolute URL, not a relative path.
+  if (!/^https?:\/\//i.test(v)) v = "https://" + v;
+  v = v.replace(/\/+$/, "");
+  // Origin with no path — the backend mounts every route under "/api".
+  if (/^https?:\/\/[^/]+$/i.test(v)) v += "/api";
+  return v;
+}
+export const baseURL = normalizeApiBase(import.meta.env.VITE_API_URL);
 
 // A production bundle still pointed at localhost means VITE_API_URL was not set
 // when Vercel built it. Every request will then fail (mixed content / refused)

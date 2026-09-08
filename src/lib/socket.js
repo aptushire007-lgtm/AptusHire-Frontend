@@ -1,6 +1,9 @@
 import { io } from "socket.io-client";
+import { baseURL } from "../api/client.js";
 
-const SOCKET_URL = (import.meta.env.VITE_API_URL || "http://localhost:9000/api").replace(/\/api\/?$/, "");
+// Same normalized base as the REST client (scheme added, "/api" ensured), minus
+// the trailing "/api" — socket.io connects to the origin.
+const SOCKET_URL = baseURL.replace(/\/api\/?$/, "");
 
 let socket = null;
 
