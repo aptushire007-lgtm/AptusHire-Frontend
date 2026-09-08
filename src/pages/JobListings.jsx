@@ -170,6 +170,10 @@ export default function JobListings() {
         : Promise.resolve(null),
     ])
       .then(([jobsRes, dashboardRes]) => {
+        // Defensive: /jobs/published returns an array. Anything else (e.g. an
+        // HTML page from a misrouted request) must not reach the .filter() in
+        // filteredJobs — show the error state instead of crashing the page.
+        if (!Array.isArray(jobsRes.data)) throw new Error("Unexpected response for job listings");
         setJobs(jobsRes.data);
         if (dashboardRes) {
           setSavedIds(new Set((dashboardRes.data.savedJobs || []).map((job) => String(job._id || job))));

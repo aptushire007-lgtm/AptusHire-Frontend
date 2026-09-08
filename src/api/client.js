@@ -57,6 +57,33 @@ function authHeaderOf(config) {
   return h.Authorization || h.authorization;
 }
 
+// Guard against a misrouted API call. When VITE_API_URL is wrong (relative, or
+// pointing at the frontend domain), a request for `/api/...` is answered by
+// Vercel's SPA rewrite with `index.html` and HTTP 200. Axios then resolves it,
+// and every page that does `res.data.map(...)` / `.filter(...)` throws a cryptic
+// "x is not a function" with no clue why. Turn that into one clear, rejected
+// error the pages' existing `.catch()` blocks already handle — and log the real
+// cause once. This does not hide a failure; it names it.
+api.interceptors.response.use((response) => {
+  const body = response.data;
+  const looksLikeHtml =
+    typeof body === "string" && /^\s*<(?:!doctype|html)[\s>]/i.test(body);
+  if (looksLikeHtml) {
+    console.error(
+      `[api] ${response.config?.url} returned an HTML page, not JSON. VITE_API_URL ` +
+        `is misconfigured — it must be the absolute backend origin + "/api" ` +
+        `(current base: "${baseURL}"). Redeploy the frontend after fixing it.`
+    );
+    return Promise.reject(
+      Object.assign(new Error("The API returned an HTML page instead of data (VITE_API_URL is misconfigured)."), {
+        response,
+        isApiMisroute: true,
+      })
+    );
+  }
+  return response;
+});
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
