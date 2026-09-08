@@ -6,7 +6,21 @@ import {
   clearAccountAuth,
 } from "../auth/accountAuth.js";
 
+// Set at BUILD time by Vite (inlined). Production value must be the backend
+// origin PLUS the "/api" path, no trailing slash — e.g.
+// https://aptushire-backend-production.up.railway.app/api
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:9000/api";
+
+// A production bundle still pointed at localhost means VITE_API_URL was not set
+// when Vercel built it. Every request will then fail (mixed content / refused)
+// and the app will look broken for no obvious reason — so say it loudly. This
+// only reports the misconfiguration; it does not change or hide any behaviour.
+if (import.meta.env.PROD && /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:|\/|$)/.test(baseURL)) {
+  console.error(
+    `[api] VITE_API_URL is not configured for this build — using fallback "${baseURL}". ` +
+      `Set VITE_API_URL to the backend origin + "/api" in the Vercel project settings and redeploy.`
+  );
+}
 
 const api = axios.create({ baseURL });
 
