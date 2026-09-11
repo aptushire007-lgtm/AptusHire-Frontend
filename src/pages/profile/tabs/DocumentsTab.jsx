@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import {
   FileCheck,
   UploadCloud,
@@ -35,7 +35,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
       formData.append("docNumber", docNumber);
 
       await api.post("/candidate-dashboard/profile/documents/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data", ...accountAuthHeader() },
+        headers: accountAuthHeader(),
       });
 
       setSuccess("Document uploaded and verified via Aptus AI OCR.");

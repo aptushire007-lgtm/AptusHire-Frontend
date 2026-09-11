@@ -88,7 +88,7 @@ export default function ResumeManager() {
       setUploading(true);
       setError("");
       const res = await api.post("/candidate-dashboard/resumes/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data", ...accountAuthHeader() },
+        headers: accountAuthHeader(),
       });
 
       const uploaded = res.data;

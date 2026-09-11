@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bot,
@@ -885,7 +885,7 @@ export default function InterviewRoom() {
           form.append("audio", result.audioBlob, `answer.${ext}`);
           api
             .post(`/interview-portal/interview/answer/${turnIndex}/audio`, form, {
-              headers: { ...authHeader(), "Content-Type": "multipart/form-data" },
+              headers: authHeader(),
             })
             .catch(() => {});
         }

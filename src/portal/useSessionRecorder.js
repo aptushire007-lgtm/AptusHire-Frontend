@@ -164,7 +164,7 @@ export function useSessionRecorder({ getStream, enabled, consented }) {
 
       const reqPromise = api
         .post("/interview-portal/recording/chunk", form, {
-          headers: { ...authHeader(), "Content-Type": "multipart/form-data" },
+          headers: authHeader(),
         })
         .catch((err) => {
           const status = err?.response?.status;

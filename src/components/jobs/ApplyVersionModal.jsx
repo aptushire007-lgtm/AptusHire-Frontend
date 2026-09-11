@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   Star,
@@ -14,6 +14,7 @@ import {
 import api from "../../api/client";
 import { accountAuthHeader } from "../../auth/accountAuth";
 import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
 
 export default function ApplyVersionModal({
   job,
@@ -31,7 +32,16 @@ export default function ApplyVersionModal({
   const [consentData, setConsentData] = useState(true);
 
   useEffect(() => {
-    if (!isOpen || !job?._id) return;
+    if (!isOpen || !job?._id) {
+      // Reset state when modal closes so stale data doesn't flash on reopen
+      setVersionsData([]);
+      setSelectedVersionId(null);
+      setError("");
+      setLoading(true);
+      return;
+    }
+
+    const controller = new AbortController();
 
     async function loadVersionScores() {
       try {
@@ -39,6 +49,7 @@ export default function ApplyVersionModal({
         setError("");
         const res = await api.get(`/candidate-dashboard/jobs/${job.slug || job._id}/match-versions`, {
           headers: accountAuthHeader(),
+          signal: controller.signal,
         });
         const versions = res.data.versions || [];
         setVersionsData(versions);
@@ -54,6 +65,7 @@ export default function ApplyVersionModal({
           setSelectedVersionId(versions[0]._id);
         }
       } catch (err) {
+        if (err.name === "CanceledError" || err.name === "AbortError") return;
         setError(err?.response?.data?.error || "Failed to load candidate resume versions");
       } finally {
         setLoading(false);
@@ -61,6 +73,7 @@ export default function ApplyVersionModal({
     }
 
     loadVersionScores();
+    return () => controller.abort();
   }, [isOpen, job]);
 
   if (!isOpen) return null;
@@ -92,7 +105,7 @@ export default function ApplyVersionModal({
       if (params.get("campaign")) formData.append("campaign", params.get("campaign"));
 
       const res = await api.post(`/jobs/${job.slug || job._id}/apply`, formData, {
-        headers: { "Content-Type": "multipart/form-data", ...accountAuthHeader() },
+        headers: accountAuthHeader(),
       });
 
       if (onSuccess) {
@@ -107,12 +120,20 @@ export default function ApplyVersionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F8FAF9]-deep/80 p-4 backdrop-blur-xs">
-      <div className="relative w-full max-w-xl rounded-3xl border border-[#E5EBE7] bg-white p-6 shadow-lift sm:p-7">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      showClose={false}
+      size="xl"
+      label={`Apply for ${job.title}`}
+      panelClassName="rounded-3xl border border-[#E5EBE7] bg-white p-6 shadow-lift sm:p-7"
+    >
+      <div className="relative w-full">
         <button
+          type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-5 top-5 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:text-slate-200"
+          className="absolute right-0 top-0 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
         >
           <X className="h-4 w-4" />
         </button>
@@ -261,6 +282,6 @@ export default function ApplyVersionModal({
           </form>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
