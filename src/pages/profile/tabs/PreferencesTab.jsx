@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Bell, ShieldCheck, Download, CheckCircle2, Globe, MessageSquare, Loader2 } from "lucide-react";
 import api from "../../../api/client";
 import { accountAuthHeader } from "../../../auth/accountAuth";
@@ -101,7 +101,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
         {/* Notifications & Channels */}
         <div className="rounded-2xl border border-[#C7DDD1] bg-white p-5 shadow-xs dark:border-[#C7DDD1] dark:bg-white">
           <h3 className="font-display text-base font-bold text-[#176B45] dark:text-[#176B45]">Communication Channels</h3>
-          <div className="mt-3 space-y-3 divide-y divide-[#EAF9E1] text-sm dark:divide-[#EAF9E1]">
+          <div className="mt-3 space-y-3 divide-y divide-[#F4FDE8] text-sm dark:divide-[#F4FDE8]">
             <label className="flex items-center justify-between pt-2 cursor-pointer">
               <div>
                 <p className="font-bold text-[#176B45] dark:text-[#176B45]">Recommended Job Alerts</p>
@@ -111,7 +111,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
                 type="checkbox"
                 checked={preferences.jobAlerts}
                 onChange={() => handleToggle("jobAlerts")}
-                className="h-4 w-4 rounded text-[#176B45] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#176B45] accent-[#0E3B2E] dark:accent-[#0E3B2E]"
               />
             </label>
 
@@ -124,7 +124,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
                 type="checkbox"
                 checked={preferences.whatsappUpdates}
                 onChange={() => handleToggle("whatsappUpdates")}
-                className="h-4 w-4 rounded text-[#176B45] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#176B45] accent-[#0E3B2E] dark:accent-[#0E3B2E]"
               />
             </label>
 
@@ -137,7 +137,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
                 type="checkbox"
                 checked={preferences.smsUpdates}
                 onChange={() => handleToggle("smsUpdates")}
-                className="h-4 w-4 rounded text-[#176B45] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#176B45] accent-[#0E3B2E] dark:accent-[#0E3B2E]"
               />
             </label>
           </div>
@@ -151,7 +151,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
       </form>
 
       {/* GDPR / DPDP Download My Data Box */}
-      <section className="rounded-3xl border border-[#2E4F48] bg-[#176B45] p-6 text-white shadow-soft">
+      <section className="rounded-3xl border border-[#24332E] bg-[#176B45] p-6 text-white shadow-soft">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2">
@@ -187,3 +187,4 @@ export default function PreferencesTab({ profile, onRefresh }) {
     </div>
   );
 }
+

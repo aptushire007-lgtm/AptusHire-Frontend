@@ -1,4 +1,4 @@
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { Activity } from "lucide-react";
 
 export default function ActivityHeatmap({ applications = [], interviews = [] }) {
@@ -38,8 +38,8 @@ export default function ActivityHeatmap({ applications = [], interviews = [] }) 
 
   const getIntensityClass = (count) => {
     if (count === 0) return "bg-[#E8F2EC]";
-    if (count === 1) return "bg-[#D2ECC9]";
-    if (count === 2) return "bg-[#5A7B71]";
+    if (count === 1) return "bg-[#E4F8C6]";
+    if (count === 2) return "bg-[#5B6B63]";
     return "bg-[#176B45]";
   };
 
@@ -55,8 +55,8 @@ export default function ActivityHeatmap({ applications = [], interviews = [] }) 
         <div className="flex items-center gap-1.5 text-xs text-[#64736A]">
           <span>Less</span>
           <span className="h-2.5 w-2.5 rounded-xs bg-[#E8F2EC]" />
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#D2ECC9]" />
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#5A7B71]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-[#E4F8C6]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-[#5B6B63]" />
           <span className="h-2.5 w-2.5 rounded-xs bg-[#176B45]" />
           <span>More</span>
         </div>
@@ -80,3 +80,4 @@ export default function ActivityHeatmap({ applications = [], interviews = [] }) 
     </div>
   );
 }
+

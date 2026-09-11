@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FileText,
   UploadCloud,
@@ -425,7 +425,7 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
                   {version.label}
                 </h3>
                 {version.isDefault && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#C1EBAD] px-2 py-0.5 text-[11px] font-extrabold text-[#176B45] shadow-2xs">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#D4F056] px-2 py-0.5 text-[11px] font-extrabold text-[#176B45] shadow-2xs">
                     <Star className="h-3 w-3 fill-current" /> Default
                   </span>
                 )}
@@ -525,3 +525,4 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
     </div>
   );
 }
+

@@ -21,8 +21,8 @@ import { createRequire } from "node:module";
 import * as client from "../src/portal/endpointing.js";
 
 const require = createRequire(import.meta.url);
-const server = require("../../backend/utils/endpointing.js");
-const finishIntent = require("../../backend/utils/finishIntent.js");
+const server = require("../../AptusHire-Backend/utils/endpointing.js");
+const finishIntent = require("../../AptusHire-Backend/utils/finishIntent.js");
 
 // A falling envelope (voice trailing off), a flat one (stopped abruptly,
 // mid-thought), and a rising one (making another point) — the same three shapes

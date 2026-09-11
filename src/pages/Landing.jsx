@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -75,7 +75,7 @@ export default function Landing() {
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-[#E5EBE7] bg-white">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-[radial-gradient(ellipse_at_bottom,#D2ECC9_0%,transparent_70%)] opacity-70" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-[radial-gradient(ellipse_at_bottom,#E4F8C6_0%,transparent_70%)] opacity-70" />
         <div className="relative mx-auto max-w-3xl px-5 py-24 text-center sm:px-8">
           <motion.div initial="hidden" animate="show" variants={fadeUp}>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C7DDD1] bg-[#E8F2EC] px-3.5 py-1 text-xs font-semibold text-[#176B45]">
@@ -149,7 +149,7 @@ export default function Landing() {
                 </div>
                 <p className="text-[13px] font-semibold text-[#17221C] lg:mt-1">{step}</p>
                 {i < FLOW.length - 1 && (
-                  <div className="hidden h-px flex-1 bg-gradient-to-r from-[#C1EBAD] to-[#EAF9E1] lg:block" />
+                  <div className="hidden h-px flex-1 bg-gradient-to-r from-[#D4F056] to-[#F4FDE8] lg:block" />
                 )}
               </motion.div>
             ))}
@@ -237,3 +237,4 @@ export default function Landing() {
     </div>
   );
 }
+

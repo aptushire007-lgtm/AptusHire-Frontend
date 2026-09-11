@@ -43,21 +43,35 @@
   --color-accent-gold-mid:     #D4B877;
 
   /* GREEN SCALE */
-  --color-brand-50:  #F1F7F3;
-  --color-brand-100: #E8F2EC;
-  --color-brand-200: #C7DDD1;
-  --color-brand-300: #9BBFAD;
-  --color-brand-400: #5F9475;
-  --color-brand-500: #176B45;
-  --color-brand-600: #125638;
-  --color-brand-700: #0E4028;
-  --color-brand-800: #092B1A;
-  --color-brand-900: #05180E;
-  --color-brand-950: #020D07;
+  --color-brand-50:  #F4FDE8;
+  --color-brand-100: #E4F8C6;
+  --color-brand-200: #D4F056;
+  --color-brand-300: #B6E84A;
+  --color-brand-400: #7CDE4A;
+  --color-brand-500: #2FBE62;
+  --color-brand-600: #1A9A4F;
+  --color-brand-700: #147A40;
+  --color-brand-800: #0E3B2E;
+  --color-brand-900: #0C1F1B;
+  --color-brand-950: #081210;
+
+  --color-accent-50: #E8FBF5;
+  --color-accent-100: #C7F4E6;
+  --color-accent-200: #8BE8CB;
+  --color-accent-300: #4DD6B0;
+  --color-accent-400: #12B98A;
+  --color-accent-500: #0E9A74;
+  --color-accent-600: #0C7D5F;
+  --color-accent-700: #0A624B;
+  --color-accent-800: #084538;
+  --color-accent-900: #062E26;
+  --color-accent-950: #041F1A;
 
   /* SURFACES */
-  --color-canvas:       #F8FAF9;
-  --color-canvas-deep:  #EFF4F1;
+  --color-canvas:       #FAFCF8;
+  --color-canvas-deep:  #F3F7F1;
+  --color-hairline:     #E3EBE4;
+  --color-rule:         #F0F4EF;
   --color-background:   #F8FAF9;
   --color-surface:      #FFFFFF;
   --color-surface-alt:  #FAFCFB;

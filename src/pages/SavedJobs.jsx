@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bookmark, Briefcase, Clock, MapPin, Search, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../api/client.js";
@@ -17,10 +17,10 @@ function SavedJobCard({ job, onUnsave, saving }) {
       <div className="flex items-start gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E8F2EC] text-sm font-bold text-[#176B45]">{companyInitials(job.company?.name)}</span>
         <div className="min-w-0 flex-1">
-          <Link to={to} className="block truncate text-[15px] font-semibold text-[#17221C] hover:text-[#176B45] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5A7B71]">{job.title || "Open position"}</Link>
+          <Link to={to} className="block truncate text-[15px] font-semibold text-[#17221C] hover:text-[#176B45] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B6B63]">{job.title || "Open position"}</Link>
           <p className="mt-1 truncate text-sm text-[#176B45]">{job.company?.name || "Company unavailable"}{job.department ? ` · ${job.department}` : ""}</p>
         </div>
-        <button type="button" onClick={() => onUnsave(job)} disabled={saving} aria-label={`Unsave ${job.title || "job"}`} aria-pressed="true" className="tap-target inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#C7DDD1] bg-[#E8F2EC] text-[#176B45] transition-colors hover:bg-[#D2ECC9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-wait disabled:opacity-60">
+        <button type="button" onClick={() => onUnsave(job)} disabled={saving} aria-label={`Unsave ${job.title || "job"}`} aria-pressed="true" className="tap-target inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#C7DDD1] bg-[#E8F2EC] text-[#176B45] transition-colors hover:bg-[#E4F8C6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-wait disabled:opacity-60">
           <Bookmark className="h-4 w-4 fill-current" aria-hidden="true" />
         </button>
       </div>
@@ -73,7 +73,7 @@ export default function SavedJobs() {
 
   return (
     <div className="min-h-[calc(100vh-7rem)] w-full space-y-6 pb-10">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64736A]">Your activity</p><h1 className="mt-2 text-2xl font-bold text-[#17221C]">Saved Jobs</h1><p className="mt-2 text-sm text-[#64736A]">Roles you're considering for your next application.</p></div><label className="flex min-h-11 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-4 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E] focus-within:ring-2 focus-within:ring-[#EAF9E1]"><Search className="h-4 w-4" /><span className="sr-only">Search saved jobs</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-32 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-40" /></label></div>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64736A]">Your activity</p><h1 className="mt-2 text-2xl font-bold text-[#17221C]">Saved Jobs</h1><p className="mt-2 text-sm text-[#64736A]">Roles you're considering for your next application.</p></div><label className="flex min-h-11 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-4 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E] focus-within:ring-2 focus-within:ring-[#F4FDE8]"><Search className="h-4 w-4" /><span className="sr-only">Search saved jobs</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-32 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-40" /></label></div>
       {error && <div role="alert" className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700"><Trash2 className="h-4 w-4" />{error}</div>}
       {loading && <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map((item) => <Card key={item}><Skeleton className="h-11 w-11" /><Skeleton className="mt-4 h-5 w-2/3" /><Skeleton className="mt-3 h-4 w-1/2" /><Skeleton className="mt-6 h-10 w-full" /></Card>)}</div>}
       {!loading && jobs.length === 0 && <EmptyState icon={Bookmark} title="No saved jobs yet" description="Bookmark roles you want to revisit and they'll appear here." action={<Button as={Link} to="/" size="sm">Find jobs</Button>} />}

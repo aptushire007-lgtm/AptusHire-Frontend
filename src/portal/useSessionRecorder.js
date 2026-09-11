@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import api from "../api/client.js";
 import { authHeader } from "./portalAuth.js";
+import { MIC_CONSTRAINTS } from "./audioIsolation.js";
 
 /**
- * Full-session interview recording, captured in this browser.
+ * Full-session interview recording — video AND the candidate's voice — captured in this browser.
  *
  * Replaces LiveKit Egress (docs/INTERVIEW-RECORDING-MEDIARECORDER-PLAN.md). Egress recorded
  * server-side and could only be completed by LiveKit Cloud calling a webhook we do not control,
@@ -28,6 +29,10 @@ import { authHeader } from "./portalAuth.js";
  *     A second getUserMedia video request fails outright on some browsers/OSes, and more to the
  *     point: if the candidate did not grant a camera for monitoring, they have not granted one to
  *     be filmed.
+ *   - It DOES open its own microphone, and that asymmetry is deliberate — see WHY THE MIC IS OURS.
+ *     It is opened only under the same enabled+consented gate as everything else here, and the
+ *     consent it runs under says "video and audio" in as many words (PreInterviewCheck's recording
+ *     clause), so this is the capture that clause promised, not a widening of it.
  *   - It never starts without `consented` AND `enabled`. Both come from the server; the browser
  *     never opts itself in. The chunk endpoint re-checks consent anyway (defence in depth).
  *   - It never blocks or slows the interview. Every upload is fire-and-forget with no retry, the
@@ -35,6 +40,40 @@ import { authHeader } from "./portalAuth.js";
  *     review copy, never that the candidate is held up or shown an error about it.
  *   - It never holds the interview in memory. `timeslice` means each chunk is handed over and
  *     released as it is produced; nothing accumulates across the session.
+ */
+
+/*
+ * WHY THE MIC IS OURS AND THE CAMERA IS NOT
+ *
+ * The stream proctoring holds is video-only — its getUserMedia asks for `{ video }` and nothing
+ * else, because the voice hooks manage the microphone separately. Recording that stream and
+ * setting `audioBitsPerSecond` produced exactly what you would expect and nobody checked: a silent
+ * video of every interview. The consent the candidate had ticked said "video and audio of this
+ * session being recorded", so the gap was not a missing nice-to-have, it was the product failing a
+ * claim it made to the candidate at the door.
+ *
+ * The fix cannot be "borrow the interview's mic track", because neither owner will lend one that
+ * lives long enough:
+ *
+ *   - the LiveKit path publishes its mic through the SDK, which is free to replace or restart the
+ *     underlying track across a reconnect;
+ *   - the Deepgram fallback opens a mic per turn and STOPS its tracks between turns.
+ *
+ * MediaRecorder binds its tracks once at start() — a track that ends mid-recording is silence for
+ * the remainder, and a replacement track added to the MediaStream afterwards is ignored. Borrowing
+ * would therefore have recorded the first answer and nothing after it, which is worse than silence
+ * because it looks like it worked. So this hook opens one microphone of its own and holds it for
+ * the whole session, and the recording's lifetime stops depending on how either voice engine
+ * happens to manage its own.
+ *
+ * A second concurrent capture of the same mic is allowed by every browser we support and does not
+ * re-prompt (permission was granted at pre-check). Same constraints as the interview's own mic
+ * (MIC_CONSTRAINTS) so the review copy sounds like what the transcript was made from, echo
+ * cancellation included — which also means the recording is the CANDIDATE's side, with the
+ * interviewer's questions carried by the transcript next to it.
+ *
+ * If the mic cannot be opened, the recording still runs, video-only. A silent recording is a poor
+ * review copy; no recording at all is none.
  */
 
 // One chunk every 45 seconds. Long enough that a 40-minute interview is ~53 requests rather than
@@ -66,6 +105,25 @@ function pickMimeType() {
   return null;
 }
 
+// The mic this recording is made from. Opened here rather than borrowed from the interview — see
+// WHY THE MIC IS OURS. Resolves to null on any failure (permission revoked mid-session, device
+// yanked, browser refusing a second capture); the caller then records video-only rather than not
+// at all.
+async function openMicTrack() {
+  if (!navigator.mediaDevices?.getUserMedia) return null;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(MIC_CONSTRAINTS);
+    const track = stream.getAudioTracks()[0] || null;
+    if (!track) {
+      stream.getTracks().forEach((t) => t.stop());
+      return null;
+    }
+    return track;
+  } catch {
+    return null;
+  }
+}
+
 export function useSessionRecorder({ getStream, enabled, consented }) {
   const recorderRef = useRef(null);
   const seqRef = useRef(0);
@@ -78,6 +136,19 @@ export function useSessionRecorder({ getStream, enabled, consented }) {
   // exactly the CPU and battery the interview needs. Same reasoning as `shared.exhausted` in the
   // evidence pipeline.
   const stoppedByServerRef = useRef(false);
+  const pendingUploadsRef = useRef(new Set());
+  // The microphone track this hook opened, kept so stop() can release the device. Nothing else may
+  // stop it: the interview's own voice engines must never find their mic closed by the recorder.
+  const micTrackRef = useRef(null);
+  // start() is async now (it awaits the mic), and its callers fire it from effects that can run
+  // twice. Without this a second call can slip in while the first is still awaiting getUserMedia
+  // and open a second recorder on the same stream.
+  const startingRef = useRef(false);
+  // stop() has been called, so start() must not go on to open a recorder even if it was already
+  // in flight. The awaited getUserMedia opened a window that did not exist when start() was
+  // synchronous: an interview that ends (or a tab that closes) while the mic dialog is resolving
+  // would otherwise come back and begin recording after the session was over.
+  const stopRequestedRef = useRef(false);
 
   const uploadChunk = useCallback(
     (blob, seq, durationMs) => {
@@ -91,7 +162,7 @@ export function useSessionRecorder({ getStream, enabled, consented }) {
       // began, which is wrong by however long the camera and the recorder took to come up.
       if (seq === 0 && startedAtRef.current) form.append("startedAt", new Date(startedAtRef.current).toISOString());
 
-      api
+      const reqPromise = api
         .post("/interview-portal/recording/chunk", form, {
           headers: { ...authHeader(), "Content-Type": "multipart/form-data" },
         })
@@ -105,13 +176,17 @@ export function useSessionRecorder({ getStream, enabled, consented }) {
           }
           // Otherwise: swallowed on purpose. A transient network failure costs this timeslice and
           // nothing else — the next one is 45 seconds away and the interview never sees it.
+        })
+        .finally(() => {
+          pendingUploadsRef.current.delete(reqPromise);
         });
+      pendingUploadsRef.current.add(reqPromise);
     },
     []
   );
 
-  const start = useCallback(() => {
-    if (runningRef.current || stoppedByServerRef.current) return;
+  const start = useCallback(async () => {
+    if (runningRef.current || startingRef.current || stoppedByServerRef.current || stopRequestedRef.current) return;
     if (!enabled || !consented) return;
     if (!window.MediaRecorder) return;
     const stream = getStream?.();
@@ -121,16 +196,44 @@ export function useSessionRecorder({ getStream, enabled, consented }) {
     const mimeType = pickMimeType();
     if (!mimeType) return;
 
+    startingRef.current = true;
+    let micTrack = null;
+    try {
+      micTrack = await openMicTrack();
+    } finally {
+      startingRef.current = false;
+    }
+
+    // Awaiting the mic gave the rest of the app a turn: the interview may have ended, the candidate
+    // may have closed the tab, or stop() may have run. Re-check before committing to a recorder,
+    // and hand the device straight back if so.
+    if (stopRequestedRef.current || stoppedByServerRef.current || runningRef.current || !enabled || !consented) {
+      micTrack?.stop();
+      return;
+    }
+    const videoTrack = getStream?.()?.getVideoTracks?.()[0];
+    if (!videoTrack) {
+      micTrack?.stop();
+      return;
+    }
+
+    // A stream of our own composition rather than proctoring's: adding our mic to THEIR stream
+    // would mutate an object two other consumers (the vision loop, the LiveKit publish) are holding
+    // and would outlive this recording. Ours is a view over the same video track plus our audio.
+    const recorded = new MediaStream(micTrack ? [videoTrack, micTrack] : [videoTrack]);
+
     let recorder;
     try {
-      recorder = new MediaRecorder(stream, {
+      recorder = new MediaRecorder(recorded, {
         mimeType,
         videoBitsPerSecond: VIDEO_BITS_PER_SECOND,
         audioBitsPerSecond: AUDIO_BITS_PER_SECOND,
       });
     } catch {
+      micTrack?.stop();
       return; // unsupported combination → this feature simply never runs for this candidate
     }
+    micTrackRef.current = micTrack;
 
     startedAtRef.current = Date.now();
     lastChunkAtRef.current = startedAtRef.current;
@@ -151,11 +254,28 @@ export function useSessionRecorder({ getStream, enabled, consented }) {
       // that will never emit again — the chunks already uploaded still assemble into a partial
       // recording, and the transcript is the record regardless.
       runningRef.current = false;
+      // Terminal for capture, not just paused. A restart would begin its sequence at 0 again and
+      // every chunk would collide with one the server already holds (409, dropped), so the second
+      // recorder would burn the candidate's CPU and uplink producing nothing. Closing the door also
+      // means the microphone this hook opened is released here rather than held, unused, for the
+      // rest of the interview.
+      stopRequestedRef.current = true;
+      try {
+        micTrackRef.current?.stop();
+      } catch {
+        /* device already gone */
+      }
+      micTrackRef.current = null;
     };
 
     try {
       recorder.start(TIMESLICE_MS);
     } catch {
+      // Never became a running recorder, so the unmount cleanup (which only fires on
+      // `runningRef`) will not release the microphone — do it here or it stays open for the rest
+      // of the interview with nothing reading it.
+      micTrack?.stop();
+      micTrackRef.current = null;
       return;
     }
     recorderRef.current = recorder;
@@ -168,8 +288,9 @@ export function useSessionRecorder({ getStream, enabled, consented }) {
   // Idempotent on both sides — `finalizedRef` here, and the server's completed-check — because
   // three callers can race: the interview completing, the tab closing, and a candidate reloading.
   const stop = useCallback(
-    ({ beacon = false } = {}) => {
+    async ({ beacon = false } = {}) => {
       const recorder = recorderRef.current;
+      stopRequestedRef.current = true;
       runningRef.current = false;
       if (recorder && recorder.state !== "inactive") {
         try {
@@ -183,22 +304,47 @@ export function useSessionRecorder({ getStream, enabled, consented }) {
         }
       }
       recorderRef.current = null;
+      // Release our microphone — and ONLY ours. The video track belongs to proctoring, which is
+      // still using it and stops it on its own teardown. Left open, this track holds the mic (and
+      // the browser's recording indicator) for as long as the tab lives.
+      try {
+        micTrackRef.current?.stop();
+      } catch {
+        /* device already gone */
+      }
+      micTrackRef.current = null;
       if (finalizedRef.current || stoppedByServerRef.current || !startedAtRef.current) return;
       finalizedRef.current = true;
 
       const durationMs = Date.now() - startedAtRef.current;
       if (beacon) {
-        // No auth header is possible on a beacon, so this is best-effort and expected to fail on
-        // a token-guarded route. It is kept because when the tab simply closes there is nothing
-        // else to try, and the server's own state (chunks present, no finalize) is already the
-        // honest one: "recording", which now means what it says rather than a permanently stuck row.
+        // Authenticated fetch with keepalive: true so the request carries the JWT and outlives document unload
         try {
-          navigator.sendBeacon?.("/api/interview-portal/recording/finalize");
+          const auth = authHeader();
+          const baseURL = api.defaults.baseURL || "http://localhost:9000/api";
+          if (auth.Authorization) {
+            fetch(`${baseURL}/interview-portal/recording/finalize`, {
+              method: "POST",
+              headers: { ...auth, "Content-Type": "application/json" },
+              body: JSON.stringify({ durationMs }),
+              keepalive: true,
+            }).catch(() => {});
+          }
         } catch {
           /* best effort */
         }
         return;
       }
+
+      // Wait for any in-flight chunk uploads (including the requestData flush) before sending finalize
+      try {
+        if (pendingUploadsRef.current.size > 0) {
+          await Promise.allSettled(Array.from(pendingUploadsRef.current));
+        }
+      } catch {
+        /* best effort */
+      }
+
       api
         .post("/interview-portal/recording/finalize", { durationMs }, { headers: authHeader() })
         .catch(() => {

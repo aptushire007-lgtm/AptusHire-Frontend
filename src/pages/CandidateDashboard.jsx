@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback, useId, useMemo, useRef } from "react";
+import { useEffect, useState, useCallback, useId, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -760,7 +760,7 @@ export default function CandidateDashboard() {
           <p className="mt-2 text-sm text-[#64736A]">Here's your hiring progress.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link to="/profile" className="rounded-[9px] border border-[#C7DDD1] bg-[#E8F2EC] px-3 py-2 text-xs font-semibold text-[#176B45] hover:bg-[#D2ECC9]">Profile completion: {pct}%</Link>
+          <Link to="/profile" className="rounded-[9px] border border-[#C7DDD1] bg-[#E8F2EC] px-3 py-2 text-xs font-semibold text-[#176B45] hover:bg-[#E4F8C6]">Profile completion: {pct}%</Link>
           <button onClick={handleDownloadData} disabled={exporting} className="inline-flex items-center gap-2 rounded-[9px] bg-[#176B45] px-4 py-2 text-xs font-semibold text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors hover:bg-[#176B45]-dark"><Download className="h-4 w-4" /><span>{exporting ? "Exporting…" : "Download My Data"}</span></button>
         </div>
       </section>
@@ -1012,3 +1012,4 @@ export default function CandidateDashboard() {
     </div>
   );
 }
+

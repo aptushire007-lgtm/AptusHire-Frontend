@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Briefcase, Check, CircleAlert, MoreVertical, Search, X } from "lucide-react";
 import api from "../api/client.js";
@@ -49,7 +49,7 @@ function ProgressTracker({ status }) {
           const active = !rejected && current === index;
           return (
             <div key={stage.key} className="flex min-w-0 flex-1 items-center">
-              <div className={`relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold ${complete ? "border-[#214740] bg-[#176B45] text-white" : "border-[#E5EBE7] bg-white text-[#64736A]"}`}>
+              <div className={`relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold ${complete ? "border-[#0E3B2E] bg-[#176B45] text-white" : "border-[#E5EBE7] bg-white text-[#64736A]"}`}>
                 {complete ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : index + 1}
                 {active && <span className="absolute -inset-1 rounded-full border border-[#C7DDD1]" aria-hidden="true" />}
               </div>
@@ -115,7 +115,7 @@ function ApplicationTimeline({ status, stageHistory = [] }) {
           return (
             <li key={event.key} className="relative flex gap-3 pb-5 last:pb-0">
               {index < events.length - 1 && <span className={`absolute left-[9px] top-5 h-full w-px ${completed ? "bg-[#176B45]" : "bg-border"}`} aria-hidden="true" />}
-              <span className={`relative z-10 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-bold ${completed ? "border-[#214740] bg-[#176B45] text-white" : active ? "border-[#214740] bg-[#E8F2EC] text-[#176B45]" : "border-[#E5EBE7] bg-white text-[#64736A]"}`}>
+              <span className={`relative z-10 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-bold ${completed ? "border-[#0E3B2E] bg-[#176B45] text-white" : active ? "border-[#0E3B2E] bg-[#E8F2EC] text-[#176B45]" : "border-[#E5EBE7] bg-white text-[#64736A]"}`}>
                 {completed ? <Check className="h-3 w-3" aria-hidden="true" /> : active ? "●" : "○"}
               </span>
               <div className="min-w-0 flex-1">
@@ -233,7 +233,7 @@ export default function AppliedJobs() {
 
   return (
     <div className="mx-auto max-w-[1120px] space-y-5 pb-10">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64736A]">Your activity</p><h1 className="mt-2 text-2xl font-bold text-[#17221C]">Applied Jobs</h1><p className="mt-2 text-sm text-[#64736A]">A list of the jobs you've applied to</p></div><label className="flex min-h-11 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-4 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E] focus-within:ring-2 focus-within:ring-[#EAF9E1]"><Search className="h-4 w-4" /><span className="sr-only">Search applications</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-32 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-40" /></label></div>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64736A]">Your activity</p><h1 className="mt-2 text-2xl font-bold text-[#17221C]">Applied Jobs</h1><p className="mt-2 text-sm text-[#64736A]">A list of the jobs you've applied to</p></div><label className="flex min-h-11 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-4 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E] focus-within:ring-2 focus-within:ring-[#F4FDE8]"><Search className="h-4 w-4" /><span className="sr-only">Search applications</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-32 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-40" /></label></div>
       {state === "loading" && <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map((item) => <Card key={item}><Skeleton className="h-5 w-2/3" /><Skeleton className="mt-3 h-4 w-1/3" /><Skeleton className="mt-6 h-12 w-full" /><Skeleton className="mt-5 h-10 w-32" /></Card>)}</div>}
       {state === "error" && <Card role="alert" className="border-red-200 bg-red-50"><div className="flex items-start gap-3"><CircleAlert className="h-5 w-5 shrink-0 text-red-600" /><div><p className="text-sm font-semibold text-red-700">{error}</p><Button size="sm" variant="outline" className="mt-4" onClick={() => window.location.reload()}>Try again</Button></div></div></Card>}
       {state === "ready" && applications.length === 0 && <EmptyState icon={Briefcase} title="No applications yet" description="When you apply for a role, its progress will appear here." action={<Button as={Link} to="/" size="sm">Find jobs</Button>} />}
@@ -242,3 +242,4 @@ export default function AppliedJobs() {
     </div>
   );
 }
+
