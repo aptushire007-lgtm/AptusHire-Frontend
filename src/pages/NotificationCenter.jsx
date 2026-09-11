@@ -43,7 +43,7 @@ function timeAgo(date) {
 }
 
 export default function NotificationCenter() {
-  const { refreshUnreadCount, refreshRecent } = useNotifications() || {};
+  const { refreshUnreadCount, markRead: markNotificationRead, markAllRead: markAllNotificationsRead } = useNotifications() || {};
   const [data, setData] = useState(null);
   const [page, setPage] = useState(1);
   const [type, setType] = useState("");
@@ -69,24 +69,23 @@ export default function NotificationCenter() {
   }, [load]);
 
   async function markRead(id) {
-    await api.patch(`/notifications/${id}/read`, {}, { headers: accountAuthHeader() });
+    if (markNotificationRead) await markNotificationRead(id);
+    else await api.patch(`/notifications/${id}/read`, {}, { headers: accountAuthHeader() });
     await load();
-    refreshUnreadCount?.();
-    refreshRecent?.();
+    if (!markNotificationRead) refreshUnreadCount?.();
   }
 
   async function markAllRead() {
-    await api.patch("/notifications/read-all", {}, { headers: accountAuthHeader() });
+    if (markAllNotificationsRead) await markAllNotificationsRead();
+    else await api.patch("/notifications/read-all", {}, { headers: accountAuthHeader() });
     await load();
-    refreshUnreadCount?.();
-    refreshRecent?.();
+    if (!markAllNotificationsRead) refreshUnreadCount?.();
   }
 
   async function remove(id) {
     await api.delete(`/notifications/${id}`, { headers: accountAuthHeader() });
     await load();
     refreshUnreadCount?.();
-    refreshRecent?.();
   }
 
   return (

@@ -86,15 +86,10 @@ function SidebarNav({ collapsed, onNavigate, label }) {
     if (!isAuthenticated) return undefined;
     let active = true;
     api
-      .get("/candidate-dashboard", { headers: accountAuthHeader() })
+      .get("/candidate-dashboard/summary", { headers: accountAuthHeader() })
       .then(({ data }) => {
         if (!active) return;
-        const assessments = data.assessments || [];
-        setCounts({
-          assessments: assessments.filter(
-            (a) => !["completed", "expired", "cancelled"].includes(String(a.status || "").toLowerCase())
-          ).length,
-        });
+        setCounts({ assessments: Number(data.assessmentCount) || 0 });
       })
       .catch(() => {});
     return () => { active = false; };

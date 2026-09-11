@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
@@ -9,6 +10,7 @@ const NotificationContext = createContext(null);
 
 export function NotificationProvider({ children }) {
   const { token, isAuthenticated } = useAccountAuth();
+  const { pathname } = useLocation();
   const toast = useToast();
   const [unreadCount, setUnreadCount] = useState(0);
   const [recent, setRecent] = useState([]);
@@ -34,8 +36,8 @@ export function NotificationProvider({ children }) {
   useEffect(() => {
     if (!isAuthenticated) return;
     refreshUnreadCount();
-    refreshRecent();
-  }, [isAuthenticated, refreshUnreadCount, refreshRecent]);
+    if (pathname !== "/notifications") refreshRecent();
+  }, [isAuthenticated, pathname, refreshUnreadCount, refreshRecent]);
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
