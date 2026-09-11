@@ -13,7 +13,7 @@ import GoogleButton from "../components/auth/GoogleButton.jsx";
 function LeftPanel() {
   return (
     <div
-      className="hidden lg:flex lg:w-[30%] xl:w-[28%] flex-col justify-between px-10 py-12 relative overflow-hidden"
+      className="sticky top-0 hidden h-screen lg:flex lg:w-[30%] xl:w-[28%] flex-col justify-between px-10 py-12 relative overflow-hidden"
       style={{
         background: "linear-gradient(160deg, #cce8f4 0%, #dff0f8 40%, #eef7fb 70%, #f6fbfd 100%)",
       }}
@@ -29,14 +29,14 @@ function LeftPanel() {
         style={{ background: "radial-gradient(circle, #c8e8f5 0%, transparent 70%)", opacity: 0.4 }}
       />
 
-      <BrandLogo to="/welcome" size="md" theme="light" />
+      <BrandLogo to="/welcome" size="md" textSize={24} theme="light" />
 
       <div>
         <p className="text-[22px] font-bold leading-snug text-[#F97316]">
-          Start your journey<br />today.
+          Find the right<br />opportunity.
         </p>
         <p className="mt-3 text-[14px] leading-relaxed text-[#4a7a6a]">
-          Create your account and get matched to opportunities that fit your skills.
+          AI-powered hiring. Fair, fast and transparent for every candidate.
         </p>
       </div>
 
@@ -62,23 +62,23 @@ function LeftPanel() {
    ───────────────────────────────────────────────────────────────────────────── */
 function AuthToggle({ active }) {
   return (
-    <div className="mb-7 inline-flex items-center self-center rounded-full bg-[#F0F0F0] p-1">
+    <div className="mb-7 inline-flex items-center self-center rounded-full bg-[#0F172A] p-1">
       <Link
         to="/login"
-        className={`rounded-full px-6 py-1.5 text-[13px] font-semibold transition-colors ${
+        className={`rounded-full px-6 py-2 text-[14px] font-semibold transition-colors ${
           active === "login"
             ? "bg-white text-[#0F172A] shadow-sm"
-            : "text-[#64748B] hover:text-[#0F172A]"
+            : "text-white/70 hover:text-white"
         }`}
       >
         Sign In
       </Link>
       <Link
         to="/register"
-        className={`rounded-full px-6 py-1.5 text-[13px] font-semibold transition-colors ${
+        className={`rounded-full px-6 py-2 text-[14px] font-semibold transition-colors ${
           active === "register"
-            ? "bg-[#0F172A] text-white shadow-sm"
-            : "text-[#64748B] hover:text-[#0F172A]"
+            ? "bg-white text-[#0F172A] shadow-sm"
+            : "text-white/70 hover:text-white"
         }`}
       >
         Sign Up
@@ -160,7 +160,7 @@ export default function Register() {
         >
           {/* Mobile logo */}
           <div className="mb-8 lg:hidden">
-            <BrandLogo to="/welcome" size="md" theme="light" />
+            <BrandLogo to="/welcome" size="md" textSize={24} theme="light" />
           </div>
 
           <div className="w-full max-w-[400px]">

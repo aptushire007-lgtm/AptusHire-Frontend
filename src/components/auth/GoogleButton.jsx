@@ -56,7 +56,14 @@ export default function GoogleButton({ onError, onStart, onFinish }) {
         }
       },
     });
-    window.google.accounts.id.renderButton(containerRef.current, { theme: "outline", size: "large", width: 360, text: "continue_with" });
+    window.google.accounts.id.renderButton(containerRef.current, {
+      theme: "outline",
+      size: "large",
+      width: 384,
+      text: "signin_with",
+      logo_alignment: "left",
+      shape: "pill",
+    });
     return undefined;
   }, [clientId, location.state, navigate, onError, onFinish, onStart, ready]);
 

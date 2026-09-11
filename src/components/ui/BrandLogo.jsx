@@ -28,13 +28,18 @@ export function BrandLogo({
   theme,
   variant = "full",
   size = "md",
+  textSize,
   textWeight = "font-extrabold",
   showTagline = false,
   className = "",
   onClick,
+  // Overrides the "Aptus" half's colour when the default (white on dark theme,
+  // near-black on light) isn't the point — e.g. blue on a white strip that
+  // otherwise has no accent of its own to read against.
+  nameColorClassName,
 }) {
   const dark = theme === "dark";
-  const textColor  = dark ? "text-white" : "text-[#0F172A]";
+  const textColor  = nameColorClassName || (dark ? "text-white" : "text-[#0F172A]");
   const hireColor  = "text-[#F97316]";
   const tagColor   = dark ? "text-slate-300" : "text-[#64748B]";
 
@@ -45,6 +50,9 @@ export function BrandLogo({
   const markSize  = typeof size === "number" ? size : (iconSizes[size] || 32);
   const textClass = textSizes[size] || "text-lg";
   const tagClass  = tagSizes[size]  || "text-xs";
+  // Explicit pixel override for the wordmark only — independent of the icon/tagline
+  // scale above, for spots that need one exact size regardless of the `size` preset.
+  const textStyle = textSize ? { fontSize: `${textSize}px` } : undefined;
 
   const content = (
     <div className={`inline-flex items-center gap-2.5 font-display font-bold tracking-tight select-none ${className}`}>
@@ -55,7 +63,7 @@ export function BrandLogo({
       )}
       {variant !== "mark" && (
         <div className="flex flex-col leading-none">
-          <span className={`${textClass} ${textWeight} ${textColor} flex items-center transition-colors`}>
+          <span className={`${textStyle ? "" : textClass} ${textWeight} ${textColor} flex items-center transition-colors`} style={textStyle}>
             Aptus<span className={hireColor}>Hire</span>
           </span>
           {showTagline && (

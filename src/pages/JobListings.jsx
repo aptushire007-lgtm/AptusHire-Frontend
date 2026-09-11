@@ -135,33 +135,41 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
     <button
       type="button"
       onClick={onClick}
-      className={`w-full cursor-pointer border-b border-[#F0F2F4] px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316] ${
-        active
-          ? "border-l-[3px] border-l-[#F97316] bg-[#F0F7FF] pl-[13px]"
-          : "border-l-[3px] border-l-transparent hover:bg-[#F4F6F9]"
+      className={`group relative w-full cursor-pointer border-b border-[#F0F2F4] px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316] ${
+        active ? "bg-[#F4F6F9]" : "hover:bg-[#F8F9FB]"
       }`}
     >
+      {/* Save (shows on hover, out of the way of title/badges) */}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onToggleSave(job); }}
+        disabled={saving}
+        aria-label={saved ? "Unsave" : "Save"}
+        className={`absolute right-3 top-3 z-10 p-0.5 text-[#94A3B8] transition-colors hover:text-[#F97316] focus-visible:outline-none ${
+          saved ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+        }`}
+      >
+        <Bookmark
+          className={`h-3.5 w-3.5 ${saved ? "fill-[#F97316] text-[#F97316]" : ""}`}
+          aria-hidden
+        />
+      </button>
+
       <div className="flex items-start gap-3">
         <CompanyLogo company={job.company} size={40} />
 
         <div className="min-w-0 flex-1">
-          {/* Title + save */}
+          {/* Title + status column */}
           <div className="flex items-start justify-between gap-2">
             <p className="line-clamp-2 text-[13px] font-semibold leading-[1.35] text-[#0F172A]">
               {job.title}
             </p>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onToggleSave(job); }}
-              disabled={saving}
-              aria-label={saved ? "Unsave" : "Save"}
-              className="mt-0.5 shrink-0 p-0.5 text-[#94A3B8] transition-colors hover:text-[#F97316] focus-visible:outline-none"
-            >
-              <Bookmark
-                className={`h-3.5 w-3.5 ${saved ? "fill-[#F97316] text-[#F97316]" : ""}`}
-                aria-hidden
-              />
-            </button>
+            <div className="flex shrink-0 flex-col items-end gap-1 pl-1">
+              {job.alreadyApplied && (
+                <span className="text-[11px] font-semibold text-[#2563EB]">Applied</span>
+              )}
+              {mLabel && <MatchBadge label={mLabel} />}
+            </div>
           </div>
 
           {/* Company */}
@@ -180,13 +188,6 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
               </span>
             )}
           </div>
-
-          {/* Match badge */}
-          {mLabel && (
-            <div className="mt-2">
-              <MatchBadge label={mLabel} />
-            </div>
-          )}
         </div>
       </div>
     </button>
@@ -319,7 +320,7 @@ function JobDetailPanel({ job, navigate }) {
             ].map(({ label, value }) => (
               <div key={label}>
                 <p className="text-[11px] font-medium text-[#94A3B8]">{label}</p>
-                <p className="mt-1 text-[13px] font-semibold text-[#F97316]">
+                <p className="mt-1 inline-flex rounded-lg bg-[#EFF6FF] px-2.5 py-1 text-[13px] font-semibold text-[#2563EB]">
                   {value || "—"}
                 </p>
               </div>
@@ -337,10 +338,10 @@ function JobDetailPanel({ job, navigate }) {
           <button
             type="button"
             onClick={() => navigate("/applied-jobs")}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-[#F97316] text-[14px] font-semibold text-[#F97316] transition-opacity hover:opacity-80"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#DBEAFE] text-[14px] font-semibold text-[#2563EB] transition-opacity hover:opacity-80"
           >
             <CheckCircle2 className="h-4 w-4" aria-hidden />
-            Already applied — track it
+            Applied
           </button>
         ) : (
           <button
@@ -828,7 +829,7 @@ export default function JobListings() {
       <div className="shrink-0 border-b border-[#EAEEF0] bg-white px-5 pb-4 pt-5 sm:px-6">
         {/* Title + count badges */}
         <div className="flex flex-wrap items-baseline gap-2.5">
-          <h1 className="text-[20px] font-bold text-[#0F172A]">Recommended Jobs</h1>
+          <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A]">Recommended Jobs</h1>
           {!loading && (
             <>
               <span className="rounded-full bg-[#EFF6FF] px-2.5 py-0.5 text-[12px] font-semibold text-[#2563EB]">
@@ -848,10 +849,10 @@ export default function JobListings() {
         </p>
 
         {/* Auto-apply banner */}
-        <div className="mt-3.5 flex items-center justify-between gap-4 rounded-xl border border-[#DBEAFE] bg-[#F0F7FF] px-4 py-3">
+        <div className="mt-3.5 flex items-center justify-between gap-4 rounded-xl border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF] px-4 py-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE]">
-              <Zap className="h-4 w-4 text-[#2563EB]" aria-hidden />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_3px_rgba(37,99,235,0.25)]">
+              <Zap className="h-4 w-4 fill-[#2563EB] text-[#2563EB]" aria-hidden />
             </div>
             <div>
               <p className="text-[13px] font-semibold text-[#0F172A]">
@@ -883,26 +884,26 @@ export default function JobListings() {
           {/* Filter / tab bar */}
           <div className="shrink-0 border-b border-[#EAEEF0] px-3 py-2.5">
             <div className="flex items-center gap-2">
-              {/* Tab pills */}
-              <div className="flex flex-1 gap-1.5 overflow-x-auto scrollbar-none">
+              {/* Tab segmented control */}
+              <div className="flex flex-1 gap-1 overflow-x-auto rounded-full bg-[#F1F5F9] p-1 scrollbar-none">
                 <button
                   type="button"
                   onClick={() => setTab("top")}
                   className={`rounded-full px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors ${
                     tab === "top"
-                      ? "bg-[#0F172A] text-white"
-                      : "border border-[#E2E8F0] text-[#64748B] hover:border-[#0F172A]"
+                      ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
+                      : "text-[#64748B] hover:text-[#0F172A]"
                   }`}
                 >
-                  Top matches{topMatches.length > 0 ? ` (${Math.min(topMatches.length, 2)})` : ""}
+                  Top matches{topMatches.length > 0 ? ` (${topMatches.length})` : ""}
                 </button>
                 <a
                   href="/jobs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-[#E2E8F0] px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap text-[#64748B] transition-colors hover:border-[#0F172A] hover:text-[#0F172A]"
+                  className="rounded-full px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap text-[#64748B] transition-colors hover:text-[#0F172A]"
                 >
-                  All jobs ↗
+                  All jobs
                 </a>
               </div>
 

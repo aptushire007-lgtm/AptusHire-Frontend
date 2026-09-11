@@ -15,6 +15,7 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronRight,
 } from "lucide-react";
 import { useAccountAuth } from "../../auth/useAccountAuth.js";
 import { logoutAccount } from "../../auth/logout.js";
@@ -35,23 +36,18 @@ const PUBLIC_NAV = [
 
 const ACCOUNT_NAV_GROUPS = [
   {
-    label: "Main",
+    divider: false,
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
       { to: "/", label: "Find Jobs", icon: Briefcase, end: true, hideWhenRecommended: true },
       { to: "/?recommended=1", label: "Recommended", icon: Sparkles, recommendedOnly: true },
       { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
       { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
-    ],
-  },
-  {
-    label: "Progress",
-    items: [
       { to: "/assessments", label: "Assessment", icon: ClipboardList, badgeKey: "assessments" },
     ],
   },
   {
-    label: "Account",
+    divider: true,
     items: [
       { to: "/profile", label: "Profile", icon: UserRound },
       { to: "/account", label: "Settings", icon: Settings },
@@ -97,17 +93,13 @@ function SidebarNav({ collapsed, onNavigate, label }) {
 
   const groups = isAuthenticated
     ? ACCOUNT_NAV_GROUPS
-    : [{ label: null, items: PUBLIC_NAV }];
+    : [{ divider: false, items: PUBLIC_NAV }];
 
   return (
     <nav aria-label={label} className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-3">
-      {groups.map((group) => (
-        <div key={group.label || "public"} className="mb-4 last:mb-0">
-          {group.label && !collapsed && (
-            <p className="mb-1 px-3 pt-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">
-              {group.label}
-            </p>
-          )}
+      {groups.map((group, groupIndex) => (
+        <div key={groupIndex} className="contents">
+          {group.divider && <hr className="my-3 border-t border-[#E2E8F0]" />}
           {group.items.map((item) => {
             const isHidden =
               (item.hideWhenRecommended && search.includes("recommended=1")) ||
@@ -123,12 +115,10 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                 className={({ isActive }) => {
                   const active = isActive && !isHidden;
                   return [
-                    "relative flex items-center gap-3 rounded-control py-2.5 text-[13px] font-medium whitespace-nowrap",
+                    "group flex items-center gap-3 rounded-xl py-2.5 text-[15px] font-semibold text-[#1E293B] whitespace-nowrap",
                     "transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]",
                     collapsed ? "justify-center px-2" : "px-3",
-                    active
-                      ? "before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-[#F97316] bg-[rgba(249,115,22,0.12)] font-semibold text-[#F97316]"
-                      : "text-[#94A3B8] hover:bg-[#243447] hover:text-white",
+                    active ? "bg-[#F1F5F9]" : "hover:bg-[#FEF3E8]",
                   ].join(" ");
                 }}
               >
@@ -137,14 +127,20 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                   return (
                     <>
                       <item.icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#F97316]" : "text-[#64748B]"}`}
+                        className={`h-[18px] w-[18px] shrink-0 transition-colors ${active ? "text-[#0F172A]" : "text-[#64748B] group-hover:text-[#F97316]"}`}
                         aria-hidden="true"
                       />
                       <span className={collapsed ? "sr-only" : "min-w-0 flex-1 whitespace-normal"}>{item.label}</span>
                       {item.badgeKey && !collapsed && counts[item.badgeKey] > 0 && (
-                        <span className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#F97316] text-[10px] font-bold text-white px-1.5 py-0.5">
+                        <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#F1F5F9] text-[11px] font-bold text-[#475569] px-1.5 py-0.5">
                           {counts[item.badgeKey]}
                         </span>
+                      )}
+                      {!collapsed && (
+                        <ChevronRight
+                          className="h-4 w-4 shrink-0 text-[#F97316] opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                          aria-hidden="true"
+                        />
                       )}
                     </>
                   );
@@ -159,6 +155,20 @@ function SidebarNav({ collapsed, onNavigate, label }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SidebarGreeting
+// ─────────────────────────────────────────────────────────────────────────────
+function SidebarGreeting() {
+  const { isAuthenticated, user } = useAccountAuth();
+  if (!isAuthenticated) return null;
+  const firstName = user?.name?.trim().split(/\s+/)[0] || "there";
+  return (
+    <p className="px-5 pb-1 pt-4 text-[19px] font-bold text-[#0F172A]">
+      Welcome, {firstName}!
+    </p>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SidebarBrand
 // ─────────────────────────────────────────────────────────────────────────────
 function SidebarBrand({ collapsed, onNavigate }) {
@@ -168,7 +178,7 @@ function SidebarBrand({ collapsed, onNavigate }) {
         to="/"
         onClick={onNavigate}
         title="AptusHire"
-        className="flex h-16 shrink-0 items-center justify-center border-b border-[#243447] px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
+        className="flex h-[68px] shrink-0 items-center justify-center bg-white px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
       >
         <AptusMark size={32} />
         <span className="sr-only">AptusHire, home</span>
@@ -176,8 +186,17 @@ function SidebarBrand({ collapsed, onNavigate }) {
     );
   }
   return (
-    <div className="flex h-16 shrink-0 items-center border-b border-[#243447] px-5">
-      <BrandLogo to="/" size="lg" textWeight="font-semibold" theme="dark" onClick={onNavigate} />
+    // Same height and border colour as the content header on the right, so the
+    // two strips read as one continuous white bar across the top of the page.
+    <div className="flex h-[68px] shrink-0 items-center bg-white px-5">
+      <BrandLogo
+        to="/"
+        size="lg"
+        textWeight="font-semibold"
+        theme="light"
+        nameColorClassName="text-[#2563EB]"
+        onClick={onNavigate}
+      />
     </div>
   );
 }
@@ -317,19 +336,20 @@ function ShellInner({ children }) {
       {/* ── Desktop persistent sidebar ──────────────────────────── */}
       <aside
         id={SIDEBAR_ID}
-        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#243447] bg-[#1B2A3B] transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
-          collapsed ? "w-[4.5rem]" : "w-64"
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#E2E8F0] bg-white transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
+          collapsed ? "w-[4.5rem]" : "w-[calc(18rem+1cm)]"
         }`}
       >
         <SidebarBrand collapsed={collapsed} />
+        {!collapsed && <SidebarGreeting />}
         <SidebarNav collapsed={collapsed} label="Main" />
         {/* Collapse toggle */}
-        <div className="border-t border-[#243447] p-3">
+        <div className="border-t border-[#E2E8F0] p-3">
           <button
             type="button"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="flex w-full items-center justify-center gap-2 rounded-control py-2 text-xs font-medium text-[#64748B] transition-colors hover:bg-[#243447] hover:text-[#94A3B8]"
+            className="flex w-full items-center justify-center gap-2 rounded-control py-2 text-xs font-medium text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]"
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             {!collapsed && <span>Collapse</span>}
@@ -351,18 +371,19 @@ function ShellInner({ children }) {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#243447] bg-[#1B2A3B] shadow-lift"
+            className="absolute inset-y-0 left-0 flex w-[calc(18rem+1cm)] max-w-[85vw] flex-col border-r border-[#E2E8F0] bg-white shadow-lift"
           >
             <button
               ref={closeRef}
               type="button"
               onClick={() => setDrawerOpen(false)}
               aria-label="Close menu"
-              className="tap-target absolute right-3 top-4 inline-flex h-9 w-9 items-center justify-center rounded-control text-[#64736A] transition-colors hover:bg-[#DDECE3] hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="tap-target absolute right-3 top-4 inline-flex h-9 w-9 items-center justify-center rounded-control text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
             <SidebarBrand onNavigate={() => setDrawerOpen(false)} />
+            <SidebarGreeting />
             <SidebarNav label="Menu" onNavigate={() => setDrawerOpen(false)} />
           </div>
         </div>
