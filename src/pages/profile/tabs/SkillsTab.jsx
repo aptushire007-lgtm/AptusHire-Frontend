@@ -41,7 +41,7 @@ export default function SkillsTab({ profile, onRefresh }) {
         </p>
       </div>
 
-      {success && <p role="status" className="flex items-center gap-2 rounded-xl bg-[#E8F2EC] p-3 text-xs font-semibold text-[#176B45]"><CheckCircle2 className="h-4 w-4" />{success}</p>}
+      {success && <p role="status" className="flex items-center gap-2 rounded-xl bg-[#FEF3E8] p-3 text-xs font-semibold text-[#F97316]"><CheckCircle2 className="h-4 w-4" />{success}</p>}
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700">{error}</p>}
 
       <form onSubmit={handleSave} className="space-y-4">

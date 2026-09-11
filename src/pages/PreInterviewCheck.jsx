@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, XCircle, Circle, Camera, Mic, Maximize, Cpu, Gauge, ScanFace, Smartphone, Laptop, Volume2 } from "lucide-react";
 import { PHONE_PAIRING_ENABLED } from "../lib/features.js";
@@ -678,7 +678,7 @@ export default function PreInterviewCheck() {
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-[#F97316]-500"
             />
             {/* THE SECOND HALF OF THIS SENTENCE IS CONDITIONAL, AND HAS TO BE.
                 "Raw video is not uploaded" is true of the vision pipeline and false the moment
@@ -709,7 +709,7 @@ export default function PreInterviewCheck() {
               type="checkbox"
               checked={noConcurrentShare}
               onChange={(e) => setNoConcurrentShare(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-[#F97316]-500"
             />
             <span>
               I confirm I am <span className="font-medium text-slate-800">not currently screen-sharing</span> or on a call
@@ -725,7 +725,7 @@ export default function PreInterviewCheck() {
                 type="checkbox"
                 checked={evidenceConsent}
                 onChange={(e) => setEvidenceConsent(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-[#F97316]-500"
               />
               <span>
                 <span className="font-medium text-slate-800">Optional — short evidence clips.</span> I consent to a short
@@ -761,7 +761,7 @@ export default function PreInterviewCheck() {
                 type="checkbox"
                 checked={recordingConsent}
                 onChange={(e) => setRecordingConsent(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-[#F97316]-500"
               />
               <span>
                 <span className="font-medium text-slate-800">Optional — record this interview.</span> I consent to video and

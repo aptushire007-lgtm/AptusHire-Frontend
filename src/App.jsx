@@ -20,7 +20,7 @@ import JobListings from "./pages/JobListings.jsx";
 import InterviewLogin from "./pages/InterviewLogin.jsx";
 import AssessmentLogin from "./pages/AssessmentLogin.jsx";
 
-const Landing = lazy(() => import("./pages/Landing.jsx"));
+const Landing = lazy(() => import("./pages/ForCandidates.jsx"));
 const JobDetail = lazy(() => import("./pages/JobDetail.jsx"));
 const ApplyForm = lazy(() => import("./pages/ApplyForm.jsx"));
 const ResumeUpload = lazy(() => import("./pages/ResumeUpload.jsx"));
@@ -53,6 +53,7 @@ const ProfileLayout = lazy(() => import("./pages/profile/ProfileLayout.jsx"));
 const ResumeManager = lazy(() => import("./pages/profile/ResumeManager.jsx"));
 const NotificationCenter = lazy(() => import("./pages/NotificationCenter.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
+const AllJobs = lazy(() => import("./pages/AllJobs.jsx"));
 
 // A spinner announces "something is happening"; this announces the shape of
 // what is arriving, which is the difference between a wait that feels like a
@@ -79,6 +80,9 @@ export default function App() {
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+        {/* /jobs — All Jobs public board, opens in new tab from Recommended Jobs */}
+        <Route path="/jobs" element={<AllJobs />} />
 
         {/* Live portal routes sit outside AppShell — see InterviewShell.jsx for why the
             marketing navbar is an accidental-exit risk here, not just visual noise. Each page wraps

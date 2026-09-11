@@ -104,7 +104,7 @@ function SidebarNav({ collapsed, onNavigate, label }) {
       {groups.map((group) => (
         <div key={group.label || "public"} className="mb-4 last:mb-0">
           {group.label && !collapsed && (
-            <p className="mb-1 px-3 pt-2 text-[14px] font-semibold uppercase tracking-widest text-[#9BAAA1]">
+            <p className="mb-1 px-3 pt-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">
               {group.label}
             </p>
           )}
@@ -123,12 +123,12 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                 className={({ isActive }) => {
                   const active = isActive && !isHidden;
                   return [
-                    "relative flex items-center gap-3 rounded-control py-2.5 text-[16px] font-medium whitespace-nowrap",
-                    "transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                    "relative flex items-center gap-3 rounded-control py-2.5 text-[13px] font-medium whitespace-nowrap",
+                    "transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]",
                     collapsed ? "justify-center px-2" : "px-3",
                     active
-                      ? "before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-[#176B45] bg-[#E8F2EC] font-semibold text-[#176B45]"
-                      : "text-[#64736A] hover:bg-[#DDECE3] hover:text-text",
+                      ? "before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-[#F97316] bg-[rgba(249,115,22,0.12)] font-semibold text-[#F97316]"
+                      : "text-[#94A3B8] hover:bg-[#243447] hover:text-white",
                   ].join(" ");
                 }}
               >
@@ -137,12 +137,12 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                   return (
                     <>
                       <item.icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#176B45]" : "text-[#9BAAA1]"}`}
+                        className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#F97316]" : "text-[#64748B]"}`}
                         aria-hidden="true"
                       />
-                      <span className={collapsed ? "sr-only" : "min-w-0 flex-1 whitespace-normal wrap-break-word"}>{item.label}</span>
+                      <span className={collapsed ? "sr-only" : "min-w-0 flex-1 whitespace-normal"}>{item.label}</span>
                       {item.badgeKey && !collapsed && counts[item.badgeKey] > 0 && (
-                        <span className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#176B45] text-[10px] font-bold text-white px-1.5 py-0.5">
+                        <span className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#F97316] text-[10px] font-bold text-white px-1.5 py-0.5">
                           {counts[item.badgeKey]}
                         </span>
                       )}
@@ -168,7 +168,7 @@ function SidebarBrand({ collapsed, onNavigate }) {
         to="/"
         onClick={onNavigate}
         title="AptusHire"
-        className="flex h-16 shrink-0 items-center justify-center border-b border-[#E5EBE7] px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="flex h-16 shrink-0 items-center justify-center border-b border-[#243447] px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
       >
         <AptusMark size={32} />
         <span className="sr-only">AptusHire, home</span>
@@ -176,8 +176,8 @@ function SidebarBrand({ collapsed, onNavigate }) {
     );
   }
   return (
-    <div className="flex h-16 shrink-0 items-center border-b border-[#E5EBE7] px-5">
-      <BrandLogo to="/" size="lg" textWeight="font-semibold" theme="light" onClick={onNavigate} />
+    <div className="flex h-16 shrink-0 items-center border-b border-[#243447] px-5">
+      <BrandLogo to="/" size="lg" textWeight="font-semibold" theme="dark" onClick={onNavigate} />
     </div>
   );
 }
@@ -190,7 +190,7 @@ function HeaderActions({ onNavigate }) {
   const navigate = useNavigate();
 
   const baseAction =
-    "tap-target inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/20";
+    "tap-target inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/20";
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
@@ -199,14 +199,14 @@ function HeaderActions({ onNavigate }) {
           <Link
             to="/login"
             onClick={onNavigate}
-            className={`${baseAction} text-[#17221C] hover:bg-[#DDECE3]`}
+            className={`${baseAction} text-[#0F172A] hover:bg-[#F1F5F9]`}
           >
             Log In
           </Link>
           <Link
             to="/register"
             onClick={onNavigate}
-            className="tap-target inline-flex items-center justify-center rounded-full bg-[#176B45] px-5 py-2.5 text-[14px] font-semibold text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors hover:bg-[#176B45]-dark focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/25"
+            className="tap-target inline-flex items-center justify-center rounded-full bg-[#F97316] px-5 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/25"
           >
             Register
           </Link>
@@ -215,9 +215,9 @@ function HeaderActions({ onNavigate }) {
         <>
           <NotificationBell />
           <Link
-            to="/account"
+            to="/profile"
             onClick={onNavigate}
-            className={`${baseAction} text-[#17221C] hover:bg-[#DDECE3]`}
+            className={`${baseAction} text-[#0F172A] hover:bg-[#F1F5F9]`}
           >
             <UserRound className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden max-w-[10rem] truncate sm:inline">
@@ -227,7 +227,7 @@ function HeaderActions({ onNavigate }) {
           <button
             type="button"
             onClick={() => { logoutAccount(); onNavigate?.(); navigate("/login"); }}
-            className={`${baseAction} text-[#64736A] hover:bg-[#DDECE3] hover:text-text`}
+            className={`${baseAction} text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A]`}
           >
             <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">Log Out</span>
@@ -305,11 +305,11 @@ function ShellInner({ children }) {
   }, [drawerOpen]);
 
   return (
-    <div className="candidate-side flex min-h-screen bg-[#F8FAF9] text-[#17221C]">
+    <div className="candidate-side flex min-h-screen bg-[#F4F6F9] text-[#0F172A]">
       {/* Skip link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-card focus:bg-[#176B45] focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-soft"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-card focus:bg-[#F97316] focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-soft"
       >
         Skip to main content
       </a>
@@ -317,19 +317,19 @@ function ShellInner({ children }) {
       {/* ── Desktop persistent sidebar ──────────────────────────── */}
       <aside
         id={SIDEBAR_ID}
-        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#E5EBE7] bg-white transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#243447] bg-[#1B2A3B] transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
           collapsed ? "w-[4.5rem]" : "w-64"
         }`}
       >
         <SidebarBrand collapsed={collapsed} />
         <SidebarNav collapsed={collapsed} label="Main" />
         {/* Collapse toggle */}
-        <div className="border-t border-[#E5EBE7] p-3">
+        <div className="border-t border-[#243447] p-3">
           <button
             type="button"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="flex w-full items-center justify-center gap-2 rounded-control py-2 text-xs font-medium text-[#9BAAA1] transition-colors hover:bg-[#DDECE3] hover:text-[#64736A]"
+            className="flex w-full items-center justify-center gap-2 rounded-control py-2 text-xs font-medium text-[#64748B] transition-colors hover:bg-[#243447] hover:text-[#94A3B8]"
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             {!collapsed && <span>Collapse</span>}
@@ -341,7 +341,7 @@ function ShellInner({ children }) {
       {drawerOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]"
             aria-hidden="true"
             onClick={() => setDrawerOpen(false)}
           />
@@ -351,7 +351,7 @@ function ShellInner({ children }) {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#E5EBE7] bg-white shadow-lift"
+            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#243447] bg-[#1B2A3B] shadow-lift"
           >
             <button
               ref={closeRef}
@@ -371,7 +371,7 @@ function ShellInner({ children }) {
       {/* ── Main content column ──────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Sticky header */}
-        <header className="sticky top-0 z-40 flex h-[68px] items-center justify-between gap-3 border-b border-[#E5EBE7] bg-white/95 px-5 shadow-[0_1px_4px_rgba(27,67,50,0.07)] backdrop-blur-md sm:px-8">
+        <header className="sticky top-0 z-40 flex h-[68px] items-center justify-between gap-3 border-b border-[#E2E8F0] bg-white/95 px-5 shadow-[0_1px_3px_rgba(0,0,0,0.07)] backdrop-blur-md sm:px-8">
           <div className="flex min-w-0 items-center gap-2">
             {/* Mobile: open drawer */}
             <button

@@ -1,12 +1,23 @@
 ﻿import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MailQuestion, CheckCircle2 } from "lucide-react";
+import { MailQuestion, CheckCircle2, ArrowLeft } from "lucide-react";
 import api from "../api/client.js";
-import { Card } from "../components/ui/Card.jsx";
-import { Input, Label, FormGroup } from "../components/ui/Field.jsx";
-import Button from "../components/ui/Button.jsx";
+import { Input } from "../components/ui/Field.jsx";
 import BrandLogo from "../components/ui/BrandLogo.jsx";
-import ThemeToggle from "../components/ui/ThemeToggle.jsx";
+
+function PageFooter() {
+  return (
+    <div className="mt-auto border-t border-[#E2E8F0] pt-4 pb-6 px-6 lg:px-10">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-[#94A3B8]">
+        <div className="flex flex-wrap gap-4">
+          <Link to="/welcome" className="hover:text-[#0F172A]">Privacy Policy</Link>
+          <Link to="/welcome" className="hover:text-[#0F172A]">Terms of Service</Link>
+        </div>
+        <span>© {new Date().getFullYear()} AptusHire. All rights reserved.</span>
+      </div>
+    </div>
+  );
+}
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -25,57 +36,87 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#F8FAF9] px-5 py-12 transition-colors">
-      <div className="absolute right-6 top-6">
-        <ThemeToggle />
-      </div>
-
-      <div className="w-full max-w-md">
-        <div className="mb-6 flex justify-center">
-          <BrandLogo to="/welcome" size="lg" />
+    <div className="flex min-h-screen flex-col bg-white">
+      <div
+        className="flex flex-1 flex-col items-center justify-center px-5 py-12"
+        style={{
+          backgroundImage: "radial-gradient(circle, #d4d4d4 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+          backgroundColor: "#fff",
+        }}
+      >
+        <div className="mb-8">
+          <BrandLogo to="/welcome" size="md" theme="light" />
         </div>
 
-        <Card className="rounded-3xl border border-slate-200/90 bg-white p-6 text-center shadow-soft/90 sm:p-8">
+        <div className="w-full max-w-[400px] rounded-2xl border border-[#E2E8F0] bg-white px-8 py-10 shadow-sm">
           {done ? (
-            <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-                <CheckCircle2 className="h-6 w-6" />
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <CheckCircle2 className="h-7 w-7" />
               </div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Check Your Email</h1>
-              <p className="mt-2 text-xs text-slate-500">
+              <h1 className="text-[22px] font-bold text-[#0F172A]">Check Your Email</h1>
+              <p className="mt-3 text-[14px] text-[#64748B]">
                 If an account exists for that email, a password reset link has been sent.
               </p>
-              <Link to="/login" className="mt-5 inline-block text-xs font-semibold text-[#176B45] hover:underline">
-                Back to login
+              <Link
+                to="/login"
+                className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#F97316] hover:underline"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to Sign In
               </Link>
-            </>
+            </div>
           ) : (
             <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F2EC] text-[#176B45]/60">
-                <MailQuestion className="h-6 w-6" />
+              <div className="mb-6 flex flex-col items-center text-center">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FEF3E8] text-[#F97316]">
+                  <MailQuestion className="h-6 w-6" />
+                </div>
+                <h1 className="text-[22px] font-bold text-[#0F172A]">Forgot Password</h1>
+                <p className="mt-2 text-[14px] text-[#64748B]">
+                  Enter your email and we'll send you a link to reset your password.
+                </p>
               </div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Forgot Password</h1>
-              <p className="mt-1.5 text-xs text-slate-500">
-                Enter your email and we'll send you a link to reset your password.
-              </p>
-              <form onSubmit={handleSubmit} className="mt-5 space-y-4 text-left">
-                <FormGroup>
-                  <Label required>Email Address</Label>
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                </FormGroup>
-                <Button type="submit" size="lg" loading={submitting} className="w-full">
-                  Send Reset Link
-                </Button>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="fp-email" className="mb-1.5 block text-[13px] font-semibold text-[#0F172A]">
+                    Email Address
+                  </label>
+                  <Input
+                    id="fp-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="h-11 w-full rounded-xl border border-[#E2E8F0] bg-[#F8FAFA] px-4 text-[14px] text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#F97316] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F97316]/15"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex h-12 w-full items-center justify-center rounded-full bg-[#0F172A] text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                >
+                  {submitting ? "Sending…" : "Send Reset Link"}
+                </button>
               </form>
-              <p className="mt-5 text-center">
-                <Link to="/login" className="text-xs font-semibold text-[#176B45] hover:underline">
-                  Back to login
+
+              <p className="mt-6 text-center">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#F97316] hover:underline"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Back to Sign In
                 </Link>
               </p>
             </>
           )}
-        </Card>
+        </div>
       </div>
+
+      <PageFooter />
     </div>
   );
 }

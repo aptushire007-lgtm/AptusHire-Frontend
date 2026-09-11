@@ -157,7 +157,7 @@ export default function ExperienceTab({ profile, onRefresh }) {
                   {item.skills?.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {item.skills.map((s) => (
-                        <span key={s} className="rounded-full bg-[#E8F2EC] px-2 py-0.5 text-[11px] font-semibold text-[#176B45]">
+                        <span key={s} className="rounded-full bg-[#FEF3E8] px-2 py-0.5 text-[11px] font-semibold text-[#F97316]">
                           {s}
                         </span>
                       ))}

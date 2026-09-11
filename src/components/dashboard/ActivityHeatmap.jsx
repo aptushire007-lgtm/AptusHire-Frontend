@@ -37,27 +37,27 @@ export default function ActivityHeatmap({ applications = [], interviews = [] }) 
   }, [applications, interviews]);
 
   const getIntensityClass = (count) => {
-    if (count === 0) return "bg-[#E8F2EC]";
-    if (count === 1) return "bg-[#D2ECC9]";
+    if (count === 0) return "bg-[#FEF3E8]";
+    if (count === 1) return "bg-[#FED7AA]";
     if (count === 2) return "bg-[#5A7B71]";
-    return "bg-[#176B45]";
+    return "bg-[#F97316]";
   };
 
   return (
-    <div className="rounded-[14px] border border-[#E5EBE7] bg-white p-5 text-[#176B45] shadow-[0_1px_4px_rgba(27,67,50,0.07)] dark:border-[#E5EBE7] dark:bg-white">
+    <div className="rounded-[14px] border border-[#E2E8F0] bg-white p-5 text-[#F97316] shadow-[0_1px_4px_rgba(0,0,0,0.07)] dark:border-[#E2E8F0] dark:bg-white">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-[#176B45]" />
-          <h3 className="font-display text-sm font-bold text-[#176B45]">
+          <Activity className="h-4 w-4 text-[#F97316]" />
+          <h3 className="font-display text-sm font-bold text-[#F97316]">
             Application &amp; Interview Activity
           </h3>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-[#64736A]">
+        <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
           <span>Less</span>
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#E8F2EC]" />
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#D2ECC9]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-[#FEF3E8]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-[#FED7AA]" />
           <span className="h-2.5 w-2.5 rounded-xs bg-[#5A7B71]" />
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#176B45]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-[#F97316]" />
           <span>More</span>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function ActivityHeatmap({ applications = [], interviews = [] }) 
         </div>
       </div>
 
-      <p className="mt-3 text-sm text-[#64736A]">
+      <p className="mt-3 text-sm text-[#64748B]">
         12-week activity log across your verified applications and AI interview sessions.
       </p>
     </div>

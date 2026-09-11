@@ -1,4 +1,4 @@
-import { Sun, Moon } from "lucide-react";
+﻿import { Sun, Moon } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext.jsx";
 
 export default function ThemeToggle({ className = "", compact = false }) {
@@ -9,7 +9,7 @@ export default function ThemeToggle({ className = "", compact = false }) {
     <button
       type="button"
       onClick={toggleTheme}
-      className={`relative inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-white/80 p-2 text-slate-600 shadow-sm backdrop-blur transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/80 dark:hover:border-slate-700 dark:hover:text-white ${
+      className={`relative inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-white/80 p-2 text-slate-600 shadow-sm backdrop-blur transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]/80 dark:hover:border-slate-700 dark:hover:text-white ${
         compact ? "h-8 w-8" : "h-9 w-9"
       } ${className}`}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}

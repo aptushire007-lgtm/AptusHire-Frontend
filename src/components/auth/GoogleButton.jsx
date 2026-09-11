@@ -61,7 +61,7 @@ export default function GoogleButton({ onError, onStart, onFinish }) {
   }, [clientId, location.state, navigate, onError, onFinish, onStart, ready]);
 
   if (!clientId) {
-    return <p role="status" className="text-center text-[12px] text-[#64736A]">Google sign-in is not configured. Add a Google OAuth client ID to enable it.</p>;
+    return <p role="status" className="text-center text-[12px] text-[#64748B]">Google sign-in is not configured. Add a Google OAuth client ID to enable it.</p>;
   }
   return <div ref={containerRef} className="flex min-h-11 justify-center" aria-label="Continue with Google" />;
 }

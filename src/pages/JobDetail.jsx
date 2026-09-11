@@ -14,11 +14,11 @@ function CompanyLogo({ company }) {
   const [logoFailed, setLogoFailed] = useState(false);
   const logo = company?.logoPath;
   return (
-    <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#DCE5DE] bg-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:h-20 sm:w-20">
+    <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#DCE5DE] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.07)] sm:h-20 sm:w-20">
       {logo && !logoFailed ? (
         <img src={logo} alt={`${company?.name || "Company"} logo`} className="h-full w-full object-contain p-2" onError={() => setLogoFailed(true)} />
       ) : (
-        <span className="flex h-full w-full items-center justify-center bg-[#E8F2EC] text-xl font-bold text-[#176B45]">
+        <span className="flex h-full w-full items-center justify-center bg-[#FEF3E8] text-xl font-bold text-[#F97316]">
           {companyInitials(company?.name)}
         </span>
       )}
@@ -29,8 +29,8 @@ function CompanyLogo({ company }) {
 function MetaFact({ icon: Icon, children }) {
   if (children == null || children === "") return null;
   return (
-    <span className="inline-flex items-center gap-2 text-[14px] font-medium text-[#176B45]">
-      <Icon className="h-[18px] w-[18px] shrink-0 text-[#64736A]" aria-hidden="true" />
+    <span className="inline-flex items-center gap-2 text-[14px] font-medium text-[#F97316]">
+      <Icon className="h-[18px] w-[18px] shrink-0 text-[#64748B]" aria-hidden="true" />
       {children}
     </span>
   );
@@ -78,11 +78,11 @@ export default function JobDetail() {
   if (error) {
     return (
       <div className="space-y-6">
-        <Link to="/" className="inline-flex items-center gap-2 text-[14px] font-semibold text-[#176B45] hover:text-[#176B45]">
+        <Link to="/" className="inline-flex items-center gap-2 text-[14px] font-semibold text-[#F97316] hover:text-[#F97316]">
           <ArrowLeft className="h-4 w-4" /> Back to listings
         </Link>
-        <Card className="border-[#E5EBE7] bg-white py-12 text-center dark:border-[#E5EBE7] dark:bg-white">
-          <h1 className="text-xl font-semibold text-[#17221C]">Job unavailable</h1>
+        <Card className="border-[#E2E8F0] bg-white py-12 text-center dark:border-[#E2E8F0] dark:bg-white">
+          <h1 className="text-xl font-semibold text-[#0F172A]">Job unavailable</h1>
           <p className="mx-auto mt-2 max-w-md text-[15px] text-[#5A6761]">{error}</p>
           <Button variant="outline" className="mt-5" onClick={() => setAttempt((value) => value + 1)}>Try Again</Button>
         </Card>
@@ -94,8 +94,8 @@ export default function JobDetail() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-5 w-36" />
-        <Card className="border-[#E5EBE7] bg-white dark:border-[#E5EBE7] dark:bg-white"><Skeleton className="h-52 w-full" /></Card>
-        <Card className="border-[#E5EBE7] bg-white dark:border-[#E5EBE7] dark:bg-white"><Skeleton className="h-64 w-full" /></Card>
+        <Card className="border-[#E2E8F0] bg-white dark:border-[#E2E8F0] dark:bg-white"><Skeleton className="h-52 w-full" /></Card>
+        <Card className="border-[#E2E8F0] bg-white dark:border-[#E2E8F0] dark:bg-white"><Skeleton className="h-64 w-full" /></Card>
       </div>
     );
   }
@@ -120,17 +120,17 @@ export default function JobDetail() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-5 pb-10">
-      <Link to="/" className="inline-flex items-center gap-2 rounded-lg text-[13px] font-semibold text-[#176B45] transition-colors hover:text-[#176B45] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A7B71]">
+      <Link to="/" className="inline-flex items-center gap-2 rounded-lg text-[13px] font-semibold text-[#F97316] transition-colors hover:text-[#F97316] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A7B71]">
         <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
       </Link>
 
-      <Card className="border-[#E5EBE7] bg-white dark:border-[#E5EBE7] dark:bg-white" padding="none">
+      <Card className="border-[#E2E8F0] bg-white dark:border-[#E2E8F0] dark:bg-white" padding="none">
         <div className="p-6 sm:p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <h1 className="font-display text-[24px] leading-tight font-bold tracking-tight text-[#17221C] sm:text-[28px]">{job.title}</h1>
-              <p className="mt-2 text-[14px] text-[#64736A]">
-                {job.company?.name && <span className="font-semibold text-[#176B45]">{job.company.name}</span>}
+              <h1 className="font-display text-[24px] leading-tight font-bold tracking-tight text-[#0F172A] sm:text-[28px]">{job.title}</h1>
+              <p className="mt-2 text-[14px] text-[#64748B]">
+                {job.company?.name && <span className="font-semibold text-[#F97316]">{job.company.name}</span>}
                 {job.company?.name && job.location ? <span className="mx-2 text-[#A7B2AB]">•</span> : null}
                 {job.location || "Location not specified"}
                 <span className="mx-2 text-[#A7B2AB]">•</span>
@@ -151,41 +151,41 @@ export default function JobDetail() {
       </Card>
 
       {match && (
-        <Card className="border-[#C7DDD1] bg-[#E8F2EC] dark:border-[#C7DDD1] dark:bg-[#E8F2EC]">
-          <h2 className="text-[16px] font-semibold text-[#176B45]">Why this job matches you</h2>
+        <Card className="border-[#FED7AA] bg-[#FEF3E8] dark:border-[#FED7AA] dark:bg-[#FEF3E8]">
+          <h2 className="text-[16px] font-semibold text-[#F97316]">Why this job matches you</h2>
           <TextBlock>{match.explanation || match.reason || match.summary}</TextBlock>
-          {match.score != null && <p className="mt-3 text-[13px] font-semibold text-[#176B45]">Match score: {match.score}%</p>}
+          {match.score != null && <p className="mt-3 text-[13px] font-semibold text-[#F97316]">Match score: {match.score}%</p>}
         </Card>
       )}
 
-      <Card className="border-[#E5EBE7] bg-white dark:border-[#E5EBE7] dark:bg-white">
+      <Card className="border-[#E2E8F0] bg-white dark:border-[#E2E8F0] dark:bg-white">
         <section>
-          <h2 className="text-[16px] font-semibold text-[#17221C]">Job Description</h2>
+          <h2 className="text-[16px] font-semibold text-[#0F172A]">Job Description</h2>
           <div className="mt-3"><TextBlock>{job.description || "No job description provided."}</TextBlock></div>
         </section>
 
         <section className="mt-8 border-t border-[#E5EBE6] pt-7">
-          <h2 className="text-[16px] font-semibold text-[#17221C]">Requirements</h2>
+          <h2 className="text-[16px] font-semibold text-[#0F172A]">Requirements</h2>
           <div className="mt-3"><TextBlock>{job.requirements || "No specific requirements provided."}</TextBlock></div>
         </section>
 
         <section className="mt-8 border-t border-[#E5EBE6] pt-7">
-          <h2 className="text-[16px] font-semibold text-[#17221C]">Skills</h2>
+          <h2 className="text-[16px] font-semibold text-[#0F172A]">Skills</h2>
           {job.requiredSkills?.length > 0 ? (
             <ul className="mt-4 flex flex-wrap gap-2.5">
-              {job.requiredSkills.map((skill) => <li key={skill} className="rounded-full border border-[#E5EBE7] bg-white px-3.5 py-2 text-[13px] font-medium text-[#176B45]">{skill}</li>)}
+              {job.requiredSkills.map((skill) => <li key={skill} className="rounded-full border border-[#E2E8F0] bg-white px-3.5 py-2 text-[13px] font-medium text-[#F97316]">{skill}</li>)}
             </ul>
-          ) : <p className="mt-3 text-[13px] text-[#64736A]">No specific skills listed.</p>}
+          ) : <p className="mt-3 text-[13px] text-[#64748B]">No specific skills listed.</p>}
         </section>
 
         <div className="mt-8 grid gap-4 border-t border-[#E5EBE6] pt-7 sm:grid-cols-3">
-          <div><h2 className="text-[16px] font-semibold text-[#17221C]">Salary</h2><p className="mt-2 text-[13px] text-[#64736A]">{salary || "Not provided"}</p></div>
-          <div><h2 className="text-[16px] font-semibold text-[#17221C]">Location</h2><p className="mt-2 text-[13px] text-[#64736A]">{job.location || "Not specified"}</p></div>
-          <div><h2 className="text-[16px] font-semibold text-[#17221C]">Job Type</h2><p className="mt-2 text-[13px] text-[#64736A]">{jobType}</p></div>
+          <div><h2 className="text-[16px] font-semibold text-[#0F172A]">Salary</h2><p className="mt-2 text-[13px] text-[#64748B]">{salary || "Not provided"}</p></div>
+          <div><h2 className="text-[16px] font-semibold text-[#0F172A]">Location</h2><p className="mt-2 text-[13px] text-[#64748B]">{job.location || "Not specified"}</p></div>
+          <div><h2 className="text-[16px] font-semibold text-[#0F172A]">Job Type</h2><p className="mt-2 text-[13px] text-[#64748B]">{jobType}</p></div>
         </div>
 
         <div className="mt-8 flex flex-col gap-3 border-t border-[#E5EBE6] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="max-w-xl text-[13px] leading-5 text-[#64736A]">
+          <p className="max-w-xl text-[13px] leading-5 text-[#64748B]">
             {job.alreadyApplied
               ? "You've already applied to this role. You can only apply once — track it from Applied Jobs."
               : "You'll be asked for your details and a resume. Screening starts as soon as you submit."}

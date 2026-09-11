@@ -55,7 +55,7 @@ export default function NotificationBell() {
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
         aria-expanded={open}
         aria-haspopup="true"
-        className="tap-target relative flex items-center justify-center rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-200"
+        className="tap-target relative flex items-center justify-center rounded-full p-2 text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-200"
       >
         <Bell className="h-5 w-5" aria-hidden="true" />
         {unreadCount > 0 && (
@@ -86,7 +86,7 @@ export default function NotificationBell() {
               aria-label="Notifications"
               // `max-w` keeps the 320px panel inside the viewport on a 360px
               // phone, where `right-0` alone would push it off the left edge.
-              className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2.5rem)] rounded-xl border border-slate-200 bg-white shadow-soft"
+              className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2.5rem)] rounded-xl border border-[#E2E8F0] bg-white shadow-soft"
             >
               <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
                 <p className="text-sm font-semibold text-slate-800">Notifications</p>
@@ -96,7 +96,7 @@ export default function NotificationBell() {
                     markAllRead?.();
                     setOpen(false);
                   }}
-                  className="tap-target -m-1 flex items-center gap-1 rounded-lg p-1 text-xs font-semibold text-[#176B45] transition-colors hover:bg-[#DDECE3] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
+                  className="tap-target -m-1 flex items-center gap-1 rounded-lg p-1 text-xs font-semibold text-[#F97316] transition-colors hover:bg-[#FEF3E8] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]-300"
                 >
                   <CheckCheck className="h-3.5 w-3.5" aria-hidden="true" /> Mark all read
                 </button>
@@ -104,7 +104,7 @@ export default function NotificationBell() {
 
               <div className="max-h-80 overflow-y-auto">
                 {(!recent || recent.length === 0) && (
-                  <p className="px-4 py-6 text-center text-sm text-slate-500">No notifications yet.</p>
+                  <p className="px-4 py-6 text-center text-sm text-[#64748B]">No notifications yet.</p>
                 )}
                 {recent?.map((n) => (
                   <button
@@ -114,16 +114,16 @@ export default function NotificationBell() {
                       if (!n.read) markRead?.(n._id);
                       setOpen(false);
                     }}
-                    className={`block w-full border-b border-slate-100 px-4 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-300 ${
-                      n.read ? "" : "bg-[#E8F2EC]/50"
+                    className={`block w-full border-b border-slate-100 px-4 py-3 text-left transition-colors hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316]-300 ${
+                      n.read ? "" : "bg-[#FEF3E8]/50"
                     }`}
                   >
                     <p className="text-sm font-semibold text-slate-800">
                       {n.title}
                       {!n.read && <span className="sr-only"> (unread)</span>}
                     </p>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{n.message}</p>
-                    <p className="mt-1 text-[11px] text-slate-500">{timeAgo(n.createdAt)}</p>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-[#64748B]">{n.message}</p>
+                    <p className="mt-1 text-[11px] text-[#64748B]">{timeAgo(n.createdAt)}</p>
                   </button>
                 ))}
               </div>
@@ -134,7 +134,7 @@ export default function NotificationBell() {
                   setOpen(false);
                   navigate("/notifications");
                 }}
-                className="block w-full rounded-b-xl bg-slate-50 px-4 py-2.5 text-center text-xs font-semibold text-[#176B45] transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-300"
+                className="block w-full rounded-b-xl bg-[#F8FAFC] px-4 py-2.5 text-center text-xs font-semibold text-[#F97316] transition-colors hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316]-300"
               >
                 View all notifications
               </button>

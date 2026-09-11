@@ -70,21 +70,21 @@ export default function Landing() {
   }, [theme, setTheme]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAF9] text-[#17221C]">
+    <div className="min-h-screen bg-[#F4F6F9] text-[#0F172A]">
       <MarketingNavbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-[#E5EBE7] bg-white">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-[radial-gradient(ellipse_at_bottom,#D2ECC9_0%,transparent_70%)] opacity-70" />
+      <section className="relative overflow-hidden border-b border-[#E2E8F0] bg-white">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-[radial-gradient(ellipse_at_bottom,#FED7AA_0%,transparent_70%)] opacity-70" />
         <div className="relative mx-auto max-w-3xl px-5 py-24 text-center sm:px-8">
           <motion.div initial="hidden" animate="show" variants={fadeUp}>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C7DDD1] bg-[#E8F2EC] px-3.5 py-1 text-xs font-semibold text-[#176B45]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#FED7AA] bg-[#FEF3E8] px-3.5 py-1 text-xs font-semibold text-[#F97316]">
               <Sparkles className="h-3.5 w-3.5" /> AI-Powered Recruitment Platform
             </span>
-            <h1 className="mt-5 text-[32px] font-bold leading-[38px] tracking-[-0.6px] text-[#17221C] sm:text-[40px] sm:leading-[48px]">
+            <h1 className="mt-5 text-[32px] font-bold leading-[38px] tracking-[-0.6px] text-[#0F172A] sm:text-[40px] sm:leading-[48px]">
               Land Your Dream Job with AI-Powered Hiring.
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-[15px] leading-6 text-[#64736A] sm:text-base">
+            <p className="mx-auto mt-5 max-w-xl text-[15px] leading-6 text-[#64748B] sm:text-base">
               Apply once, let AI resume screening and interviews do the heavy lifting, and grow your career with
               feedback that actually helps — every step tracked in one place.
             </p>
@@ -96,12 +96,12 @@ export default function Landing() {
                 Explore Jobs
               </Button>
             </div>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-[#64736A]">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-[#64748B]">
               <div className="flex items-center gap-1.5 font-medium">
-                <CheckCircle2 className="h-4 w-4 text-[#176B45]" /> Free for candidates, always
+                <CheckCircle2 className="h-4 w-4 text-[#F97316]" /> Free for candidates, always
               </div>
               <div className="flex items-center gap-1.5 font-medium">
-                <CheckCircle2 className="h-4 w-4 text-[#176B45]" /> Apply in minutes
+                <CheckCircle2 className="h-4 w-4 text-[#F97316]" /> Apply in minutes
               </div>
             </div>
           </motion.div>
@@ -111,16 +111,16 @@ export default function Landing() {
       {/* Features */}
       <section id="features" className="mx-auto max-w-7xl px-5 py-20 sm:px-8">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp} className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[24px] leading-[30px] font-bold text-[#17221C]">Everything you need to land your next role</h2>
-          <p className="mt-3 text-[13px] leading-5 text-[#64736A]">From first upload to your next offer — everything in one place.</p>
+          <h2 className="text-[24px] leading-[30px] font-bold text-[#0F172A]">Everything you need to land your next role</h2>
+          <p className="mt-3 text-[13px] leading-5 text-[#64748B]">From first upload to your next offer — everything in one place.</p>
         </motion.div>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f, i) => (
             <motion.div key={f.title} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp} transition={{ delay: (i % 4) * 0.06 }}>
-              <Card interactive className="group h-full rounded-2xl border border-[#E5EBE7] bg-white p-6 shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
+              <Card interactive className="group h-full rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)]">
                 <IconTile icon={f.icon} tone={i % 4 === 3 ? "ember" : "brand"} className="mb-4" />
-                <h3 className="text-[15px] font-semibold text-[#17221C]">{f.title}</h3>
-                <p className="mt-2 text-[13px] leading-5 text-[#64736A]">{f.desc}</p>
+                <h3 className="text-[15px] font-semibold text-[#0F172A]">{f.title}</h3>
+                <p className="mt-2 text-[13px] leading-5 text-[#64748B]">{f.desc}</p>
               </Card>
             </motion.div>
           ))}
@@ -128,11 +128,11 @@ export default function Landing() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="border-y border-[#E5EBE7] bg-white py-20">
+      <section id="how-it-works" className="border-y border-[#E2E8F0] bg-white py-20">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp} className="mx-auto max-w-2xl text-center">
-            <h2 className="text-[24px] leading-[30px] font-bold text-[#17221C]">How it works</h2>
-            <p className="mt-3 text-[13px] leading-5 text-[#64736A]">From creating your account to hearing back — a fully connected journey.</p>
+            <h2 className="text-[24px] leading-[30px] font-bold text-[#0F172A]">How it works</h2>
+            <p className="mt-3 text-[13px] leading-5 text-[#64748B]">From creating your account to hearing back — a fully connected journey.</p>
           </motion.div>
           <div className="mt-16 flex flex-col gap-0 lg:flex-row lg:items-center lg:justify-between">
             {FLOW.map((step, i) => (
@@ -144,12 +144,12 @@ export default function Landing() {
                 transition={{ delay: i * 0.08 }}
                 className="relative flex flex-1 items-center gap-4 lg:flex-col lg:gap-3 lg:text-center"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#176B45] text-sm font-semibold text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F97316] text-sm font-semibold text-white shadow-[0_1px_4px_rgba(0,0,0,0.07)]">
                   {i + 1}
                 </div>
-                <p className="text-[13px] font-semibold text-[#17221C] lg:mt-1">{step}</p>
+                <p className="text-[13px] font-semibold text-[#0F172A] lg:mt-1">{step}</p>
                 {i < FLOW.length - 1 && (
-                  <div className="hidden h-px flex-1 bg-gradient-to-r from-[#C1EBAD] to-[#EAF9E1] lg:block" />
+                  <div className="hidden h-px flex-1 bg-gradient-to-r from-[#FEF3E8] to-[#FEF3E8] lg:block" />
                 )}
               </motion.div>
             ))}
@@ -160,16 +160,16 @@ export default function Landing() {
       {/* Why choose us */}
       <section id="why-us" className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp} className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[24px] leading-[30px] font-bold text-[#17221C]">Why candidates choose AptusHire</h2>
+          <h2 className="text-[24px] leading-[30px] font-bold text-[#0F172A]">Why candidates choose AptusHire</h2>
         </motion.div>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {WHY_US.map((f, i) => {
             return (
               <motion.div key={f.title} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp} transition={{ delay: (i % 3) * 0.08 }}>
-                <Card className="h-full rounded-2xl border border-[#E5EBE7] bg-white p-6 shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
+                <Card className="h-full rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)]">
                   <IconTile icon={f.icon} tone="brand" className="mb-4" />
-                  <h3 className="text-[15px] font-semibold text-[#17221C]">{f.title}</h3>
-                  <p className="mt-2 text-[13px] leading-5 text-[#64736A]">{f.desc}</p>
+                  <h3 className="text-[15px] font-semibold text-[#0F172A]">{f.title}</h3>
+                  <p className="mt-2 text-[13px] leading-5 text-[#64748B]">{f.desc}</p>
                 </Card>
               </motion.div>
             );
@@ -178,10 +178,10 @@ export default function Landing() {
       </section>
 
       {/* About */}
-      <section id="about" className="border-y border-[#E5EBE7] bg-white py-20">
+      <section id="about" className="border-y border-[#E2E8F0] bg-white py-20">
         <div className="mx-auto max-w-3xl px-5 text-center sm:px-8">
-          <h2 className="text-[24px] leading-[30px] font-bold text-[#17221C]">About AptusHire</h2>
-          <p className="mt-4 text-[15px] leading-6 text-[#64736A]">
+          <h2 className="text-[24px] leading-[30px] font-bold text-[#0F172A]">About AptusHire</h2>
+          <p className="mt-4 text-[15px] leading-6 text-[#64748B]">
             AptusHire connects candidates with companies using AI-driven resume screening and real-time interviews
             — so you spend less time waiting and more time showing what you can actually do. Every application you
             submit, interview you take, and piece of feedback you receive lives in one dashboard you control.
@@ -194,11 +194,11 @@ export default function Landing() {
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8">
-        <div className="rounded-2xl border border-[#C7DDD1] bg-[#E8F2EC] px-8 py-14 text-center shadow-[0_1px_4px_rgba(27,67,50,0.07)]">
-          <h2 className="text-[24px] leading-[30px] font-bold text-[#17221C]">Ready to start applying?</h2>
+        <div className="rounded-2xl border border-[#FED7AA] bg-[#FEF3E8] px-8 py-14 text-center shadow-[0_1px_4px_rgba(0,0,0,0.07)]">
+          <h2 className="text-[24px] leading-[30px] font-bold text-[#0F172A]">Ready to start applying?</h2>
           {/* white/90 rather than brand-100: brand-100 on the gradient's
               lightest stop is 4.49:1, which rounds to "fails". */}
-          <p className="mx-auto mt-3 max-w-xl text-[13px] leading-5 text-[#64736A]">
+          <p className="mx-auto mt-3 max-w-xl text-[13px] leading-5 text-[#64748B]">
             Create your free account and apply to your first job in minutes.
           </p>
           <Button as={Link} to="/register" size="lg" className="mt-8">
@@ -212,7 +212,7 @@ export default function Landing() {
           <div className="flex flex-col justify-between gap-8 sm:flex-row">
             <div>
               <div className="flex items-center gap-2 font-display text-lg font-bold text-slate-900">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#176B45] text-white">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F97316] text-white">
                   <Sparkles className="h-4.5 w-4.5" />
                 </span>
                 AptusHire
@@ -223,10 +223,10 @@ export default function Landing() {
             </div>
             <div className="text-sm text-slate-600">
               <div className="font-semibold text-slate-800">Get in Touch</div>
-              <a href="mailto:careers@AptusHire.ai" className="mt-2 flex items-center gap-2 hover:text-[#176B45]">
+              <a href="mailto:careers@AptusHire.ai" className="mt-2 flex items-center gap-2 hover:text-[#F97316]">
                 <Mail className="h-4 w-4" /> careers@AptusHire.ai
               </a>
-              <a href="tel:+911140001234" className="mt-2 flex items-center gap-2 hover:text-[#176B45]">
+              <a href="tel:+911140001234" className="mt-2 flex items-center gap-2 hover:text-[#F97316]">
                 <Phone className="h-4 w-4" /> +91 11 4000 1234
               </a>
             </div>

@@ -1,4 +1,4 @@
-import { Component } from "react";
+﻿import { Component } from "react";
 
 // Top-level safety net. Before this existed, ANY uncaught error thrown while
 // React was rendering (a provider, the shell, or the first route) unmounted the
@@ -39,8 +39,8 @@ export default class ErrorBoundary extends Component {
           alignItems: "center",
           justifyContent: "center",
           padding: "24px",
-          background: "#F8FAF9",
-          color: "#17221C",
+          background: "#F4F6F9",
+          color: "#0F172A",
           fontFamily:
             'Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
         }}
@@ -50,7 +50,7 @@ export default class ErrorBoundary extends Component {
             maxWidth: "28rem",
             width: "100%",
             background: "#FFFFFF",
-            border: "1px solid #E5EBE7",
+            border: "1px solid #E2E8F0",
             borderRadius: "16px",
             padding: "28px",
             boxShadow: "0 8px 24px rgba(23,34,28,0.09)",
@@ -69,7 +69,7 @@ export default class ErrorBoundary extends Component {
                 marginTop: "16px",
                 padding: "12px",
                 background: "#F1F4F2",
-                border: "1px solid #E5EBE7",
+                border: "1px solid #E2E8F0",
                 borderRadius: "10px",
                 fontSize: "0.8rem",
                 whiteSpace: "pre-wrap",
@@ -92,7 +92,7 @@ export default class ErrorBoundary extends Component {
                 fontSize: "0.9rem",
                 fontWeight: 600,
                 color: "#FFFFFF",
-                background: "#176B45",
+                background: "#F97316",
                 cursor: "pointer",
               }}
             >
@@ -107,8 +107,8 @@ export default class ErrorBoundary extends Component {
                 padding: "10px 20px",
                 fontSize: "0.9rem",
                 fontWeight: 600,
-                color: "#176B45",
-                background: "#E8F2EC",
+                color: "#F97316",
+                background: "#FEF3E8",
                 textDecoration: "none",
               }}
             >

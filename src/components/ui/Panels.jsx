@@ -23,26 +23,26 @@ export function PageHero({
 }) {
   return (
     <Component
-      className={`overflow-hidden rounded-panel border border-[#E5EBE7] bg-white px-6 py-7 shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:px-8 sm:py-8 ${className}`}
+      className={`overflow-hidden rounded-panel border border-[#E2E8F0] bg-white px-6 py-7 shadow-[0_1px_4px_rgba(0,0,0,0.07)] sm:px-8 sm:py-8 ${className}`}
       {...props}
     >
       <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-5">
         <div className="min-w-0 max-w-2xl">
           {eyebrow && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C7DDD1] bg-[#E8F2EC] px-3 py-1 text-xs font-semibold text-[#176B45]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#FED7AA] bg-[#FEF3E8] px-3 py-1 text-xs font-semibold text-[#F97316]">
               {EyebrowIcon && <EyebrowIcon className="h-3.5 w-3.5" aria-hidden="true" />}
               {eyebrow}
             </span>
           )}
           <h1
-            className={`font-display text-2xl font-bold tracking-tight text-[#17221C] sm:text-3xl ${
+            className={`font-display text-2xl font-bold tracking-tight text-[#0F172A] sm:text-3xl ${
               eyebrow ? "mt-3.5" : ""
             }`}
           >
             {title}
           </h1>
           {description && (
-            <p className={`mt-2.5 max-w-prose text-sm leading-relaxed text-[#64736A] ${descriptionClassName}`}>
+            <p className={`mt-2.5 max-w-prose text-sm leading-relaxed text-[#64748B] ${descriptionClassName}`}>
               {description}
             </p>
           )}
@@ -51,13 +51,13 @@ export function PageHero({
       </div>
 
       {points.length > 0 && (
-        <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2.5 border-t border-[#E5EBE7]/60 pt-5">
+        <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2.5 border-t border-[#E2E8F0]/60 pt-5">
           {points.map((point) => (
             <li
               key={point}
-              className={`inline-flex items-center gap-2 text-xs font-medium text-[#64736A] ${pointsClassName}`}
+              className={`inline-flex items-center gap-2 text-xs font-medium text-[#64748B] ${pointsClassName}`}
             >
-              <CircleCheck className="h-4 w-4 shrink-0 text-[#176B45]" aria-hidden="true" />
+              <CircleCheck className="h-4 w-4 shrink-0 text-[#F97316]" aria-hidden="true" />
               {point}
             </li>
           ))}
@@ -85,8 +85,8 @@ export function Chip({
         "tap-target inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium whitespace-nowrap",
         "transition-colors duration-150 focus-visible:outline-none focus-visible:ring-3",
         active
-          ? "border-[#176B45] bg-[#176B45] text-white shadow-[0_1px_2px_rgba(23,107,69,0.20)] focus-visible:ring-[#176B45]/25"
-          : "border-[#E5EBE7] bg-white text-[#64736A] hover:border-[#C7DDD1] hover:bg-[#DDECE3] hover:text-[#176B45] focus-visible:ring-primary/20",
+          ? "border-[#F97316] bg-[#F97316] text-white shadow-[0_1px_2px_rgba(23,107,69,0.20)] focus-visible:ring-[#F97316]/25"
+          : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#FED7AA] hover:bg-[#FEF3E8] hover:text-[#F97316] focus-visible:ring-[#F97316]/20",
         className,
       ].join(" ")}
       {...props}
@@ -162,7 +162,7 @@ export function HeroStat({
   return (
     <Card tone={tone} className={`p-7 ${className}`} {...props}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="text-sm font-medium text-[#64736A]">{label}</p>
+        <p className="text-sm font-medium text-[#64748B]">{label}</p>
         {badge}
       </div>
 
@@ -171,10 +171,10 @@ export function HeroStat({
           {/* shadcn stat convention: a restrained 2xl semibold figure, not a
               display-weight banner number — the label and basis carry meaning,
               the digit just anchors it. */}
-          <p className="text-2xl font-semibold tabular-nums tracking-tight text-[#17221C]">
+          <p className="text-2xl font-semibold tabular-nums tracking-tight text-[#0F172A]">
             {value}
           </p>
-          <p className="mt-1.5 max-w-prose text-sm text-[#64736A]">{basis}</p>
+          <p className="mt-1.5 max-w-prose text-sm text-[#64748B]">{basis}</p>
           {action && <div className="mt-5">{action}</div>}
         </div>
 
@@ -183,9 +183,9 @@ export function HeroStat({
             {tiles.map((t) => (
               <li key={t.label} className="flex w-16 flex-col items-center gap-1.5 text-center">
                 <IconTile icon={t.icon} tone={t.tone || "brand"} />
-                <span className="text-[11px] font-medium leading-tight text-[#64736A]">{t.label}</span>
+                <span className="text-[11px] font-medium leading-tight text-[#64748B]">{t.label}</span>
                 {t.value != null && (
-                  <span className="text-xs font-bold tabular-nums text-[#17221C]">{t.value}</span>
+                  <span className="text-xs font-bold tabular-nums text-[#0F172A]">{t.value}</span>
                 )}
               </li>
             ))}
@@ -232,21 +232,21 @@ export function ListRow({
   return (
     <Component
       className={[
-        "group flex w-full items-center gap-3 rounded-control border border-[#E5EBE7] bg-white px-4 py-3 text-left",
-        "transition-colors duration-150 hover:border-[#C7DDD1] hover:bg-[#DDECE3]",
-        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+        "group flex w-full items-center gap-3 rounded-control border border-[#E2E8F0] bg-white px-4 py-3 text-left",
+        "transition-colors duration-150 hover:border-[#FED7AA] hover:bg-[#FEF3E8]",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]",
         className,
       ].join(" ")}
       {...props}
     >
       {icon && <IconTile icon={icon} tone={iconTone} size="sm" />}
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-[#17221C]">{title}</span>
-        {meta && <span className="block truncate text-xs text-[#64736A]">{meta}</span>}
+        <span className="block truncate text-sm font-semibold text-[#0F172A]">{title}</span>
+        {meta && <span className="block truncate text-xs text-[#64748B]">{meta}</span>}
       </span>
       {trailing}
       <ChevronRight
-        className="h-4 w-4 shrink-0 text-[#9BAAA1] transition-colors group-hover:text-[#176B45]"
+        className="h-4 w-4 shrink-0 text-[#94A3B8] transition-colors group-hover:text-[#F97316]"
         aria-hidden="true"
       />
     </Component>
@@ -280,17 +280,17 @@ export function RecordCard({
   return (
     <Card
       padding="compact"
-      className={`relative flex h-full flex-col transition-[box-shadow,border-color] duration-150 hover:border-[#C7DDD1]/30 hover:shadow-soft ${className}`}
+      className={`relative flex h-full flex-col transition-[box-shadow,border-color] duration-150 hover:border-[#FED7AA]/30 hover:shadow-soft ${className}`}
       {...props}
     >
       <div className="flex items-start gap-3">
         {avatar}
         {icon && <IconTile icon={icon} tone={iconTone} size="sm" />}
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-[#17221C] wrap-anywhere">
+          <h3 className="text-sm font-semibold text-[#0F172A] wrap-anywhere">
             <RecordLink link={link}>{title}</RecordLink>
           </h3>
-          {subtitle && <p className="mt-0.5 text-xs text-[#64736A] wrap-anywhere">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 text-xs text-[#64748B] wrap-anywhere">{subtitle}</p>}
         </div>
         {trailing && <div className="shrink-0">{trailing}</div>}
       </div>
@@ -299,8 +299,8 @@ export function RecordCard({
         <dl className={`mt-3 grid gap-x-4 gap-y-2.5 ${metaCols[metaColumns] ?? metaCols[3]}`}>
           {meta.map((m) => (
             <div key={m.label} className="min-w-0">
-              <dt className="text-[11px] font-semibold text-[#9BAAA1]">{m.label}</dt>
-              <dd className="mt-0.5 text-sm text-[#17221C] wrap-anywhere">
+              <dt className="text-[11px] font-semibold text-[#94A3B8]">{m.label}</dt>
+              <dd className="mt-0.5 text-sm text-[#0F172A] wrap-anywhere">
                 {m.value == null || m.value === "" ? "—" : m.value}
               </dd>
             </div>
@@ -311,7 +311,7 @@ export function RecordCard({
       {children}
 
       {(footer || footerTrailing) && (
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-[#E5EBE7] pt-2.5 text-xs text-[#64736A]">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-[#E2E8F0] pt-2.5 text-xs text-[#64748B]">
           <span className="min-w-0 wrap-anywhere">{footer}</span>
           {footerTrailing && <span className="shrink-0">{footerTrailing}</span>}
         </div>
@@ -344,7 +344,7 @@ export function RecordRow({
 }) {
   return (
     <li
-      className={`relative bg-white px-4 py-3 transition-colors duration-150 hover:bg-[#DDECE3] ${className}`}
+      className={`relative bg-white px-4 py-3 transition-colors duration-150 hover:bg-[#FEF3E8] ${className}`}
       {...props}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
@@ -352,10 +352,10 @@ export function RecordRow({
           {avatar}
           {icon && <IconTile icon={icon} tone={iconTone} size="sm" />}
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-semibold text-[#17221C]">
+            <h3 className="truncate text-sm font-semibold text-[#0F172A]">
               <RecordLink link={link}>{title}</RecordLink>
             </h3>
-            {subtitle && <p className="truncate text-xs text-[#64736A]">{subtitle}</p>}
+            {subtitle && <p className="truncate text-xs text-[#64748B]">{subtitle}</p>}
           </div>
         </div>
 
@@ -363,8 +363,8 @@ export function RecordRow({
           <dl className="hidden shrink-0 items-start gap-x-6 xl:flex">
             {meta.map((m) => (
               <div key={m.label} className="w-32 min-w-0">
-                <dt className="text-[11px] font-semibold text-[#9BAAA1]">{m.label}</dt>
-                <dd className="mt-0.5 truncate text-sm text-[#17221C]">
+                <dt className="text-[11px] font-semibold text-[#94A3B8]">{m.label}</dt>
+                <dd className="mt-0.5 truncate text-sm text-[#0F172A]">
                   {m.value == null || m.value === "" ? "—" : m.value}
                 </dd>
               </div>
@@ -382,7 +382,7 @@ export function RecordRow({
           <div className="relative z-10 flex shrink-0 items-center gap-2">{actions}</div>
         )}
       </div>
-      {note && <div className="mt-2 text-xs text-[#64736A] wrap-anywhere">{note}</div>}
+      {note && <div className="mt-2 text-xs text-[#64748B] wrap-anywhere">{note}</div>}
       {children}
     </li>
   );
@@ -393,7 +393,7 @@ export function RecordList({ children, label, className = "" }) {
   return (
     <ul
       aria-label={label}
-      className={`divide-y divide-[#E5EBE7] overflow-hidden rounded-card border border-[#E5EBE7] shadow-[0_1px_4px_rgba(27,67,50,0.07)] ${className}`}
+      className={`divide-y divide-[#E2E8F0] overflow-hidden rounded-card border border-[#E2E8F0] shadow-[0_1px_4px_rgba(0,0,0,0.07)] ${className}`}
     >
       {children}
     </ul>
@@ -420,7 +420,7 @@ function RecordLink({ link, children }) {
   const { as: Component = "a", className = "", ...rest } = link;
   return (
     <Component
-      className={`rounded-sm transition-colors after:absolute after:inset-0 after:rounded-card hover:text-[#176B45] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${className}`}
+      className={`rounded-sm transition-colors after:absolute after:inset-0 after:rounded-card hover:text-[#F97316] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316] ${className}`}
       {...rest}
     >
       {children}
@@ -448,28 +448,28 @@ export function StepTrack({ steps, currentKey, reached, label, className = "" })
             className={[
               "min-w-[9.5rem] flex-1 rounded-xl border p-4",
               current
-                ? "border-[#C7DDD1] bg-[#E8F2EC]"
+                ? "border-[#FED7AA] bg-[#FEF3E8]"
                 : done
-                ? "border-transparent bg-[#E8F2EC]"
-                : "border-[#E5EBE7] bg-white",
+                ? "border-transparent bg-[#FEF3E8]"
+                : "border-[#E2E8F0] bg-white",
             ].join(" ")}
           >
             <div className="flex items-start justify-between gap-2">
               <span
                 className={`text-[11px] font-semibold tabular-nums ${
-                  current ? "text-[#176B45]" : done ? "text-[#176B45]" : "text-[#9BAAA1]"
+                  current ? "text-[#F97316]" : done ? "text-[#F97316]" : "text-[#94A3B8]"
                 }`}
               >
                 Step {String(i + 1).padStart(2, "0")}
               </span>
-              {done    && <CircleCheck className="h-4 w-4 shrink-0 text-[#176B45]" aria-hidden="true" />}
-              {current && <CircleDot   className="h-4 w-4 shrink-0 text-[#176B45]" aria-hidden="true" />}
+              {done    && <CircleCheck className="h-4 w-4 shrink-0 text-[#F97316]" aria-hidden="true" />}
+              {current && <CircleDot   className="h-4 w-4 shrink-0 text-[#F97316]" aria-hidden="true" />}
             </div>
-            <p className={`mt-1.5 text-sm font-semibold ${current || done ? "text-[#17221C]" : "text-[#64736A]"}`}>
+            <p className={`mt-1.5 text-sm font-semibold ${current || done ? "text-[#0F172A]" : "text-[#64748B]"}`}>
               {step.label}
               {current && <span className="sr-only"> (current step)</span>}
             </p>
-            {step.meta && <p className="mt-0.5 text-[11px] text-[#64736A]">{step.meta}</p>}
+            {step.meta && <p className="mt-0.5 text-[11px] text-[#64748B]">{step.meta}</p>}
           </li>
         );
       })}
@@ -485,7 +485,7 @@ export function TokenList({ items = [], max = 6, label, className = "" }) {
   return (
     <div className={className}>
       {label && (
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BAAA1]">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-[#94A3B8]">
           {label}
         </p>
       )}
@@ -493,13 +493,13 @@ export function TokenList({ items = [], max = 6, label, className = "" }) {
         {shown.map((item) => (
           <li
             key={item}
-            className="rounded-lg border border-[#E5EBE7] bg-[#F8FAF9] px-2.5 py-1 text-xs font-medium text-[#64736A]"
+            className="rounded-lg border border-[#E2E8F0] bg-[#F4F6F9] px-2.5 py-1 text-xs font-medium text-[#64748B]"
           >
             {item}
           </li>
         ))}
         {rest.length > 0 && (
-          <li className="rounded-lg border border-dashed border-[#E5EBE7] px-2.5 py-1 text-xs font-medium text-[#9BAAA1]">
+          <li className="rounded-lg border border-dashed border-[#E2E8F0] px-2.5 py-1 text-xs font-medium text-[#94A3B8]">
             +{rest.length} more
             <span className="sr-only">: {rest.join(", ")}</span>
           </li>
@@ -513,8 +513,8 @@ export function TokenList({ items = [], max = 6, label, className = "" }) {
 export function MetaItem({ icon: Icon, children, className = "" }) {
   if (children == null || children === "") return null;
   return (
-    <span className={`inline-flex items-center gap-1.5 text-sm text-[#64736A] ${className}`}>
-      {Icon && <Icon className="h-4 w-4 shrink-0 text-[#9BAAA1]" aria-hidden="true" />}
+    <span className={`inline-flex items-center gap-1.5 text-sm text-[#64748B] ${className}`}>
+      {Icon && <Icon className="h-4 w-4 shrink-0 text-[#94A3B8]" aria-hidden="true" />}
       {children}
     </span>
   );

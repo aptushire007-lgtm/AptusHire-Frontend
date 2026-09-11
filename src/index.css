@@ -2,18 +2,14 @@
 @import "tailwindcss";
 
 /**
- * AptusHire Candidate Frontend — HiringAnt Design Token System
- * Primary: #176B45 deep green | Canvas: #F8FAF9 | Cards: #FFFFFF
+ * AptusHire Candidate Frontend
+ * Primary: #F97316 orange  |  Sidebar: #1B2A3B navy  |  Canvas: #F4F6F9
  */
 
 @theme {
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Lexend", Inter, system-ui, sans-serif;
 
-  /* Portal-wide readable scale, bumped +1px so nothing reads as fine print.
-     0.875rem = 14px is the minimum: `text-xs` sits here, and every hard-coded
-     size at or below 14px is floored to it in the utilities layer below.
-     `text-sm` (the default body size) is 15px. */
   --text-xs:              0.875rem;
   --text-xs--line-height: 1.5;
   --text-sm:              0.9375rem;
@@ -21,103 +17,93 @@
   --text-base:            1rem;
   --text-base--line-height: 1.6;
 
-  /* PRIMARY GREEN */
-  --color-primary:        #176B45;
-  --color-primary-dark:   #125638;
-  --color-primary-light:  #E8F2EC;
-  --color-brand-green:    #176B45;
+  /* ── PRIMARY ORANGE ─────────────────────────── */
+  --color-primary:        #F97316;
+  --color-primary-dark:   #EA6C0A;
+  --color-primary-light:  #FEF3E8;
+  --color-brand-orange:   #F97316;
 
-  /* SECONDARY */
-  --color-secondary-green:  #5F9475;
-  --color-green-light:      #E8F2EC;
-  --color-green-muted:      #F1F7F3;
+  /* ── NAVY ───────────────────────────────────── */
+  --color-navy:           #1B2A3B;
+  --color-navy-dark:      #131F2E;
+  --color-navy-light:     #243447;
 
-  /* LEGACY ALIASES → green */
-  --color-accent-orange:       #176B45;
-  --color-accent-orange-dark:  #125638;
-  --color-accent-orange-soft:  #E8F2EC;
-  --color-accent-orange-mid:   #9BBFAD;
-  --color-accent-gold:         #A88A45;
-  --color-accent-gold-dark:    #8A6E32;
-  --color-accent-gold-light:   #F5EDD8;
-  --color-accent-gold-mid:     #D4B877;
+  /* ── ORANGE SCALE ───────────────────────────── */
+  --color-brand-50:  #FFF7ED;
+  --color-brand-100: #FEF3E8;
+  --color-brand-200: #FED7AA;
+  --color-brand-300: #FDBA74;
+  --color-brand-400: #FB923C;
+  --color-brand-500: #F97316;
+  --color-brand-600: #EA6C0A;
+  --color-brand-700: #C2570A;
+  --color-brand-800: #9A3E08;
+  --color-brand-900: #7C3009;
+  --color-brand-950: #431607;
 
-  /* GREEN SCALE */
-  --color-brand-50:  #F1F7F3;
-  --color-brand-100: #E8F2EC;
-  --color-brand-200: #C7DDD1;
-  --color-brand-300: #9BBFAD;
-  --color-brand-400: #5F9475;
-  --color-brand-500: #176B45;
-  --color-brand-600: #125638;
-  --color-brand-700: #0E4028;
-  --color-brand-800: #092B1A;
-  --color-brand-900: #05180E;
-  --color-brand-950: #020D07;
-
-  /* SURFACES */
-  --color-canvas:       #F8FAF9;
-  --color-canvas-deep:  #EFF4F1;
-  --color-background:   #F8FAF9;
+  /* ── SURFACES ───────────────────────────────── */
+  --color-canvas:       #F4F6F9;
+  --color-canvas-deep:  #E8ECF2;
+  --color-background:   #F4F6F9;
   --color-surface:      #FFFFFF;
-  --color-surface-alt:  #FAFCFB;
+  --color-surface-alt:  #FAFBFD;
   --color-cream:        #FDFEFE;
-  --color-cream-mid:    #F4F8F5;
+  --color-cream-mid:    #F8FAFC;
 
-  /* TEXT */
-  --color-text:         #17221C;
-  --color-text-strong:  #17221C;
-  --color-text-muted:   #64736A;
-  --color-text-faint:   #9BAAA1;
+  /* ── TEXT ───────────────────────────────────── */
+  --color-text:         #0F172A;
+  --color-text-strong:  #0F172A;
+  --color-text-muted:   #64748B;
+  --color-text-faint:   #94A3B8;
   --color-text-on-fill: #FFFFFF;
 
-  /* BORDERS */
-  --color-border:       #E5EBE7;
-  --color-border-mid:   #C7D4CC;
-  --color-border-brand: #C7DDD1;
+  /* ── BORDERS ────────────────────────────────── */
+  --color-border:       #E2E8F0;
+  --color-border-mid:   #CBD5E1;
+  --color-border-brand: #FED7AA;
 
-  /* HOVER */
-  --color-hover: #DDECE3;
+  /* ── HOVER ──────────────────────────────────── */
+  --color-hover: #FEF3E8;
 
-  /* VERDICTS */
-  --color-verdict-positive:      #238653;
-  --color-verdict-positive-tint: #DDF1E5;
-  --color-verdict-pending:       #A88A45;
-  --color-verdict-pending-tint:  #F5EDD8;
-  --color-verdict-negative:      #C95C5C;
-  --color-verdict-negative-tint: #F8EAEA;
+  /* ── VERDICTS ───────────────────────────────── */
+  --color-verdict-positive:      #16A34A;
+  --color-verdict-positive-tint: #DCFCE7;
+  --color-verdict-pending:       #D97706;
+  --color-verdict-pending-tint:  #FEF3C7;
+  --color-verdict-negative:      #DC2626;
+  --color-verdict-negative-tint: #FEE2E2;
 
-  /* LIME → success */
-  --color-lime:      #238653;
-  --color-lime-soft: #DDF1E5;
+  /* ── LIME → success ─────────────────────────── */
+  --color-lime:      #16A34A;
+  --color-lime-soft: #DCFCE7;
 
-  /* NEUTRALS */
-  --color-slate-50:  #FFFFFF;
-  --color-slate-100: #F8FAF9;
-  --color-slate-200: #E5EBE7;
-  --color-slate-300: #C7D4CC;
-  --color-slate-400: #9BAAA1;
-  --color-slate-500: #64736A;
-  --color-slate-600: #445249;
-  --color-slate-700: #2D3B32;
-  --color-slate-800: #1A2520;
-  --color-slate-900: #17221C;
-  --color-slate-950: #0C1310;
+  /* ── NEUTRALS (slate) ───────────────────────── */
+  --color-slate-50:  #F8FAFC;
+  --color-slate-100: #F1F5F9;
+  --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B;
+  --color-slate-900: #0F172A;
+  --color-slate-950: #020617;
 
-  /* CHART */
-  --color-chart-brand:    #E8F2EC;
-  --color-chart-positive: #DDF1E5;
-  --color-chart-neutral:  #E5EBE7;
-  --color-chart-negative: #F8EAEA;
+  /* ── CHART ──────────────────────────────────── */
+  --color-chart-brand:    #FEF3E8;
+  --color-chart-positive: #DCFCE7;
+  --color-chart-neutral:  #F1F5F9;
+  --color-chart-negative: #FEE2E2;
 
-  /* SHADOWS */
-  --shadow-card: 0 1px 2px rgba(23,34,28,0.05), 0 1px 4px rgba(23,34,28,0.04);
-  --shadow-soft: 0 4px 16px rgba(23,34,28,0.07);
-  --shadow-lift: 0 8px 24px rgba(23,34,28,0.09);
-  --shadow-deep: 0 20px 48px -8px rgba(23,34,28,0.12);
-  --shadow-glow: 0 0 0 3px rgba(23,107,69,0.20);
+  /* ── SHADOWS ────────────────────────────────── */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-soft: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lift: 0 8px 24px rgba(0,0,0,0.10);
+  --shadow-deep: 0 20px 48px -8px rgba(0,0,0,0.15);
+  --shadow-glow: 0 0 0 3px rgba(249,115,22,0.22);
 
-  /* SPACING */
+  /* ── SPACING ────────────────────────────────── */
   --spacing-page-x:       1.5rem;
   --spacing-page-y:       1.5rem;
   --spacing-card:         1.25rem;
@@ -125,47 +111,59 @@
   --spacing-table-cell-x: 0.875rem;
   --spacing-table-cell-y: 0.75rem;
 
-  /* RADIUS */
+  /* ── RADIUS ─────────────────────────────────── */
   --radius-control: 0.5rem;
   --radius-card:    0.75rem;
   --radius-panel:   1rem;
   --radius-pill:    9999px;
 
-  /* HEIGHTS */
+  /* ── HEIGHTS ────────────────────────────────── */
   --control-height-sm: 2.125rem;
   --control-height-md: 2.5rem;
   --control-height-lg: 2.75rem;
   --input-height:      2.75rem;
 
-  /* MOTION */
+  /* ── MOTION ─────────────────────────────────── */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
-  /* LEGACY aptus-* */
-  --aptus-ink:    #17221C;
-  --aptus-cream:  #F8FAF9;
+  /* ── LEGACY aliases kept for backward compat ── */
+  --color-accent-orange:       #F97316;
+  --color-accent-orange-dark:  #EA6C0A;
+  --color-accent-orange-soft:  #FEF3E8;
+  --color-accent-orange-mid:   #FED7AA;
+  --color-accent-gold:         #D97706;
+  --color-accent-gold-dark:    #B45309;
+  --color-accent-gold-light:   #FEF3C7;
+  --color-accent-gold-mid:     #FCD34D;
+  /* green aliases → orange so old tailwind classes still compile */
+  --color-brand-green:         #F97316;
+  --color-secondary-green:     #FB923C;
+  --color-green-light:         #FEF3E8;
+  --color-green-muted:         #FEF3E8;
+  --aptus-ink:    #0F172A;
+  --aptus-cream:  #F4F6F9;
   --aptus-paper:  #FFFFFF;
-  --aptus-forest: #176B45;
-  --aptus-green:  #176B45;
-  --aptus-lime:   #238653;
-  --aptus-body:   #17221C;
+  --aptus-forest: #F97316;
+  --aptus-green:  #F97316;
+  --aptus-lime:   #16A34A;
+  --aptus-body:   #0F172A;
 }
 
 :root {
-  --background:     #F8FAF9;
+  --background:     #F4F6F9;
   --surface:        #FFFFFF;
   --white:          #FFFFFF;
-  --text-primary:   #17221C;
-  --text-secondary: #64736A;
-  --text-muted:     #64736A;
-  --border:         #E5EBE7;
-  --border-light:   #F1F7F3;
-  --green-900:      #0E4028;
-  --green-700:      #176B45;
-  --green-500:      #5F9475;
-  --lime-400:       #238653;
-  --lime-200:       #E8F2EC;
+  --text-primary:   #0F172A;
+  --text-secondary: #64748B;
+  --text-muted:     #64748B;
+  --border:         #E2E8F0;
+  --border-light:   #F1F5F9;
+  --orange-500:     #F97316;
+  --orange-600:     #EA6C0A;
+  --orange-100:     #FEF3E8;
+  --navy-900:       #1B2A3B;
   --font-family:    "Inter", sans-serif;
 }
 
@@ -177,15 +175,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    background-color: #F8FAF9;
-    color: #17221C;
+    background-color: #F4F6F9;
+    color: #0F172A;
     line-height: 1.6;
     overflow-x: clip;
     color-scheme: light;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    color: #17221C;
+    color: #0F172A;
     letter-spacing: -0.02em;
     line-height: 1.25;
   }
@@ -194,21 +192,21 @@
   input[type="url"], input[type="date"], select, textarea {
     min-height: var(--input-height);
     border-radius: var(--radius-control);
-    border: 1px solid #E5EBE7;
+    border: 1px solid #E2E8F0;
     background: #FFFFFF;
     padding: 0.625rem 0.875rem;
     font-size: 0.875rem;
-    color: #17221C;
+    color: #0F172A;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   input:focus, select:focus, textarea:focus {
-    border-color: #176B45;
+    border-color: #F97316;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(23, 107, 69, 0.15);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
   }
   ::selection {
-    background: #E8F2EC;
-    color: #125638;
+    background: #FEF3E8;
+    color: #EA6C0A;
   }
 }
 
@@ -219,21 +217,11 @@
   .candidate-side { color-scheme: light; }
   .ring-brand { box-shadow: var(--shadow-glow); }
 
-  /* 14px font-size floor for the whole portal. Every hard-coded size at or
-     below 14px is raised to it; line-height is left to each call site.
-     `text-xs` / `sm:text-xs` / `text-sm` are handled by the tokens above. */
-  .text-\[8px\],
-  .text-\[9px\],
-  .text-\[10px\],
-  .text-\[11px\],
-  .text-\[12px\],
-  .text-\[13px\],
-  .text-\[14px\],
-  .text-\[0\.625rem\],
-  .text-\[0\.6875rem\],
-  .text-\[0\.75rem\],
-  .text-\[0\.8125rem\],
-  .text-\[0\.875rem\] {
+  /* 14px font-size floor */
+  .text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\],
+  .text-\[12px\], .text-\[13px\], .text-\[14px\],
+  .text-\[0\.625rem\], .text-\[0\.6875rem\], .text-\[0\.75rem\],
+  .text-\[0\.8125rem\], .text-\[0\.875rem\] {
     font-size: 0.875rem;
   }
 }
