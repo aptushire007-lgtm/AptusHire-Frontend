@@ -7,6 +7,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import api from "../api/client.js";
+import BrandLogo from "../components/ui/BrandLogo.jsx";
 
 /* ───── colours ─────────────────────────────────────────────── */
 const O  = "#FF9022";          // orange light
@@ -464,10 +465,7 @@ function Navbar() {
   return (
     <header className="fmc-hdr">
       <div className="fmc-hdr-inner">
-        {/* Logo */}
-        <Link to="/" className="fmc-logo">
-          <span><span className="lo">Aptus</span><span className="lk">Hire</span></span>
-        </Link>
+        <BrandLogo to="/" variant="text" size="lg" textWeight="font-extrabold" className="fmc-logo" />
 
         {/* Candidates chip */}
         <span className="fmc-cands">
@@ -1133,9 +1131,7 @@ function Footer() {
       <div className="fmc-footer-grid">
         {/* brand */}
         <div>
-          <div className="fmc-footer-logo">
-            <span><span style={{ color: O2 }}>Aptus</span><span style={{ color: BK }}>Hire</span></span>
-          </div>
+          <BrandLogo variant="text" size="md" textWeight="font-extrabold" className="fmc-footer-logo" />
           <p className="s14" style={{ marginTop: 12, maxWidth: 260, color: "#736C64", lineHeight: 1.6 }}>
             Upload your CV once. Companies with a matching role come to you. Free for candidates, always.
           </p>

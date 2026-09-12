@@ -39,7 +39,7 @@ export function BrandLogo({
   nameColorClassName,
 }) {
   const dark = theme === "dark";
-  const textColor  = nameColorClassName || (dark ? "text-white" : "text-[#0F172A]");
+  const textColor  = nameColorClassName || (dark ? "text-white" : "text-[#2563EB]");
   const hireColor  = "text-[#F97316]";
   const tagColor   = dark ? "text-slate-300" : "text-[#64748B]";
 

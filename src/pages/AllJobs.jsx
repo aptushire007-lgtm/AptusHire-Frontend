@@ -15,6 +15,7 @@ import api from "../api/client.js";
 import { accountAuthHeader, getAccountAuth } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
 import { Skeleton } from "../components/ui/Card.jsx";
+import BrandLogo from "../components/ui/BrandLogo.jsx";
 
 /* ─────────────────────────────────────────────────────────────
    Flowmingo design tokens  (scoped to this page only)
@@ -280,13 +281,7 @@ function FMTopNav({ user, isAuthenticated }) {
       <div style={{ maxWidth: 1200, margin: "0 auto", height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
         {/* Left — logo + candidates dropdown */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Logo: "Aptus" styled like Flowmingo */}
-          <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em" }}>
-              <span style={{ color: FM.orange }}>Aptus</span>
-              <span style={{ color: FM.black }}>Hire</span>
-            </span>
-          </Link>
+          <BrandLogo to="/" variant="text" size="lg" textWeight="font-extrabold" />
           {/* Candidates chip */}
           <button
             type="button"

@@ -13,6 +13,7 @@ import {
   ArrowRight, Clock, GraduationCap, SlidersHorizontal,
   CheckCircle2, Zap, Globe, ChevronDown, MoreHorizontal,
 } from "lucide-react";
+import AutoApplyModal from "../components/jobs/AutoApplyModal.jsx";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
@@ -197,7 +198,22 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
 // ─────────────────────────────────────────────────────────────────────────────
 // RIGHT PANEL — job detail
 // ─────────────────────────────────────────────────────────────────────────────
-function JobDetailPanel({ job, navigate }) {
+function JobDetailPanel({ job, navigate, onRemove }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close the menu when a different job is selected
+  useEffect(() => { setMenuOpen(false); }, [job?._id]);
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleOutside(e) {
+      if (!e.target.closest("[data-job-menu]")) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [menuOpen]);
+
   if (!job) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-12 text-center">
@@ -227,13 +243,44 @@ function JobDetailPanel({ job, navigate }) {
             <h1 className="text-[22px] font-bold leading-snug text-[#0F172A]">
               {job.title}
             </h1>
-            <button
-              type="button"
-              aria-label="More options"
-              className="mt-1 shrink-0 rounded-lg p-1 text-[#94A3B8] hover:bg-[#F4F6F9] hover:text-[#0F172A]"
-            >
-              <MoreHorizontal className="h-5 w-5" aria-hidden />
-            </button>
+            {/* 3-dot menu */}
+            <div className="relative mt-1 shrink-0" data-job-menu>
+              <button
+                type="button"
+                aria-label="More options"
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F4F6F9] hover:text-[#0F172A]"
+              >
+                <MoreHorizontal className="h-5 w-5" aria-hidden />
+              </button>
+              {menuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full z-50 mt-1 min-w-[190px] overflow-hidden rounded-xl border border-[#F1F5F9] bg-white shadow-lg"
+                >
+                  <button
+                    role="menuitem"
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onRemove?.(job._id);
+                    }}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[13px] font-medium text-[#EF4444] hover:bg-[#FFF5F5]"
+                  >
+                    {/* Trash icon */}
+                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v6M14 11v6" />
+                      <path d="M9 6V4h6v2" />
+                    </svg>
+                    Remove — not suitable
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Company info */}
@@ -661,6 +708,10 @@ export default function JobListings() {
   const [showFilters,  setShowFilters]  = useState(false);
   const [showSearch,   setShowSearch]   = useState(false);
   const [selectedJobId, setSelectedJobId] = useState(null);
+  const [autoApplyOpen, setAutoApplyOpen] = useState(false);
+  // tracks whether auto-apply is active + which jobs it covers
+  const [autoApplyState, setAutoApplyState] = useState(null);
+  // null = off  |  { includeGood, resumeLabel, jobIds: Set } = on
 
   // ── Fetch jobs + dashboard (API calls unchanged) ──
   useEffect(() => {
@@ -765,6 +816,48 @@ export default function JobListings() {
     return jobs.filter((j) => new Date(j.createdAt || 0).getTime() > cutoff).length;
   }, [jobs]);
 
+  // ── Strong / Good match splits for AutoApplyModal ──
+  const strongJobs = useMemo(() =>
+    filteredJobs.filter((j) => {
+      const pos   = recommendedOrder.indexOf(String(j._id));
+      const score = j.ats?.overallScore ?? j.matchScore ?? null;
+      return pos !== -1 && (pos < 5 || (score != null && score >= 80));
+    }),
+    [filteredJobs, recommendedOrder],
+  );
+
+  const goodJobs = useMemo(() =>
+    filteredJobs.filter((j) => {
+      const pos   = recommendedOrder.indexOf(String(j._id));
+      const score = j.ats?.overallScore ?? j.matchScore ?? null;
+      if (pos === -1) return false;
+      const isStrong = pos < 5 || (score != null && score >= 80);
+      const isGood   = !isStrong && (pos < 15 || (score != null && score >= 60));
+      return isGood;
+    }),
+    [filteredJobs, recommendedOrder],
+  );
+
+  // ── Auto-apply confirm handler ──
+  async function handleAutoApply({ resumeId, resumeLabel, includeGood }) {
+    // Build the set of job IDs that are being auto-applied to
+    const chosenJobs = includeGood ? [...strongJobs, ...goodJobs] : strongJobs;
+    const jobIds = new Set(chosenJobs.map((j) => String(j._id)));
+
+    // Store active state — this drives the filtered view below
+    setAutoApplyState({ includeGood, resumeLabel: resumeLabel || "Resume", jobIds });
+    setAutoApplyOpen(false);
+
+    // Backend call (fire-and-forget; route doesn't exist yet but wire is ready)
+    try {
+      await api.post(
+        "/candidate-dashboard/auto-apply",
+        { resumeId, includeGood, jobIds: [...jobIds] },
+        { headers: accountAuthHeader() },
+      ).catch(() => {}); // swallow until backend implements it
+    } catch (_) {}
+  }
+
   // ── Save / unsave (API call unchanged) ──
   async function toggleSave(job) {
     if (!isAuthenticated) {
@@ -788,6 +881,29 @@ export default function JobListings() {
       setError(err?.response?.data?.error || "Could not update saved jobs.");
     } finally {
       setSavingId(null);
+    }
+  }
+
+  // ── Remove from recommendations ("not suitable") ──
+  async function handleRemoveRecommendation(jobId) {
+    const id = String(jobId);
+    // Optimistically remove from local state so the card disappears immediately
+    setRecommendedOrder((prev) => prev.filter((x) => x !== id));
+    // Move selection to next job (if available)
+    setSelectedJobId((prev) => {
+      if (prev !== id) return prev;
+      const remaining = filteredJobs.filter((j) => String(j._id) !== id);
+      return remaining.length > 0 ? String(remaining[0]._id) : null;
+    });
+    // Persist to backend (fire-and-forget; silently ignore failures)
+    try {
+      await api.post(
+        `/candidate-dashboard/recommended-jobs/${jobId}/dismiss`,
+        {},
+        { headers: accountAuthHeader() },
+      );
+    } catch (_) {
+      // non-critical — local state is already updated
     }
   }
 
@@ -848,28 +964,63 @@ export default function JobListings() {
           New matches arrive every hour.
         </p>
 
-        {/* Auto-apply banner */}
-        <div className="mt-3.5 flex items-center justify-between gap-4 rounded-xl border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF] px-4 py-3">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_3px_rgba(37,99,235,0.25)]">
-              <Zap className="h-4 w-4 fill-[#2563EB] text-[#2563EB]" aria-hidden />
+        {/* Auto-apply banner — shows two states: inactive / active */}
+        {!autoApplyState ? (
+          /* ── INACTIVE: invite to turn on ── */
+          <div className="mt-3.5 flex items-center justify-between gap-4 rounded-xl border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF] px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_3px_rgba(37,99,235,0.25)]">
+                <Zap className="h-4 w-4 fill-[#2563EB] text-[#2563EB]" aria-hidden />
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-[#0F172A]">
+                  Auto-apply to my strong matches
+                </p>
+                <p className="text-[12px] text-[#64748B]">
+                  We send your CV the moment a Strong match appears — no more checking back.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-[13px] font-semibold text-[#0F172A]">
-                Auto-apply to my strong matches
-              </p>
-              <p className="text-[12px] text-[#64748B]">
-                We send your CV the moment a Strong match appears — no more checking back.
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setAutoApplyOpen(true)}
+              className="shrink-0 rounded-full bg-[#0F172A] px-4 py-2 text-[12px] font-semibold text-white hover:opacity-90"
+            >
+              Turn it on
+            </button>
           </div>
-          <button
-            type="button"
-            className="shrink-0 rounded-full bg-[#0F172A] px-4 py-2 text-[12px] font-semibold text-white hover:opacity-90"
-          >
-            Turn it on
-          </button>
-        </div>
+        ) : (
+          /* ── ACTIVE: show what's running + allow turn-off ── */
+          <div className="mt-3.5 flex items-center justify-between gap-4 rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_3px_rgba(22,163,74,0.20)]">
+                <Zap className="h-4 w-4 fill-[#16A34A] text-[#16A34A]" aria-hidden />
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-[#0F172A]">
+                  Auto-apply is on
+                  <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-[#16A34A] px-2 py-0.5 text-[10px] font-bold text-white">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                    Active
+                  </span>
+                </p>
+                <p className="text-[12px] text-[#64748B]">
+                  Using <span className="font-semibold text-[#0F172A]">{autoApplyState.resumeLabel}</span>
+                  {" · "}
+                  {autoApplyState.jobIds.size} role{autoApplyState.jobIds.size !== 1 ? "s" : ""}
+                  {autoApplyState.includeGood ? " (strong + good matches)" : " (strong matches only)"}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAutoApplyState(null)}
+              className="shrink-0 rounded-full border border-[#16A34A] px-4 py-2 text-[12px] font-semibold text-[#16A34A] hover:bg-[#DCFCE7] transition-colors"
+            >
+              Turn off
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Two-column body ───────────────────────────────────── */}
@@ -991,7 +1142,54 @@ export default function JobListings() {
                 Try different filters or check back later.
               </p>
             </div>
+          ) : autoApplyState ? (
+            /* ── AUTO-APPLY ACTIVE: show only the selected jobs ── */
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {/* Active filter chip strip */}
+              <div className="flex items-center gap-2 border-b border-[#EAEEF0] bg-[#F0FDF4] px-4 py-2">
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#16A34A]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                </span>
+                <p className="min-w-0 flex-1 text-[11px] font-semibold text-[#16A34A]">
+                  Showing {autoApplyState.jobIds.size} auto-applied role{autoApplyState.jobIds.size !== 1 ? "s" : ""}
+                  {autoApplyState.includeGood ? " (strong + good)" : " (strong only)"}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setAutoApplyState(null)}
+                  className="shrink-0 text-[11px] font-semibold text-[#64748B] hover:text-[#0F172A]"
+                >
+                  Clear
+                </button>
+              </div>
+
+              {/* Jobs in the auto-apply set */}
+              {filteredJobs
+                .filter((j) => autoApplyState.jobIds.has(String(j._id)))
+                .map((job) => (
+                  <ListCard
+                    key={job._id}
+                    job={job}
+                    active={String(job._id) === selectedJobId}
+                    onClick={() => setSelectedJobId(String(job._id))}
+                    saved={savedIds.has(String(job._id))}
+                    onToggleSave={toggleSave}
+                    saving={savingId === String(job._id)}
+                    matchLabel={getMatchLabel(job, recommendedOrder)}
+                  />
+                ))}
+
+              {/* Empty guard */}
+              {filteredJobs.filter((j) => autoApplyState.jobIds.has(String(j._id))).length === 0 && (
+                <div className="flex flex-col items-center justify-center gap-2 p-10 text-center">
+                  <Briefcase className="h-8 w-8 text-[#E2E8F0]" aria-hidden />
+                  <p className="text-[13px] font-semibold text-[#0F172A]">No jobs in this set</p>
+                  <p className="text-[12px] text-[#94A3B8]">Turn off auto-apply to see all matches.</p>
+                </div>
+              )}
+            </div>
           ) : (
+            /* ── NORMAL: all filtered jobs ── */
             <div className="min-h-0 flex-1 overflow-y-auto">
               {/* Top matches section */}
               {topMatches.length > 0 &&
@@ -1047,9 +1245,19 @@ export default function JobListings() {
 
         {/* ── RIGHT: job detail (desktop) ─────────────────────── */}
         <div className="hidden min-h-0 flex-1 overflow-hidden bg-white md:flex md:flex-col">
-          <JobDetailPanel job={selectedJob} navigate={navigate} />
+          <JobDetailPanel job={selectedJob} navigate={navigate} onRemove={handleRemoveRecommendation} />
         </div>
       </div>
+
+      {/* ── AutoApply Modal ───────────────────────────────────── */}
+      {autoApplyOpen && (
+        <AutoApplyModal
+          strongJobs={strongJobs}
+          goodJobs={goodJobs}
+          onClose={() => setAutoApplyOpen(false)}
+          onConfirm={handleAutoApply}
+        />
+      )}
     </div>
   );
 }
