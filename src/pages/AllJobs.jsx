@@ -275,6 +275,22 @@ function FMTopNav({ user, isAuthenticated }) {
   const userInitials = auth?.user?.name
     ? auth.user.name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase()
     : "DU";
+  const userName  = auth?.user?.name  || "";
+  const userEmail = auth?.user?.email || "";
+
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Close on outside click
+  useEffect(() => {
+    if (!profileMenuOpen) return;
+    function handleOutside(e) {
+      if (!profileMenuRef.current?.contains(e.target)) setProfileMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [profileMenuOpen]);
 
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 50, background: "#fff", borderBottom: `1px solid ${FM.border}`, height: 56 }}>
@@ -315,14 +331,57 @@ function FMTopNav({ user, isAuthenticated }) {
 
           {/* User initials / profile */}
           {isAuthenticated ? (
-            <Link to="/account" style={{ textDecoration: "none" }}>
-              <button type="button" style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 32, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}>
+            <div ref={profileMenuRef} style={{ position: "relative" }}>
+              <button
+                type="button"
+                onClick={() => setProfileMenuOpen((v) => !v)}
+                style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 32, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}
+              >
                 <span style={{ width: 22, height: 22, borderRadius: 999, background: "#E8E8ED", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span className="fm-text-11" style={{ fontWeight: 700, color: FM.textPrimary }}>{userInitials}</span>
                 </span>
                 <ChevronDown size={13} color={FM.textSecondary} />
               </button>
-            </Link>
+
+              {profileMenuOpen && (
+                <div style={{
+                  position: "absolute", right: 0, top: "calc(100% + 8px)",
+                  minWidth: 260, background: "#fff",
+                  border: `1px solid ${FM.border}`,
+                  borderRadius: 14,
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                  overflow: "hidden",
+                  zIndex: 999,
+                }}>
+                  {/* Identity header */}
+                  <div style={{ padding: "14px 16px 12px", borderBottom: `1px solid ${FM.border}` }}>
+                    <p className="fm-text-13" style={{ fontWeight: 700, color: FM.textPrimary, margin: 0 }}>{userName}</p>
+                    <p className="fm-text-12" style={{ color: FM.textSecondary, margin: "2px 0 0" }}>{userEmail}</p>
+                  </div>
+
+                  {/* Menu items */}
+                  <button
+                    type="button"
+                    onClick={() => { setProfileMenuOpen(false); navigate("/dashboard"); }}
+                    style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", borderBottom: `1px solid ${FM.border}` }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = FM.bgOff}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                  >
+                    <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>Go to your dashboard</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setProfileMenuOpen(false); navigate("/applied-jobs"); }}
+                    style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", background: "none", border: "none", cursor: "pointer" }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = FM.bgOff}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                  >
+                    <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>Applied Jobs</span>
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <Link to="/login" style={{ textDecoration: "none" }}>
               <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>Log in</span>
@@ -345,6 +404,10 @@ function FMTopNav({ user, isAuthenticated }) {
 /* ─────────────────────────────────────────────────────────────
    Filter chip dropdown
    ───────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   Filter chip — multi-select with checkboxes
+   value: string[]   onChange: (newArray) => void
+   ───────────────────────────────────────────────────────────── */
 function FMFilterChip({ label, value, options, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -356,36 +419,74 @@ function FMFilterChip({ label, value, options, onChange }) {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  function toggle(opt) {
+    if (value.includes(opt)) {
+      onChange(value.filter((v) => v !== opt));
+    } else {
+      onChange([...value, opt]);
+    }
+  }
+
+  const selectedCount = value.length;
+  const chipLabel = selectedCount > 0
+    ? `${label} · ${selectedCount}`
+    : label;
+
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
         type="button"
         className="fm-chip"
         onClick={() => setOpen((v) => !v)}
-        style={value ? { borderColor: FM.black, background: "#F5F5F7" } : {}}
+        style={selectedCount > 0 ? { borderColor: FM.black, background: "#F5F5F7" } : {}}
       >
-        <span className="fm-text-13">{label}{value ? `: ${value}` : ""}</span>
+        <span className="fm-text-13">{chipLabel}</span>
         <ChevronDown size={14} color={FM.textSecondary} />
       </button>
       {open && (
-        <div className="fm-dropdown">
-          {value && (
-            <button className="fm-dropdown-item" onClick={() => { onChange(""); setOpen(false); }}>
+        <div className="fm-dropdown" style={{ minWidth: 200 }}>
+          {/* Clear option — only shown when something is selected */}
+          {selectedCount > 0 && (
+            <button
+              className="fm-dropdown-item"
+              style={{ borderBottom: `1px solid ${FM.borderLight}` }}
+              onClick={() => onChange([])}
+            >
               <span className="fm-text-13" style={{ color: "#DC2626" }}>
-                <X size={13} style={{ marginRight: 6, display: "inline" }} />Clear
+                <X size={13} style={{ marginRight: 6, display: "inline" }} />Clear all
               </span>
             </button>
           )}
-          {options.map((opt) => (
-            <button
-              key={opt}
-              className={`fm-dropdown-item${opt === value ? " active" : ""}`}
-              onClick={() => { onChange(opt === value ? "" : opt); setOpen(false); }}
-            >
-              <span className="fm-text-13">{opt}</span>
-              {opt === value && <CheckCircle2 size={14} color={FM.orange} />}
-            </button>
-          ))}
+          {options.map((opt) => {
+            const checked = value.includes(opt);
+            return (
+              <button
+                key={opt}
+                className="fm-dropdown-item"
+                onClick={() => toggle(opt)}
+                style={checked ? { background: "#FFF8F4" } : {}}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  {/* Custom checkbox */}
+                  <span style={{
+                    width: 16, height: 16, borderRadius: 4, border: `2px solid ${checked ? FM.orange : "#C7D4CC"}`,
+                    background: checked ? FM.orange : "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, transition: "all .12s",
+                  }}>
+                    {checked && (
+                      <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                        <path d="M1 3.5L3.5 6L8 1" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className="fm-text-13" style={{ color: checked ? FM.orange : FM.textPrimary, fontWeight: checked ? 600 : 400 }}>
+                    {opt}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
@@ -691,9 +792,9 @@ export default function AllJobs() {
   const [submitted,   setSubmitted]   = useState({ title: "", loc: "" });
 
   // Filters
-  const [filterFunction,    setFilterFunction]    = useState("");
-  const [filterEmployment,  setFilterEmployment]  = useState("");
-  const [filterArrangement, setFilterArrangement] = useState("");
+  const [filterFunction,    setFilterFunction]    = useState([]);
+  const [filterEmployment,  setFilterEmployment]  = useState([]);
+  const [filterArrangement, setFilterArrangement] = useState([]);
 
   // Detail selection + pagination
   const [selectedId, setSelectedId] = useState(null);
@@ -763,15 +864,13 @@ export default function AllJobs() {
       const lc = submitted.loc.toLowerCase();
       list = list.filter((j) => (j.location || "").toLowerCase().includes(lc));
     }
-    if (filterEmployment) {
-      const lc = filterEmployment.toLowerCase();
-      list = list.filter((j) => (j.jobType || j.employmentType || "").toLowerCase() === lc);
+    if (filterEmployment.length > 0) {
+      list = list.filter((j) => filterEmployment.map((v) => v.toLowerCase()).includes((j.jobType || j.employmentType || "").toLowerCase()));
     }
-    if (filterArrangement) {
-      const lc = filterArrangement.toLowerCase();
-      list = list.filter((j) => (j.workplaceType || j.workPlace || "").toLowerCase() === lc);
+    if (filterArrangement.length > 0) {
+      list = list.filter((j) => filterArrangement.map((v) => v.toLowerCase()).includes((j.workplaceType || j.workPlace || "").toLowerCase()));
     }
-    if (filterFunction) list = list.filter((j) => j.department === filterFunction);
+    if (filterFunction.length > 0) list = list.filter((j) => filterFunction.includes(j.department));
     return list;
   }, [jobs, submitted, filterEmployment, filterArrangement, filterFunction]);
 
@@ -782,7 +881,7 @@ export default function AllJobs() {
     return jobs.filter((j) => new Date(j.createdAt || 0).getTime() > cutoff).length;
   }, [jobs]);
 
-  const hasFilter = filterEmployment || filterArrangement || filterFunction || submitted.title || submitted.loc;
+  const hasFilter = filterEmployment.length > 0 || filterArrangement.length > 0 || filterFunction.length > 0 || submitted.title || submitted.loc;
 
   /* ── Save / unsave ── */
   async function toggleSave(job) {
@@ -865,7 +964,7 @@ export default function AllJobs() {
                 onClick={() => {
                   setTitleInput(""); setLocInput("");
                   setSubmitted({ title: "", loc: "" });
-                  setFilterFunction(""); setFilterEmployment(""); setFilterArrangement("");
+                  setFilterFunction([]); setFilterEmployment([]); setFilterArrangement([]);
                 }}
                 className="fm-chip"
                 style={{ color: "#DC2626", borderColor: "#FECACA" }}
