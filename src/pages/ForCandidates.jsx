@@ -112,7 +112,7 @@ const CSS = `
     linear-gradient(180deg,rgba(11,10,9,0.72) 0%,rgba(11,10,9,0.55) 40%,rgba(11,10,9,0.5) 68%,rgba(11,10,9,0.7) 100%),
     linear-gradient(118deg,rgba(224,51,12,0) 34%,rgba(242,86,10,0.26) 100%),
     linear-gradient(90deg,rgba(11,10,9,0.45) 0%,rgba(11,10,9,0.22) 34%,rgba(11,10,9,0) 58%),
-    url('/image.png') center/cover no-repeat;
+    url('/abc.png') center/cover no-repeat;
 }
 .fmc-hero-inner{max-width:1120px;margin:0 auto;position:relative;}
 .fmc-hero-grid{display:grid;grid-template-columns:.88fr 1.12fr;gap:48px;align-items:center;}
@@ -163,18 +163,6 @@ const CSS = `
   position:absolute;left:50%;top:0;transform:translateX(-50%);
   width:13%;height:6px;border-radius:0 0 8px 8px;
   background:linear-gradient(180deg,#A9ABB1,#C6C8CE);
-}
-
-/* ── trust bar ── */
-.fmc-trust{
-  border-top:1px solid rgba(0,0,0,.07);
-  border-bottom:1px solid rgba(0,0,0,.07);
-  background:#FAF9F7;padding:40px 24px;
-}
-.fmc-trust-inner{
-  max-width:1120px;margin:0 auto;
-  display:flex;flex-wrap:wrap;align-items:center;
-  justify-content:center;gap:20px 36px;
 }
 
 /* ── features ── */
@@ -436,12 +424,6 @@ const Plus = ({ size = 22 }) => (
     <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
-const Shield = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-  </svg>
-);
 /* ── initials helper ── */
 function ini(name) {
   return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
@@ -456,7 +438,7 @@ function Navbar() {
       <div className="fmc-hdr-inner">
         {/* Logo */}
         <Link to="/" className="fmc-logo">
-          <span><span className="lo">Aptus</span><span className="lk">Hire</span></span>
+          <img src="/logo.png" alt="AptusHire" style={{ height: 52, width: "auto" }} />
         </Link>
 
         {/* Candidates chip */}
@@ -608,39 +590,6 @@ function Hero({ jobCount }) {
             </div>
             <div className="fmc-laptop-base"><div className="fmc-laptop-notch" /></div>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════
-   TRUST BAR
-═══════════════════════════════════════════════════════════════ */
-function TrustBar() {
-  const badges = [
-    { label: "GDPR compliant", color: "#1A3A9F" },
-    { label: "Google Cloud Security", color: "#4285F4" },
-    { label: "CLOUDFLARE", color: "#F38020" },
-    { label: "Microsoft for Startups", color: "#00A4EF" },
-  ];
-  return (
-    <section className="fmc-trust">
-      <div className="fmc-trust-inner">
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <Shield />
-          <span className="s11" style={{ fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#8A8177" }}>Security, compliance &amp; partners</span>
-        </span>
-        <span style={{ width: 1, height: 32, background: "rgba(0,0,0,.12)", flexShrink: 0 }} />
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "12px 36px" }}>
-          {badges.map((b, i) => (
-            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: i > 0 ? 0 : 0 }}>
-              {i > 0 && <span style={{ width: 1, height: 32, background: "rgba(0,0,0,.12)", marginRight: 36 }} />}
-              <div style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(0,0,0,.08)", background: "#fff" }}>
-                <span className="s11" style={{ fontWeight: 700, color: b.color, whiteSpace: "nowrap" }}>{b.label}</span>
-              </div>
-            </span>
-          ))}
         </div>
       </div>
     </section>
@@ -1064,11 +1013,6 @@ function FAQSection() {
         </div>
 
         <div className="fmc-reveal" style={{ marginTop: 48, display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={{ display: "inline-flex", flexWrap: "wrap", alignItems: "center", gap: "12px 16px", borderRadius: 14, padding: "12px 20px", background: "rgba(255,255,255,.90)" }}>
-            {["GDPR", "Google Cloud", "Cloudflare", "Microsoft for Startups"].map(b => (
-              <span key={b} className="s11" style={{ fontWeight: 700, color: "#374151" }}>{b}</span>
-            ))}
-          </div>
           <p className="s12" style={{ color: "rgba(255,255,255,.60)", maxWidth: 520, lineHeight: 1.65 }}>
             Built by AptusHire. Data on Google Cloud under GDPR terms.{" "}
             <a href="/privacy" style={{ textDecoration: "underline", textUnderlineOffset: 2, color: "rgba(255,255,255,.70)" }}>Privacy</a>
@@ -1119,7 +1063,7 @@ function Footer() {
         {/* brand */}
         <div>
           <div className="fmc-footer-logo">
-            <span><span style={{ color: O2 }}>Aptus</span><span style={{ color: BK }}>Hire</span></span>
+            <img src="/logo.png" alt="AptusHire" style={{ height: 52, width: "auto" }} />
           </div>
           <p className="s14" style={{ marginTop: 12, maxWidth: 260, color: "#736C64", lineHeight: 1.6 }}>
             Upload your CV once. Companies with a matching role come to you. Free for candidates, always.
@@ -1215,7 +1159,6 @@ export default function ForCandidates() {
         <Navbar />
         <div style={{ paddingTop: 60 }}>
           <Hero jobCount={total} />
-          <TrustBar />
           <ChooseSection />
           <WalkSection />
           <JobsSection jobs={jobs} companies={companies} totalCount={total} newCount={newCount} />

@@ -1,6 +1,6 @@
 ﻿import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import api from "../api/client.js";
 import { saveAccountAuth } from "../auth/accountAuth.js";
 import { getReturnTo, clearReturnTo } from "../auth/returnTo.js";
@@ -15,48 +15,61 @@ import GoogleButton from "../components/auth/GoogleButton.jsx";
 function LeftPanel() {
   return (
     <div
-      className="sticky top-0 hidden h-screen lg:flex lg:w-[30%] xl:w-[28%] flex-col justify-between px-10 py-12 relative overflow-hidden"
-      style={{
-        background: "linear-gradient(160deg, #cce8f4 0%, #dff0f8 40%, #eef7fb 70%, #f6fbfd 100%)",
-      }}
+      className="sticky top-0 hidden h-screen lg:flex lg:w-[45%] xl:w-[42%] flex-col justify-between px-10 py-12 relative overflow-hidden"
+      style={{ backgroundColor: "#FFF9E8" }}
     >
-      {/* Subtle circle decoration */}
+      {/* Mountain/sun illustration — anchored to the bottom. A solid cream
+          overlay (not just a fade) covers the whole left ~48% unconditionally,
+          so the image's own baked-in text can never show through behind the
+          quote/tagline regardless of viewport width or crop math. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-32 -left-32 h-80 w-80 rounded-full"
-        style={{ background: "radial-gradient(circle, #b3d9ef 0%, transparent 70%)", opacity: 0.5 }}
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        style={{
+          height: "68%",
+          backgroundImage: "url('/hero-banner.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "88% 30%",
+          backgroundRepeat: "no-repeat",
+        }}
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full"
-        style={{ background: "radial-gradient(circle, #c8e8f5 0%, transparent 70%)", opacity: 0.4 }}
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        style={{
+          height: "68%",
+          background: "linear-gradient(90deg, #FFF9E8 0%, #FFF9E8 48%, rgba(255,249,232,0.85) 58%, rgba(255,249,232,0) 78%)",
+        }}
       />
 
       {/* Logo */}
-      <BrandLogo to="/welcome" size="md" textSize={24} theme="light" />
+      <div className="relative">
+        <BrandLogo to="/welcome" variant="image" size={52} />
+      </div>
+
+      {/* Quote */}
+      <div className="relative -mt-10">
+        <p
+          className="text-[42px] leading-[1.15] text-[#172334]"
+          style={{ fontFamily: "'Caveat', cursive", fontWeight: 700 }}
+        >
+          &ldquo;Progress today, a brighter tomorrow.&rdquo;
+        </p>
+        <span className="mt-4 block h-[3px] w-11 rounded-full bg-[#F97316]" />
+      </div>
 
       {/* Tagline */}
-      <div>
-        <p className="text-[22px] font-bold leading-snug text-[#F97316]">
+      <div className="relative">
+        <p className="text-[22px] font-bold leading-snug text-[#172334]">
           Find the right<br />opportunity.
         </p>
-        <p className="mt-3 text-[14px] leading-relaxed text-[#4a7a6a]">
+        <p className="mt-3 text-[14px] leading-relaxed text-[#64748B]">
           AI-powered hiring. Fair, fast and transparent for every candidate.
         </p>
       </div>
 
-      {/* Trust badges */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          {/* GDPR badge */}
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-blue-300 bg-blue-700 text-[9px] font-bold leading-tight text-white text-center">
-            <span>GDPR</span>
-          </div>
-          {/* SOC 2 badge */}
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-blue-300 bg-blue-800 text-[8px] font-bold leading-tight text-white text-center px-1">
-            <span>SOC 2</span>
-          </div>
-        </div>
+      {/* Trust line */}
+      <div className="relative">
         <p className="text-[11px] text-[#5A6E6A]">
           Always free for candidates. Secure &amp; compliant.
         </p>
@@ -70,13 +83,13 @@ function LeftPanel() {
    ───────────────────────────────────────────────────────────────────────────── */
 function AuthToggle({ active }) {
   return (
-    <div className="mb-7 inline-flex items-center self-center rounded-full bg-[#0F172A] p-1">
+    <div className="mb-7 inline-flex items-center self-center rounded-full bg-[#F1F5F9] p-1">
       <Link
         to="/login"
         className={`rounded-full px-6 py-2 text-[14px] font-semibold transition-colors ${
           active === "login"
-            ? "bg-white text-[#0F172A] shadow-sm"
-            : "text-white/70 hover:text-white"
+            ? "bg-[#0F172A] text-white shadow-sm"
+            : "text-[#64748B] hover:text-[#0F172A]"
         }`}
       >
         Sign In
@@ -85,8 +98,8 @@ function AuthToggle({ active }) {
         to="/register"
         className={`rounded-full px-6 py-2 text-[14px] font-semibold transition-colors ${
           active === "register"
-            ? "bg-white text-[#0F172A] shadow-sm"
-            : "text-white/70 hover:text-white"
+            ? "bg-[#0F172A] text-white shadow-sm"
+            : "text-[#64748B] hover:text-[#0F172A]"
         }`}
       >
         Sign Up
@@ -176,22 +189,36 @@ export default function Login() {
       <LeftPanel />
 
       {/* ── Right: form column ── */}
-      <div className="flex min-h-screen w-full flex-col lg:w-[70%] xl:w-[72%]">
-        {/* dot-grid background pattern */}
+      <div className="flex min-h-screen w-full flex-col lg:w-[55%] xl:w-[58%]">
+        {/* Glass background — soft blurred colour blobs behind a frosted panel */}
         <div
-          className="flex flex-1 flex-col items-center justify-center px-5 py-10 sm:px-10"
-          style={{
-            backgroundImage: "radial-gradient(circle, #d4d4d4 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-            backgroundColor: "#fff",
-          }}
+          className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-5 py-10 sm:px-10"
+          style={{ backgroundColor: "#F4F6F9" }}
         >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-24 -left-16 h-80 w-80 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(249,115,22,0.22) 0%, rgba(249,115,22,0) 70%)" }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-28 -right-20 h-96 w-96 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(37,99,235,0.16) 0%, rgba(37,99,235,0) 70%)" }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/3 right-1/4 h-64 w-64 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, rgba(245,181,27,0.20) 0%, rgba(245,181,27,0) 70%)" }}
+          />
+
           {/* Mobile logo (hidden on desktop — shown in left panel) */}
-          <div className="mb-8 lg:hidden">
-            <BrandLogo to="/welcome" size="md" textSize={24} theme="light" />
+          <div className="relative mb-8 lg:hidden">
+            <BrandLogo to="/welcome" variant="image" size={52} />
           </div>
 
-          <div className="w-full max-w-[400px]">
+          <div
+            className="relative w-full max-w-[400px] rounded-3xl border border-white/60 bg-white/55 p-8 shadow-[0_8px_40px_rgba(15,23,42,0.08)] backdrop-blur-2xl sm:p-10"
+          >
             {/* Tab toggle */}
             <div className="flex justify-center">
               <AuthToggle active="login" />
@@ -202,7 +229,7 @@ export default function Login() {
               <h1 className="text-[26px] font-bold leading-tight text-[#0F172A]">
                 Sign In To
               </h1>
-              <p className="mt-1 text-[22px] font-bold text-[#2563EB]">
+              <p className="mt-1 text-[22px] font-bold text-[#F97316]">
                 Your Candidate Account
               </p>
             </div>
@@ -301,7 +328,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-2 flex h-12 w-full items-center justify-center rounded-full bg-[#0F172A] text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#0F172A] text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? (
                   <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -309,7 +336,7 @@ export default function Login() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a10 10 0 100 10h-4a8 8 0 01-8-8z" />
                   </svg>
                 ) : null}
-                Sign In
+                Sign In {!submitting && <ArrowRight className="h-4 w-4" aria-hidden />}
               </button>
             </form>
 

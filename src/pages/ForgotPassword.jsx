@@ -46,7 +46,7 @@ export default function ForgotPassword() {
         }}
       >
         <div className="mb-8">
-          <BrandLogo to="/welcome" size="md" theme="light" />
+          <BrandLogo to="/welcome" variant="image" size={52} />
         </div>
 
         <div className="w-full max-w-[400px] rounded-2xl border border-[#E2E8F0] bg-white px-8 py-10 shadow-sm">

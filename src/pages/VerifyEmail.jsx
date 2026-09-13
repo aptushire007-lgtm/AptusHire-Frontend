@@ -56,7 +56,7 @@ export default function VerifyEmail() {
 
       <div className="w-full max-w-md">
         <div className="mb-6 flex justify-center">
-          <BrandLogo to="/welcome" size="lg" />
+          <BrandLogo to="/welcome" variant="image" size={52} />
         </div>
 
         <Card className="rounded-3xl border border-[#E2E8F0] bg-white p-6 text-center shadow-soft sm:p-8">

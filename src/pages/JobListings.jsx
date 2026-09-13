@@ -135,8 +135,8 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
     <button
       type="button"
       onClick={onClick}
-      className={`group relative w-full cursor-pointer border-b border-[#F0F2F4] px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316] ${
-        active ? "bg-[#F4F6F9]" : "hover:bg-[#F8F9FB]"
+      className={`group relative w-full cursor-pointer border-b-[1px] border-l-[3px] border-b-[#F0F2F4] px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316] ${
+        active ? "border-l-[#F97316] bg-[#FFF7ED]" : "border-l-transparent hover:bg-[#F8F9FB]"
       }`}
     >
       {/* Status column (Applied / match badge) — centered on the row's vertical middle */}
@@ -855,10 +855,10 @@ export default function JobListings() {
         </p>
 
         {/* Auto-apply banner */}
-        <div className="mt-3.5 flex items-center justify-between gap-4 rounded-xl border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF] px-4 py-3">
+        <div className="mt-3.5 flex items-center justify-between gap-4 rounded-xl border border-[#F5B51B]/40 bg-gradient-to-r from-[#FFF4CC] to-[#FFFAEB] px-4 py-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_3px_rgba(37,99,235,0.25)]">
-              <Zap className="h-4 w-4 fill-[#2563EB] text-[#2563EB]" aria-hidden />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_3px_rgba(245,181,27,0.35)]">
+              <Zap className="h-4 w-4 fill-[#E5A514] text-[#E5A514]" aria-hidden />
             </div>
             <div>
               <p className="text-[16px] font-semibold text-[#0F172A]">

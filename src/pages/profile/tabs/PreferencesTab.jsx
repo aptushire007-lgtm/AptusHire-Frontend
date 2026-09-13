@@ -64,7 +64,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
   return (
     <div className="candidate-preferences-tab space-y-6">
       <div>
-        <h2 className="font-display text-xl font-bold text-[#F97316] dark:text-[#F97316]">Preferences &amp; Privacy</h2>
+        <h2 className="font-display text-xl font-bold text-[#E5A514] dark:text-[#E5A514]">Preferences &amp; Privacy</h2>
         <p className="text-sm text-[#64748B] dark:text-[#64748B]">
           Configure notification channels, job alerts, and manage your data rights under GDPR &amp; DPDP regulations.
         </p>
@@ -79,8 +79,8 @@ export default function PreferencesTab({ profile, onRefresh }) {
 
       <form onSubmit={handleSave} className="space-y-5">
         {/* Availability */}
-        <div className="rounded-2xl border border-[#FED7AA] bg-white p-5 shadow-xs dark:border-[#FED7AA] dark:bg-white">
-          <label className="block font-display text-base font-bold text-[#F97316] dark:text-[#F97316]">
+        <div className="rounded-2xl border border-[#F5B51B]/50 bg-white p-5 shadow-xs dark:border-[#F5B51B]/50 dark:bg-white">
+          <label className="block font-display text-base font-bold text-[#E5A514] dark:text-[#E5A514]">
             Availability Notice Period
           </label>
           <p className="text-sm text-[#64748B] dark:text-[#64748B]">
@@ -89,7 +89,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
           <select
             value={preferences.availabilityWindow}
             onChange={(e) => setPreferences({ ...preferences, availabilityWindow: e.target.value })}
-            className="mt-3 w-full max-w-xs rounded-xl border border-[#FED7AA] bg-white px-3.5 py-2.5 text-sm font-bold text-[#F97316] dark:border-[#FED7AA] dark:bg-white dark:text-[#F97316]"
+            className="mt-3 w-full max-w-xs rounded-xl border border-[#F5B51B]/50 bg-white px-3.5 py-2.5 text-sm font-bold text-[#E5A514] dark:border-[#F5B51B]/50 dark:bg-white dark:text-[#E5A514]"
           >
             <option value="immediate">Immediate Joiner (0-7 days)</option>
             <option value="15_days">15 Days Notice Period</option>
@@ -99,66 +99,70 @@ export default function PreferencesTab({ profile, onRefresh }) {
         </div>
 
         {/* Notifications & Channels */}
-        <div className="rounded-2xl border border-[#FED7AA] bg-white p-5 shadow-xs dark:border-[#FED7AA] dark:bg-white">
-          <h3 className="font-display text-base font-bold text-[#F97316] dark:text-[#F97316]">Communication Channels</h3>
-          <div className="mt-3 space-y-3 divide-y divide-[#FEF3E8] text-sm dark:divide-[#FEF3E8]">
+        <div className="rounded-2xl border border-[#F5B51B]/50 bg-white p-5 shadow-xs dark:border-[#F5B51B]/50 dark:bg-white">
+          <h3 className="font-display text-base font-bold text-[#E5A514] dark:text-[#E5A514]">Communication Channels</h3>
+          <div className="mt-3 space-y-3 divide-y divide-[#FFF4CC] text-sm dark:divide-[#FFF4CC]">
             <label className="flex items-center justify-between pt-2 cursor-pointer">
               <div>
-                <p className="font-bold text-[#F97316] dark:text-[#F97316]">Recommended Job Alerts</p>
+                <p className="font-bold text-[#E5A514] dark:text-[#E5A514]">Recommended Job Alerts</p>
                 <p className="text-[#64748B]">Receive weekly emails with roles matching your resume version skills.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.jobAlerts}
                 onChange={() => handleToggle("jobAlerts")}
-                className="h-4 w-4 rounded text-[#F97316] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#E5A514] accent-[#F5B51B] dark:accent-[#F5B51B]"
               />
             </label>
 
             <label className="flex items-center justify-between pt-3 cursor-pointer">
               <div>
-                <p className="font-bold text-[#F97316] dark:text-[#F97316]">WhatsApp Interview Reminders</p>
+                <p className="font-bold text-[#E5A514] dark:text-[#E5A514]">WhatsApp Interview Reminders</p>
                 <p className="text-[#64748B]">Get timely reminders before AI interviews and assessment deadlines.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.whatsappUpdates}
                 onChange={() => handleToggle("whatsappUpdates")}
-                className="h-4 w-4 rounded text-[#F97316] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#E5A514] accent-[#F5B51B] dark:accent-[#F5B51B]"
               />
             </label>
 
             <label className="flex items-center justify-between pt-3 cursor-pointer">
               <div>
-                <p className="font-bold text-[#F97316] dark:text-[#F97316]">SMS Notifications</p>
+                <p className="font-bold text-[#E5A514] dark:text-[#E5A514]">SMS Notifications</p>
                 <p className="text-[#64748B]">Critical stage alerts sent to your verified mobile number.</p>
               </div>
               <input
                 type="checkbox"
                 checked={preferences.smsUpdates}
                 onChange={() => handleToggle("smsUpdates")}
-                className="h-4 w-4 rounded text-[#F97316] accent-[#214740] dark:accent-[#214740]"
+                className="h-4 w-4 rounded text-[#E5A514] accent-[#F5B51B] dark:accent-[#F5B51B]"
               />
             </label>
           </div>
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={saving}>
+          <Button
+            type="submit"
+            disabled={saving}
+            className="!bg-[#F5B51B] !text-[#172334] hover:!bg-[#E5A514] focus-visible:!ring-[#F5B51B]/25"
+          >
             {saving ? "Saving…" : "Save Preferences"}
           </Button>
         </div>
       </form>
 
       {/* GDPR / DPDP Download My Data Box */}
-      <section className="rounded-3xl border border-[#1B2A3B] bg-[#F97316] p-6 text-white shadow-soft">
+      <section className="rounded-3xl border border-[#E5A514]/40 bg-[#FFF4CC] p-6 text-[#172334] shadow-soft">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-accent-300" />
-              <h3 className="font-display text-base font-bold text-white">Download My Data (GDPR &amp; DPDP Portability)</h3>
+              <ShieldCheck className="h-5 w-5 text-[#E5A514]" />
+              <h3 className="font-display text-base font-bold text-[#172334]">Download My Data (GDPR &amp; DPDP Portability)</h3>
             </div>
-            <p className="mt-1 max-w-xl text-xs text-slate-300">
+            <p className="mt-1 max-w-xl text-xs text-[#5B5335]">
               Download a complete JSON export of all your candidate profile data, resume versions, uploaded documents, application history, and interview logs.
             </p>
           </div>
@@ -168,7 +172,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
             variant="secondary"
             onClick={handleDownloadData}
             disabled={exporting}
-            className="shrink-0 bg-white text-[#F97316] hover:bg-[#FEF3E8] font-bold"
+            className="shrink-0 !bg-white !text-[#E5A514] !border-[#F5B51B] hover:!bg-[#FFF1C7] font-bold"
           >
             {exporting ? (
               <>

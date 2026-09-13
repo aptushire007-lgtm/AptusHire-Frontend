@@ -114,10 +114,10 @@ export default function ProfileLayout() {
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`tap-target flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-center text-xs font-bold transition-all sm:flex-none sm:px-4 ${
+              className={`tap-target flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-center text-xs font-semibold transition-all sm:flex-none sm:px-4 ${
                 isActive
-                  ? "bg-[#EA6C0A] text-white shadow-xs dark:bg-[#EA6C0A] dark:text-white"
-                  : "bg-white text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#EA6C0A] dark:bg-white dark:text-[#64748B] dark:hover:bg-[#FEF3E8] dark:hover:text-[#EA6C0A]"
+                  ? "bg-[#F5B51B] text-[#172334] shadow-xs dark:bg-[#F5B51B] dark:text-[#172334]"
+                  : "bg-white text-[#64748B] hover:bg-[#FFF4CC] hover:text-[#E5A514] dark:bg-white dark:text-[#64748B] dark:hover:bg-[#FFF4CC] dark:hover:text-[#E5A514]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -146,16 +146,16 @@ export default function ProfileLayout() {
           {/* Profile Strength Card */}
           <Card className="rounded-3xl border border-[#E2E8F0] bg-white p-5 shadow-soft dark:border-[#E2E8F0] dark:bg-white">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#EA6C0A]">Profile Strength</span>
-              <span className="font-display text-base font-extrabold text-[#EA6C0A]">
+              <span className="text-sm font-bold text-[#172334]">Profile Strength</span>
+              <span className="font-display text-base font-extrabold text-[#E5A514]">
                 {strength}%
               </span>
             </div>
 
             {/* Segmented Progress Bar */}
-            <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-[#FEF3E8]">
+            <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-[#F1F3F5]">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#1B2A3B] via-[#4E7567] to-[#FEF3E8] transition-all duration-500"
+                className="h-full rounded-full bg-[#F5B51B] transition-all duration-500"
                 style={{ width: `${strength}%` }}
               />
             </div>
@@ -170,7 +170,7 @@ export default function ProfileLayout() {
                 <div key={item.label} className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-2">
                     <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
-                      item.done ? "bg-[#FEF3E8] text-[#EA6C0A]" : "bg-border text-[#94A3B8]"
+                      item.done ? "bg-[#FFF1C7] text-[#E5A514]" : "bg-border text-[#94A3B8]"
                     }`}>
                       {item.done ? "✓" : "•"}
                     </span>
@@ -178,35 +178,35 @@ export default function ProfileLayout() {
                       {item.label}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#EA6C0A]">{item.points}%</span>
+                  <span className="text-[11px] font-bold text-[#E5A514]">{item.points}%</span>
                 </div>
               ))}
             </div>
           </Card>
 
           {/* Recruiter View Preview (Trust Badge) */}
-          <div className="rounded-3xl border border-[#1B2A3B] bg-[#EA6C0A] p-5 text-white shadow-soft">
-            <div className="flex items-center gap-2 text-[#FED7AA]">
+          <div className="rounded-3xl border border-[#E5A514] bg-[#F5B51B] p-5 text-[#172334] shadow-soft">
+            <div className="flex items-center gap-2 text-[#172334]">
               <ShieldCheck className="h-4 w-4" />
               <span className="text-xs font-bold uppercase tracking-wider">Recruiter View Preview</span>
             </div>
 
-            <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
+            <div className="mt-3 rounded-2xl border border-black/5 bg-white/40 p-4 backdrop-blur-xs">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FEF3E8] font-bold text-[#EA6C0A]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white font-bold text-[#E5A514]">
                   {(profile.personal?.firstName || "S")[0]}
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">
+                  <h4 className="text-sm font-bold text-[#172334]">
                     {profile.personal?.firstName || "Candidate"} {profile.personal?.lastName || ""}
                   </h4>
-                  <p className="text-xs text-slate-300">{profile.headline || "Specialist"}</p>
+                  <p className="text-xs text-[#3F3620]">{profile.headline || "Specialist"}</p>
                 </div>
               </div>
 
-              <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-2.5 text-[11px]">
-                <span className="text-slate-300">Trust Credential</span>
-                <span className="font-bold text-[#FED7AA]">
+              <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-2.5 text-[11px]">
+                <span className="text-[#3F3620]">Trust Credential</span>
+                <span className="font-bold text-[#172334]">
                   {ver.govDocVerified ? "✓ Aptus Verified (6/6)" : "Self-Reported"}
                 </span>
               </div>

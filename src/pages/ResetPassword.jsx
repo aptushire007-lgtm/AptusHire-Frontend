@@ -39,7 +39,7 @@ export default function ResetPassword() {
 
       <div className="w-full max-w-md">
         <div className="mb-6 flex justify-center">
-          <BrandLogo to="/welcome" size="lg" />
+          <BrandLogo to="/welcome" variant="image" size={52} />
         </div>
 
         <Card className="rounded-3xl border border-slate-200/90 bg-white p-6 text-center shadow-soft/90 sm:p-8">

@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Search, MapPin, ChevronDown, X, Bookmark,
   CheckCircle2, Globe, MoreHorizontal, Briefcase,
-  Clock, Building2,
+  Clock, Building2, Star,
 } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader, getAccountAuth } from "../auth/accountAuth.js";
@@ -20,20 +20,26 @@ import { Skeleton } from "../components/ui/Card.jsx";
    Flowmingo design tokens  (scoped to this page only)
    ───────────────────────────────────────────────────────────── */
 const FM = {
-  orange:       "#FF6B00",
+  orange:       "#F97316",
   orangeLight:  "#FFF0E6",
-  black:        "#1D1D1F",
-  blackSoft:    "rgba(29,29,31,0.65)",
+  yellow:       "#F5B51B",
+  yellowDark:   "#E5A514",
+  lightYellow:  "#FFF4CC",
+  veryLightYellow: "#FFF9E8",
+  black:        "#17191D",
   bg:           "#FFFFFF",
-  bgOff:        "#F5F5F7",
-  border:       "#E8E8ED",
-  borderLight:  "#F0F0F5",
-  textPrimary:  "#1D1D1F",
-  textSecondary:"rgba(29,29,31,0.65)",
-  textMuted:    "rgba(29,29,31,0.45)",
-  activeRow:    "#F5F5F7",
-  pillBg:       "#F5F5F7",
-  bottomBg:     "#FDF5EE",
+  bgPage:       "#F7F8FA",
+  bgOff:        "#F1F3F5",
+  border:       "#E5E7EB",
+  borderLight:  "#F1F3F5",
+  textPrimary:  "#111827",
+  textDark:     "#172334",
+  textSecondary:"#64748B",
+  textMuted:    "#94A3B8",
+  textBody:     "#475569",
+  activeRow:    "#FAFAFA",
+  pillBg:       "#F8FAFC",
+  bottomBg:     "#FFF9E8",
 };
 
 /* ─────────────────────────────────────────────────────────────
@@ -41,8 +47,8 @@ const FM = {
    ───────────────────────────────────────────────────────────── */
 const PAGE_CSS = `
 .fmjobs * { box-sizing: border-box; }
-.fmjobs { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; }
-.fmjobs h1, .fmjobs h2, .fmjobs h3 { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; letter-spacing: -0.01em; }
+.fmjobs { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.fmjobs h1, .fmjobs h2, .fmjobs h3 { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: -0.01em; }
 
 /* reset Tailwind floor inside this scope */
 .fmjobs .fm-text-11 { font-size: 11px !important; line-height: 1.45; }
@@ -52,65 +58,57 @@ const PAGE_CSS = `
 .fmjobs .fm-text-15 { font-size: 15px !important; line-height: 1.55; }
 .fmjobs .fm-text-16 { font-size: 16px !important; line-height: 1.5;  }
 .fmjobs .fm-text-22 { font-size: 22px !important; line-height: 1.3;  }
-.fmjobs .fm-text-48 { font-size: 48px !important; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+.fmjobs .fm-text-48 { font-size: 42px !important; line-height: 1.08; font-weight: 600; letter-spacing: -0.01em; }
 
 /* scrollbar-none */
 .fmjobs .scrollbar-none::-webkit-scrollbar { display: none; }
 .fmjobs .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ticker animation */
-@keyframes fm-ticker {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.fmjobs .fm-ticker-inner { display: flex; animation: fm-ticker 28s linear infinite; }
-.fmjobs .fm-ticker-inner:hover { animation-play-state: paused; }
-
 /* job-list-card hover */
-.fmjobs .fm-job-card { transition: background 0.12s; }
+.fmjobs .fm-job-card { transition: background 0.15s; }
 .fmjobs .fm-job-card:hover { background: ${FM.bgOff}; }
-.fmjobs .fm-job-card.fm-active { background: #fff; border-left: 3px solid ${FM.black}; }
+.fmjobs .fm-job-card.fm-active { background: ${FM.activeRow}; border-left: 3px solid ${FM.textPrimary}; }
 
 /* filter chip */
-.fmjobs .fm-chip { display: inline-flex; align-items: center; gap: 5px; height: 34px; border-radius: 999px; border: 1px solid ${FM.border}; background: #fff; padding: 0 14px; font-size: 13px; font-weight: 500; color: ${FM.textPrimary}; cursor: pointer; transition: border-color .12s; white-space: nowrap; }
-.fmjobs .fm-chip:hover { border-color: #999; }
+.fmjobs .fm-chip { display: inline-flex; align-items: center; gap: 5px; height: 32px; border-radius: 999px; border: 1px solid ${FM.border}; background: #fff; padding: 0 14px; font-size: 13px; font-weight: 500; color: ${FM.textPrimary}; cursor: pointer; transition: border-color .15s; white-space: nowrap; }
+.fmjobs .fm-chip:hover { border-color: #CBD5E1; }
 
 /* apply-now button */
-.fmjobs .fm-apply-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 52px; border-radius: 999px; background: ${FM.black}; color: #fff; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: opacity .12s; }
+.fmjobs .fm-apply-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 52px; border-radius: 10px; background: ${FM.black}; color: #fff; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: opacity .15s; }
 .fmjobs .fm-apply-btn:hover { opacity: .85; }
 
 /* nav your-matches button */
-.fmjobs .fm-matches-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; border-radius: 999px; background: ${FM.black}; color: #fff; padding: 0 16px; font-size: 13px; font-weight: 600; text-decoration: none; transition: opacity .12s; }
+.fmjobs .fm-matches-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; border-radius: 18px; background: ${FM.black}; color: #fff; padding: 0 16px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity .15s; }
 .fmjobs .fm-matches-btn:hover { opacity: .85; }
 .fmjobs .fm-matches-chip { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 999px; background: ${FM.orange}; }
 
 /* search bar */
-.fmjobs .fm-search-box { display: flex; align-items: center; background: #fff; border: 1px solid ${FM.border}; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
-.fmjobs .fm-search-input { border: none; outline: none; background: transparent; font-size: 14px; color: ${FM.textPrimary}; width: 100%; padding: 0 14px; height: 52px; }
+.fmjobs .fm-search-box { display: flex; align-items: center; background: #fff; border: 1px solid ${FM.border}; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(15,23,42,0.04); }
+.fmjobs .fm-search-input { border: none; outline: none; background: transparent; font-size: 14px; font-weight: 400; color: ${FM.textPrimary}; width: 100%; padding: 0 14px; height: 46px; }
 .fmjobs .fm-search-input::placeholder { color: ${FM.textSecondary}; }
-.fmjobs .fm-search-divider { width: 1px; height: 28px; background: ${FM.borderLight}; flex-shrink: 0; }
-.fmjobs .fm-search-btn { height: 52px; border: none; background: ${FM.black}; color: #fff; font-size: 13px; font-weight: 600; padding: 0 22px; cursor: pointer; transition: opacity .12s; white-space: nowrap; }
+.fmjobs .fm-search-divider { width: 1px; height: 24px; background: ${FM.border}; flex-shrink: 0; }
+.fmjobs .fm-search-btn { height: 46px; width: 112px; flex-shrink: 0; border: none; background: ${FM.black}; color: #fff; font-size: 13px; font-weight: 500; padding: 0 16px; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
 .fmjobs .fm-search-btn:hover { opacity: .85; }
 
 /* show-more button */
-.fmjobs .fm-show-more { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; border-radius: 12px; border: 1px solid ${FM.border}; background: #fff; font-size: 14px; font-weight: 600; color: ${FM.textPrimary}; cursor: pointer; transition: background .12s; }
+.fmjobs .fm-show-more { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; border-radius: 10px; border: 1px solid ${FM.border}; background: #fff; font-size: 14px; font-weight: 500; color: ${FM.textPrimary}; cursor: pointer; transition: background .15s; }
 .fmjobs .fm-show-more:hover { background: ${FM.bgOff}; }
 
 /* bottom section links */
-.fmjobs .fm-bottom-action { font-size: 13px; font-weight: 700; color: ${FM.orange}; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+.fmjobs .fm-bottom-action { font-size: 13px; font-weight: 500; color: ${FM.orange}; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
 .fmjobs .fm-bottom-action:hover { text-decoration: underline; }
 
 /* dropdown */
-.fmjobs .fm-dropdown { position: absolute; top: calc(100% + 8px); left: 0; z-index: 100; background: #fff; border: 1px solid ${FM.border}; border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.12); min-width: 180px; overflow: hidden; }
-.fmjobs .fm-dropdown-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px; font-size: 13px; color: ${FM.textPrimary}; cursor: pointer; transition: background .1s; border: none; background: transparent; width: 100%; text-align: left; }
+.fmjobs .fm-dropdown { position: absolute; top: calc(100% + 8px); left: 0; z-index: 100; background: #fff; border: 1px solid ${FM.border}; border-radius: 10px; box-shadow: 0 8px 28px rgba(15,23,42,.10); min-width: 180px; overflow: hidden; }
+.fmjobs .fm-dropdown-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px; font-size: 13px; font-weight: 400; color: ${FM.textPrimary}; cursor: pointer; transition: background .1s; border: none; background: transparent; width: 100%; text-align: left; }
 .fmjobs .fm-dropdown-item:hover { background: ${FM.bgOff}; }
-.fmjobs .fm-dropdown-item.active { color: ${FM.orange}; font-weight: 600; }
+.fmjobs .fm-dropdown-item.active { color: ${FM.orange}; font-weight: 500; }
 
 /* detail description prose */
 .fmjobs .fm-prose ul { list-style: disc; padding-left: 1.4em; }
-.fmjobs .fm-prose ul li { margin-bottom: 6px; font-size: 14px; line-height: 1.65; color: ${FM.textPrimary}; }
-.fmjobs .fm-prose p { font-size: 14px; line-height: 1.65; color: ${FM.textPrimary}; margin-bottom: 10px; }
-.fmjobs .fm-prose h3 { font-size: 15px; font-weight: 700; margin: 18px 0 8px; color: ${FM.textPrimary}; }
+.fmjobs .fm-prose ul li { margin-bottom: 6px; font-size: 14px; line-height: 1.65; color: ${FM.textBody}; font-weight: 400; }
+.fmjobs .fm-prose p { font-size: 14px; line-height: 1.65; color: ${FM.textBody}; font-weight: 400; margin-bottom: 10px; }
+.fmjobs .fm-prose h3 { font-size: 18px; font-weight: 600; margin: 20px 0 8px; color: ${FM.textPrimary}; }
 `;
 
 /* ─────────────────────────────────────────────────────────────
@@ -205,7 +203,7 @@ function CompanyAvatar({ company, size = 36 }) {
       {logo && !failed ? (
         <img src={logo} alt={company?.name || ""} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 2 }} onError={() => setFailed(true)} />
       ) : (
-        <span style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", background: "#F5F5F7", fontSize: size > 30 ? 13 : 11, fontWeight: 700, color: "#64748B" }}>
+        <span style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", background: FM.bgOff, fontSize: size > 30 ? 13 : 11, fontWeight: 500, color: FM.textSecondary }}>
           {initials(company?.name)}
         </span>
       )}
@@ -271,21 +269,18 @@ function FMTopNav({ user, isAuthenticated }) {
   }, [menuOpen]);
 
   return (
-    <header style={{ position: "sticky", top: 0, zIndex: 50, background: "#fff", borderBottom: `1px solid ${FM.border}`, height: 56 }}>
+    <header style={{ position: "sticky", top: 0, zIndex: 50, background: "#fff", borderBottom: `1px solid ${FM.border}`, height: 64 }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
         {/* Left — logo + candidates dropdown */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Logo: "Aptus" styled like Flowmingo */}
+          {/* Real AptusHire brand logo */}
           <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em" }}>
-              <span style={{ color: FM.orange }}>Aptus</span>
-              <span style={{ color: FM.black }}>Hire</span>
-            </span>
+            <img src="/logo.png" alt="AptusHire" style={{ height: 52, width: "auto" }} />
           </Link>
           {/* Candidates chip */}
           <button
             type="button"
-            style={{ display: "inline-flex", alignItems: "center", gap: 4, height: 32, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 4, height: 34, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}
           >
             <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>Candidates</span>
             <ChevronDown size={13} color={FM.textSecondary} />
@@ -298,7 +293,10 @@ function FMTopNav({ user, isAuthenticated }) {
             <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>What you get</span>
           </Link>
           <Link to="/jobs" style={{ textDecoration: "none" }}>
-            <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>Jobs</span>
+            <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 600, position: "relative", display: "inline-block", paddingBottom: 4 }}>
+              Jobs
+              <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: FM.orange, borderRadius: 999 }} />
+            </span>
           </Link>
           <Link to="/welcome#how" style={{ textDecoration: "none" }}>
             <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>How it works</span>
@@ -313,10 +311,10 @@ function FMTopNav({ user, isAuthenticated }) {
               <button
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
-                style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 32, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}
+                style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 34, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}
               >
-                <span style={{ width: 22, height: 22, borderRadius: 999, background: "#E8E8ED", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span className="fm-text-11" style={{ fontWeight: 700, color: FM.textPrimary }}>{userInitials}</span>
+                <span style={{ width: 22, height: 22, borderRadius: 999, background: FM.bgOff, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span className="fm-text-12" style={{ fontWeight: 500, color: FM.textPrimary }}>{userInitials}</span>
                 </span>
                 <ChevronDown size={13} color={FM.textSecondary} />
               </button>
@@ -376,7 +374,7 @@ function FMFilterChip({ label, value, options, onChange }) {
         type="button"
         className="fm-chip"
         onClick={() => setOpen((v) => !v)}
-        style={value ? { borderColor: FM.black, background: "#F5F5F7" } : {}}
+        style={value ? { borderColor: FM.textPrimary, background: FM.pillBg } : {}}
       >
         <span className="fm-text-13">{label}{value ? `: ${value}` : ""}</span>
         <ChevronDown size={14} color={FM.textSecondary} />
@@ -417,7 +415,7 @@ function JobListCard({ job, active, onClick, saved, onToggleSave, saving }) {
   return (
     <div
       className={`fm-job-card${active ? " fm-active" : ""}`}
-      style={{ borderLeft: active ? `3px solid ${FM.black}` : "3px solid transparent", borderBottom: `1px solid ${FM.borderLight}`, padding: "14px 16px 14px 14px", cursor: "pointer" }}
+      style={{ borderLeft: active ? `3px solid ${FM.textPrimary}` : "3px solid transparent", borderBottom: `1px solid ${FM.borderLight}`, padding: "16px 16px 16px 14px", minHeight: 95, cursor: "pointer" }}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -429,7 +427,7 @@ function JobListCard({ job, active, onClick, saved, onToggleSave, saving }) {
           role="checkbox"
           aria-checked="false"
           aria-label={job.title}
-          style={{ width: 16, height: 16, border: `1.5px solid ${FM.border}`, borderRadius: 4, flexShrink: 0, marginTop: 3, background: "#fff" }}
+          style={{ width: 16, height: 16, border: "1px solid #CBD5E1", borderRadius: 4, flexShrink: 0, marginTop: 3, background: "#fff" }}
           onClick={(e) => e.stopPropagation()}
         />
 
@@ -438,7 +436,7 @@ function JobListCard({ job, active, onClick, saved, onToggleSave, saving }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Title row */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 6 }}>
-            <span className="fm-text-14" style={{ fontWeight: 600, color: FM.textPrimary, lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+            <span className="fm-text-14" style={{ fontWeight: 500, color: FM.textPrimary, lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
               {job.title}
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
@@ -522,7 +520,7 @@ function JobDetail({ job, navigate }) {
       <div style={{ flex: 1, overflowY: "auto", padding: "28px 28px 0" }}>
         {/* Title + more */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-          <h1 className="fm-text-22" style={{ fontWeight: 700, color: FM.textPrimary, flex: 1 }}>
+          <h1 className="fm-text-22" style={{ fontWeight: 600, color: FM.textPrimary, flex: 1 }}>
             {job.title}
           </h1>
           <button type="button" aria-label="More" style={{ background: "none", border: "none", cursor: "pointer", padding: 4, marginTop: 2, color: FM.textMuted, flexShrink: 0 }}>
@@ -534,7 +532,7 @@ function JobDetail({ job, navigate }) {
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 18 }}>
           <CompanyAvatar company={job.company} size={48} />
           <div style={{ minWidth: 0 }}>
-            <p className="fm-text-15" style={{ fontWeight: 600, color: FM.textPrimary }}>{job.company?.name}</p>
+            <p className="fm-text-15" style={{ fontWeight: 500, color: FM.textPrimary }}>{job.company?.name}</p>
             {website && (
               <a href={website} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 5, textDecoration: "none" }}>
                 <Globe size={13} color={FM.textSecondary} />
@@ -564,7 +562,7 @@ function JobDetail({ job, navigate }) {
         {job.requiredSkills?.length > 0 && (
           <div style={{ marginTop: 20, display: "flex", flexWrap: "wrap", gap: 8 }}>
             {job.requiredSkills.map((s) => (
-              <span key={s} style={{ display: "inline-block", border: `1px solid ${FM.border}`, borderRadius: 999, padding: "4px 12px", fontSize: 12, fontWeight: 500, color: FM.textPrimary, background: "#fff" }}>
+              <span key={s} style={{ display: "inline-block", border: `1px solid ${FM.border}`, borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 500, color: FM.textBody, background: FM.pillBg }}>
                 {s}
               </span>
             ))}
@@ -580,8 +578,8 @@ function JobDetail({ job, navigate }) {
             { label: "Seniority level", value: job.seniorityLevel || job.experienceLevel },
           ].map(({ label, value }) => (
             <div key={label}>
-              <p className="fm-text-11" style={{ color: FM.textMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
-              <p className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 600, marginTop: 4 }}>{value || "—"}</p>
+              <p className="fm-text-13" style={{ color: FM.textSecondary, fontWeight: 500 }}>{label}</p>
+              <p className="fm-text-14" style={{ color: FM.textPrimary, fontWeight: 400, marginTop: 4 }}>{value || "—"}</p>
             </div>
           ))}
         </div>
@@ -607,24 +605,37 @@ function JobDetail({ job, navigate }) {
    Company ticker strip
    ───────────────────────────────────────────────────────────── */
 function CompanyTicker({ companies, onSelect }) {
-  // Duplicate for seamless loop
-  const doubled = [...companies, ...companies];
   return (
-    <div style={{ overflow: "hidden", width: "100%" }}>
-      <div className="fm-ticker-inner" style={{ gap: 16 }}>
-        {doubled.map((company, i) => (
-          <button
-            key={`${company.name}-${i}`}
-            type="button"
-            onClick={() => onSelect(company.name)}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0, height: 52, border: `1px solid ${FM.border}`, borderRadius: 14, background: "#fff", cursor: "pointer", padding: "0 16px", transition: "border-color .12s" }}
-          >
-            <CompanyAvatar company={company} size={26} />
-            <span className="fm-text-13" style={{ color: FM.textSecondary, whiteSpace: "nowrap", fontWeight: 500 }}>{company.name}</span>
-          </button>
-        ))}
-      </div>
-    </div>
+    <>
+      {companies.map((company) => (
+        <button
+          key={company.name}
+          type="button"
+          onClick={() => onSelect(company.name)}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0, height: 42, border: `1px solid ${FM.border}`, borderRadius: 12, background: "#fff", cursor: "pointer", padding: "0 12px", transition: "border-color .15s" }}
+        >
+          <CompanyAvatar company={company} size={26} />
+          <span className="fm-text-13" style={{ color: FM.textSecondary, whiteSpace: "nowrap", fontWeight: 500 }}>{company.name}</span>
+        </button>
+      ))}
+    </>
+  );
+}
+
+function QuickFilterChip({ icon: Icon, label, active, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0, height: 42,
+        border: `1px solid ${active ? FM.textPrimary : FM.border}`, borderRadius: 12,
+        background: active ? FM.pillBg : "#fff", cursor: "pointer", padding: "0 12px", transition: "border-color .15s",
+      }}
+    >
+      <Icon size={16} color={FM.textSecondary} />
+      <span className="fm-text-13" style={{ color: FM.textSecondary, whiteSpace: "nowrap", fontWeight: 500 }}>{label}</span>
+    </button>
   );
 }
 
@@ -637,9 +648,9 @@ function BottomEngines() {
       <div style={{ maxWidth: 860, margin: "0 auto", background: "#fff", borderRadius: 20, border: `1px solid ${FM.border}`, padding: "24px 28px" }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 20 }}>
-          <p className="fm-text-16" style={{ fontWeight: 700, color: FM.textPrimary }}>Your job-hunting engines</p>
+          <p className="fm-text-16" style={{ fontWeight: 600, color: FM.textPrimary }}>Your job-hunting engines</p>
           <Link to="/?recommended=1" target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, textDecoration: "none" }}>
-            <span className="fm-text-13" style={{ color: FM.orange, fontWeight: 600 }}>Go to your dashboard</span>
+            <span className="fm-text-13" style={{ color: FM.orange, fontWeight: 500 }}>Go to your dashboard</span>
             <IconArrowRight color={FM.orange} />
           </Link>
         </div>
@@ -815,29 +826,51 @@ export default function AllJobs() {
       {/* Inject scoped CSS */}
       <style>{PAGE_CSS}</style>
 
-      <div className="fmjobs" style={{ minHeight: "100vh", background: "#fff", display: "flex", flexDirection: "column" }}>
+      <div className="fmjobs" style={{ minHeight: "100vh", background: FM.bgPage, display: "flex", flexDirection: "column" }}>
         <FMTopNav user={user} isAuthenticated={isAuthenticated} />
 
         {/* ── HERO ── */}
-        <section style={{ background: "#fff", padding: "40px 24px 28px", maxWidth: 1200, margin: "0 auto", width: "100%" }}>
-          {/* Live now pill */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: FM.orangeLight, borderRadius: 999, padding: "5px 12px", marginBottom: 20 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 999, background: FM.orange, flexShrink: 0 }} />
-            <span className="fm-text-12" style={{ fontWeight: 700, color: FM.orange, textTransform: "uppercase", letterSpacing: "0.06em" }}>Live now</span>
+        <section style={{ background: "#fff", padding: "20px 24px 14px", maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+          <div style={{
+            backgroundImage: `linear-gradient(to right, #fff 0%, #fff 44%, rgba(255,255,255,0.55) 66%, rgba(255,255,255,0) 88%), url('/hero-banner.png')`,
+            backgroundSize: "cover, cover",
+            backgroundPosition: "center, right center",
+            backgroundRepeat: "no-repeat, no-repeat",
+            borderRadius: 16,
+            padding: "16px 24px",
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 32, flexWrap: "wrap", marginBottom: 10,
+          }}>
+            <div style={{ flex: "1 1 420px", minWidth: 280 }}>
+              {/* Live now pill */}
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: FM.orangeLight, borderRadius: 999, padding: "5px 12px", marginBottom: 12 }}>
+                <span style={{ width: 8, height: 8, borderRadius: 999, background: FM.orange, flexShrink: 0 }} />
+                <span className="fm-text-12" style={{ fontWeight: 500, color: FM.orange, textTransform: "uppercase", letterSpacing: "0.06em" }}>Live now</span>
+              </div>
+
+              {/* Count headline */}
+              <h1 className="fm-text-48" style={{ color: FM.textPrimary, margin: "0 0 8px" }}>
+                <span style={{ color: FM.orange }}>{loading ? "…" : filteredJobs.length.toLocaleString()}</span>
+                <span style={{ color: FM.textPrimary }}> live roles </span>
+                <span style={{ color: FM.textMuted }}>open right now</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="fm-text-15" style={{ color: FM.textSecondary, margin: 0 }}>
+                {newThisWeek > 0 && <span style={{ fontWeight: 600, color: FM.orange }}>{newThisWeek}+ added this week.</span>}
+                {" "}Free to browse, no account needed.
+              </p>
+            </div>
+
+            {/* Quote (illustration now lives in the hero background) */}
+            <div style={{ flex: "0 0 auto", display: "flex", alignItems: "center" }}>
+              <div>
+                <p style={{ fontSize: 20, fontWeight: 500, color: FM.textPrimary, lineHeight: 1.25, margin: 0, maxWidth: 170 }}>
+                  A better career is a brighter you.
+                </p>
+                <span style={{ display: "block", width: 42, height: 3, background: FM.orange, borderRadius: 999, marginTop: 10 }} />
+              </div>
+            </div>
           </div>
-
-          {/* Count headline */}
-          <h1 className="fm-text-48" style={{ color: FM.textPrimary, margin: "0 0 14px" }}>
-            <span style={{ color: FM.orange }}>{loading ? "…" : filteredJobs.length.toLocaleString()}</span>
-            <span style={{ color: FM.textPrimary }}> live roles </span>
-            <span style={{ color: FM.textMuted }}>open right now</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="fm-text-15" style={{ color: FM.textSecondary, marginBottom: 24 }}>
-            {newThisWeek > 0 && <span style={{ fontWeight: 700, color: FM.orange }}>{newThisWeek}+ added this week.</span>}
-            {" "}Free to browse, no account needed.
-          </p>
 
           {/* Search bar */}
           <form
@@ -869,7 +902,7 @@ export default function AllJobs() {
           </form>
 
           {/* Filter chips */}
-          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
             <FMFilterChip label="Job function"     value={filterFunction}    options={functionOpts.length ? functionOpts : ["Engineering", "Design", "Marketing", "Sales", "Operations"]} onChange={setFilterFunction} />
             <FMFilterChip label="Employment type"  value={filterEmployment}  options={employmentOpts}  onChange={setFilterEmployment} />
             <FMFilterChip label="Work arrangement" value={filterArrangement} options={arrangementOpts} onChange={setFilterArrangement} />
@@ -890,9 +923,19 @@ export default function AllJobs() {
             )}
           </div>
 
-          {/* Company ticker */}
-          {companyStrip.length > 0 && (
-            <div style={{ marginTop: 20, overflow: "hidden" }}>
+          {/* Quick filters + company chips */}
+          <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 10 }}>
+            <QuickFilterChip
+              icon={Star}
+              label="Featured"
+              active={!hasFilter}
+              onClick={() => {
+                setTitleInput(""); setLocInput("");
+                setSubmitted({ title: "", loc: "" });
+                setFilterFunction(""); setFilterEmployment(""); setFilterArrangement("");
+              }}
+            />
+            {companyStrip.length > 0 && (
               <CompanyTicker
                 companies={companyStrip}
                 onSelect={(name) => {
@@ -900,25 +943,37 @@ export default function AllJobs() {
                   if (match) setSelectedId(String(match._id));
                 }}
               />
-            </div>
-          )}
+            )}
+            <QuickFilterChip
+              icon={Briefcase}
+              label="Remote Jobs"
+              active={filterArrangement === "Remote"}
+              onClick={() => setFilterArrangement((v) => (v === "Remote" ? "" : "Remote"))}
+            />
+          </div>
         </section>
 
-        {/* ── SPLIT LAYOUT ── */}
-        <div style={{ display: "flex", flex: 1, maxWidth: 1200, margin: "0 auto", width: "100%", borderTop: `1px solid ${FM.border}` }}>
+        {/* ── SPLIT LAYOUT — sized to fill the first viewport (nav+hero+search+filters
+             above it are ~380px on desktop), so the board fits one screen like the
+             reference; the page still scrolls further down to the engines section. ── */}
+        <div style={{
+          display: "flex", maxWidth: 1200, margin: "0 auto 16px", width: "100%",
+          height: "calc(100vh - 380px)", minHeight: 360, maxHeight: 640,
+          background: "#fff", border: `1px solid ${FM.border}`, borderRadius: 14, overflow: "hidden",
+          boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
+        }}>
 
           {/* Left list panel */}
           <div
             ref={listRef}
             style={{
-              width: 340,
-              minWidth: 340,
+              width: "36%",
+              minWidth: 320,
+              maxWidth: 400,
               borderRight: `1px solid ${FM.border}`,
               overflowY: "auto",
-              maxHeight: "calc(100vh - 56px - 48px)",
-              position: "sticky",
-              top: 56,
-              background: "#FAFBFA",
+              height: "100%",
+              background: "#fff",
               flexShrink: 0,
             }}
           >
@@ -971,9 +1026,7 @@ export default function AllJobs() {
               flex: 1,
               minWidth: 0,
               overflowY: "auto",
-              maxHeight: "calc(100vh - 56px - 48px)",
-              position: "sticky",
-              top: 56,
+              height: "100%",
               background: "#fff",
               display: "flex",
               flexDirection: "column",

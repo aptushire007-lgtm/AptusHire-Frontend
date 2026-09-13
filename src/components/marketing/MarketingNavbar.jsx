@@ -31,7 +31,7 @@ export default function MarketingNavbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#E2E8F0] bg-white/95 backdrop-blur-md transition-colors">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
-        <BrandLogo to="/welcome" size="lg" textWeight="font-medium" theme="light" />
+        <BrandLogo to="/welcome" variant="image" size={52} />
 
         <nav className="hidden items-center gap-9 md:flex">
           {LINKS.map((link) => (

@@ -77,7 +77,7 @@ export default function PersonalTab({ profile, onRefresh }) {
   return (
     <div className="candidate-personal-tab space-y-6">
       <div>
-        <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">Personal Information</h2>
+        <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">Basic Information</h2>
         <p className="text-xs text-slate-500">
           Core identity credentials with instant OCR &amp; OTP trust signals.
         </p>
@@ -232,7 +232,11 @@ export default function PersonalTab({ profile, onRefresh }) {
         </div>
 
         <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={saving}>
+          <Button
+            type="submit"
+            disabled={saving}
+            className="!bg-[#F5B51B] !text-[#172334] hover:!bg-[#E5A514] focus-visible:!ring-[#F5B51B]/25"
+          >
             {saving ? "Saving Changes…" : "Save Personal Info"}
           </Button>
         </div>
@@ -242,7 +246,7 @@ export default function PersonalTab({ profile, onRefresh }) {
       {otpModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F4F6F9]-deep/80 p-4 backdrop-blur-xs">
           <div className="w-full max-w-sm rounded-3xl border border-[#E2E8F0] bg-white p-6 shadow-lift">
-            <div className="flex items-center gap-2 text-[#F97316]">
+            <div className="flex items-center gap-2 text-[#E5A514]">
               <ShieldCheck className="h-5 w-5" />
               <h3 className="font-display text-base font-bold text-[#0F172A]">
                 Verify {otpModal.channel === "email" ? "Email Address" : "Phone Number"}

@@ -450,7 +450,7 @@ function ShellInner({ children }) {
             <BrandLogo
               to="/welcome"
               variant="image"
-              size="md"
+              size={52}
               className="lg:hidden"
             />
           </div>
