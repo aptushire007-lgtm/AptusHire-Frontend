@@ -54,7 +54,14 @@ export function BrandLogo({
   // scale above, for spots that need one exact size regardless of the `size` preset.
   const textStyle = textSize ? { fontSize: `${textSize}px` } : undefined;
 
-  const content = (
+  const imageHeights = { sm: 22, md: 30, lg: 38, xl: 46, "2xl": 56 };
+  const imageHeight  = typeof size === "number" ? size : (imageHeights[size] || 30);
+
+  const content = variant === "image" ? (
+    <div className={`inline-flex items-center select-none ${className}`}>
+      <img src="/logo.png" alt="AptusHire" style={{ height: imageHeight, width: "auto" }} className="shrink-0" />
+    </div>
+  ) : (
     <div className={`inline-flex items-center gap-2.5 font-display font-bold tracking-tight select-none ${className}`}>
       {variant !== "text" && (
         variant === "icon"

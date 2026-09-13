@@ -16,6 +16,7 @@ import {
   PanelLeftOpen,
   ChevronRight,
   ChevronDown,
+  Search,
 } from "lucide-react";
 import { useAccountAuth } from "../../auth/useAccountAuth.js";
 import { logoutAccount } from "../../auth/logout.js";
@@ -183,10 +184,8 @@ function SidebarBrand({ collapsed, onNavigate }) {
     <div className="flex h-[68px] shrink-0 items-center bg-white px-5">
       <BrandLogo
         to="/welcome"
-        size="lg"
-        textWeight="font-semibold"
-        theme="light"
-        nameColorClassName="text-[#2563EB]"
+        variant="image"
+        size={52}
         onClick={onNavigate}
       />
     </div>
@@ -297,10 +296,19 @@ function HeaderActions({ onNavigate }) {
 function ShellInner({ children }) {
   const [collapsed, setCollapsed]   = useState(readCollapsed);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [headerSearch, setHeaderSearch] = useState("");
   const { pathname }                = useLocation();
   const { theme, setTheme }         = useTheme();
+  const { isAuthenticated }         = useAccountAuth();
+  const navigate                    = useNavigate();
   const panelRef                    = useRef(null);
   const closeRef                    = useRef(null);
+
+  const handleHeaderSearch = useCallback((e) => {
+    e.preventDefault();
+    const q = headerSearch.trim();
+    navigate(q ? `/?recommended=1&q=${encodeURIComponent(q)}` : "/?recommended=1");
+  }, [headerSearch, navigate]);
 
   // Lock to light palette
   useEffect(() => {
@@ -441,12 +449,28 @@ function ShellInner({ children }) {
             {/* Brand on mobile (sidebar hidden) */}
             <BrandLogo
               to="/welcome"
+              variant="image"
               size="md"
-              textWeight="font-medium"
-              theme="light"
               className="lg:hidden"
             />
           </div>
+
+          {isAuthenticated && (
+            <form onSubmit={handleHeaderSearch} className="hidden min-w-0 flex-1 max-w-md md:block">
+              <label className="sr-only" htmlFor="app-header-search">Search for jobs, roles or companies</label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" aria-hidden="true" />
+                <input
+                  id="app-header-search"
+                  type="search"
+                  value={headerSearch}
+                  onChange={(e) => setHeaderSearch(e.target.value)}
+                  placeholder="Search for jobs, roles or companies..."
+                  className="h-10 w-full rounded-full border border-[#E5E7EB] bg-[#F8FAFC] pl-10 pr-4 text-[14px] text-[#111827] placeholder:text-[#94A3B8] transition-colors focus:border-[#F97316] focus:bg-white focus:outline-none focus:ring-3 focus:ring-[#F97316]/15"
+                />
+              </div>
+            </form>
+          )}
 
           <HeaderActions />
         </header>

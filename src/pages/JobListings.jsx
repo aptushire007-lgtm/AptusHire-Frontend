@@ -651,15 +651,16 @@ export default function JobListings() {
   const [recommendedOrder, setRecommendedOrder] = useState([]);
 
   // ── UI state ──
-  const [searchInput, setSearchInput] = useState("");
-  const [query,       setQuery]       = useState("");
+  const initialQuery = searchParams.get("q") || "";
+  const [searchInput, setSearchInput] = useState(initialQuery);
+  const [query,       setQuery]       = useState(initialQuery);
   const [filters,     setFilters]     = useState({
     location: "", matchFilter: "", minSalary: "Any",
     experience: "", skills: "", company: "", department: "",
     workArrangement: "", employmentType: "",
   });
   const [showFilters,  setShowFilters]  = useState(false);
-  const [showSearch,   setShowSearch]   = useState(false);
+  const [showSearch,   setShowSearch]   = useState(() => Boolean(initialQuery));
   const [selectedJobId, setSelectedJobId] = useState(null);
 
   // ── Fetch jobs + dashboard (API calls unchanged) ──

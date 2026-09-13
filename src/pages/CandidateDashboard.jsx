@@ -1,51 +1,46 @@
-﻿/* =============================================================
+/* =============================================================
    CandidateDashboard.jsx  —  /dashboard
-   Exact match to the screenshot. Contains only:
-     1. Hero welcome card (greeting + profile % + download btn)
+   Content-only redesign (yellow/charcoal design system) matching
+   the "AptusHire Candidate Dashboard" reference. The shared sidebar
+   and header (AppShell.jsx) are NOT part of this file and keep
+   their existing orange/navy styling — this page's own content is:
+     1. Hero welcome card (greeting, profile %, actions, illustration)
      2. Three stat cards (Applications · Interviews · Profile Strength)
      3. Application Pipeline (5 stage buckets)
-     4. Quick-nav chips (Find Roles · My Profile & Trust · Notifications)
-     5. Your applications (2-col job cards)
-     6. Bottom CTA banner (assessments)
-     7. Footer
-   All other sections removed.
+     4. Quick Actions (Find Roles · My Profile & Trust · Notifications)
+     5. Recent Activity
    ============================================================= */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  AlertTriangle, ArrowRight, Bell, Bookmark, Briefcase,
-  ChevronRight, ClipboardList, Download, Search, Star,
-  UserRound, Video, Zap,
+  AlertTriangle, ArrowRight, BarChart3, Bell, Briefcase,
+  ChevronRight, ClipboardList, Clock, Download, Search,
+  UserRound, Video,
 } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader, clearAccountAuth } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
-import { saveAuth as savePortalAuth, clearAuth as clearPortalAuth } from "../portal/portalAuth.js";
-import { saveAuth as saveAssessmentAuth, clearAuth as clearAssessmentAuth } from "../portal/assessmentAuth.js";
 import { getSocket } from "../lib/socket.js";
 import { isRejected } from "../lib/pipeline.js";
 
-/* ─── design tokens ─────────────────────────────────────────────── */
-const OR   = "#F97316";   // primary orange
-const OR_S = "#FEF3E8";   // orange soft bg
-const OR_D = "#EA6C0A";   // orange dark (hover)
-const NV   = "#1B2A3B";   // navy (dark stat card / pipeline icon / banner)
-const BD   = "#E2E8F0";   // border
-const TX   = "#0F172A";   // body text dark
-const MT   = "#64748B";   // muted text
-const FT   = "#94A3B8";   // faint text
-const WH   = "#FFFFFF";   // white
-const CV   = "#F4F6F9";   // canvas bg
+/* ─── design tokens (spec §3/§40) ───────────────────────────────── */
+const TXP  = "#111827";  // primary text
+const TXS  = "#64748B";  // secondary text
+const TXM  = "#94A3B8";  // muted text
+const BORD = "#E5E7EB";  // border
+const YEL  = "#F5B51B";  // yellow
+const YELD = "#E5A514";  // dark yellow
+const YELL = "#FFF1C7";  // light yellow
+const YELS = "#FFF9E8";  // very light yellow
+const DARK = "#172334";  // dark charcoal
+const PBG  = "#E7EBEF";  // progress track background
+const WH   = "#FFFFFF";
+const GRN  = "#65A30D";  // Live Updates dot only
+
+const SHADOW_CARD  = "0 2px 8px rgba(15,23,42,0.04)";
+const SHADOW_HOVER = "0 6px 18px rgba(15,23,42,0.07)";
 
 /* ─── helpers ────────────────────────────────────────────────────── */
-function useServerClock(serverTime) {
-  const [offset, setOffset] = useState(0);
-  const [tick,   setTick]   = useState(0);
-  useEffect(() => { if (serverTime) setOffset(new Date(serverTime).getTime() - Date.now()); }, [serverTime]);
-  useEffect(() => { const id = setInterval(() => setTick(t => t + 1), 60_000); return () => clearInterval(id); }, []);
-  return useCallback(() => Date.now() + offset, [offset, tick]);
-}
-
 function indianGreeting(now = new Date()) {
   const h = Number(new Intl.DateTimeFormat("en-IN", {
     timeZone: "Asia/Kolkata", hour: "numeric", hourCycle: "h23",
@@ -74,150 +69,64 @@ function pipelineBucket(status) {
   return "applied";
 }
 
-/* ─── tiny primitives ─────────────────────────────────────────────── */
-
-// White card with subtle border + shadow
+/* ─── primitives ─────────────────────────────────────────────────── */
 const Card = ({ children, style }) => (
   <div style={{
-    background: WH, border: `1px solid ${BD}`, borderRadius: 12, padding: 20,
-    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+    background: WH, border: `1px solid ${BORD}`, borderRadius: 16, padding: 24,
+    boxShadow: SHADOW_CARD, transition: "box-shadow 180ms ease",
     ...style,
   }}>
     {children}
   </div>
 );
 
-// Dark navy card (Applications stat)
-const NavyCard = ({ children, style }) => (
+const IconBox = ({ icon: Icon, size = 40, radius = 10, bg = YELL, color = TXP, iconSize = 22 }) => (
   <div style={{
-    background: NV, borderRadius: 12, padding: 20,
-    boxShadow: "0 2px 8px rgba(27,42,59,0.18)",
-    ...style,
+    width: size, height: size, borderRadius: radius, background: bg, flexShrink: 0,
+    display: "flex", alignItems: "center", justifyContent: "center",
   }}>
-    {children}
+    <Icon style={{ width: iconSize, height: iconSize, color }} strokeWidth={1.75} />
   </div>
 );
 
-// Orange filled button
-const OrangeBtn = ({ children, onClick, loading, style, to, as: As }) => {
-  const base = {
-    display: "inline-flex", alignItems: "center", justifyContent: "center",
-    gap: 7, height: 38, padding: "0 18px", borderRadius: 8,
-    background: loading ? OR_D : OR, color: WH,
-    border: "none", cursor: "pointer",
-    fontSize: 13, fontWeight: 600, textDecoration: "none",
-    transition: "opacity 0.15s", whiteSpace: "nowrap",
-    ...style,
-  };
-  if (to) return <Link to={to} style={base}>{children}</Link>;
-  return <button type="button" onClick={onClick} disabled={loading} style={base}>{children}</button>;
-};
-
-// Pill badge
-const Badge = ({ children, color = OR, bg = OR_S, border = "transparent" }) => (
-  <span style={{
-    display: "inline-flex", alignItems: "center",
-    borderRadius: 999, padding: "2px 8px",
-    fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase",
-    color, background: bg, border: `1px solid ${border}`,
-  }}>
-    {children}
-  </span>
-);
-
-// Skill tag
-const Tag = ({ children, accent }) => (
-  <span style={{
-    display: "inline-block", padding: "3px 10px", borderRadius: 6,
-    fontSize: 12, fontWeight: 500,
-    background: accent ? "#EFF6FF" : "#F1F5F9",
-    color:      accent ? "#3B82F6" : "#475569",
-    border:     `1px solid ${accent ? "#BFDBFE" : BD}`,
-  }}>
-    {children}
-  </span>
-);
-
-// Quick-nav chip
-const Chip = ({ icon: Icon, children, to, dot }) => (
-  <Link to={to} style={{
-    display: "inline-flex", alignItems: "center", gap: 7,
-    height: 36, padding: "0 14px", borderRadius: 8,
-    background: WH, border: `1px solid ${BD}`,
-    color: "#334155", fontSize: 13, fontWeight: 500,
-    textDecoration: "none", whiteSpace: "nowrap",
-    boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-  }}>
-    <Icon style={{ width: 14, height: 14, color: MT }} />
-    {children}
-    {dot && <span style={{ width: 7, height: 7, borderRadius: "50%", background: OR, flexShrink: 0 }} />}
-  </Link>
-);
-
-/* ─── Skeleton loader ─────────────────────────────────────────────── */
-const Sk = ({ w = "100%", h = 16, r = 6 }) => (
-  <div style={{
-    width: w, height: h, borderRadius: r,
-    background: "#E2E8F0",
-    animation: "skPulse 1.4s ease-in-out infinite",
-  }} />
-);
-
-/* ─── Application card ─────────────────────────────────────────────── */
-function AppCard({ application }) {
-  const job       = application.job || {};
-  const isRemote  = ["remote","hybrid"].includes((job.workplaceType || application.workplaceType || "").toLowerCase());
-  const isFullTime = (job.jobType || job.employmentType || "full").toLowerCase().includes("full");
-  const typeLabel  = isRemote ? "REMOTE" : "FULL-TIME";
-  const typeStyle  = isRemote
-    ? { color: "#16A34A", bg: "#F0FDF4", border: "#BBF7D0" }
-    : { color: "#6366F1", bg: "#EEF2FF", border: "#C7D2FE" };
-
-  const title    = job.title   || application.title   || "Job Application";
-  const company  = job.company?.name || application.company?.name || "";
-  const location = [company, job.location || application.location].filter(Boolean).join(" • ");
-  const skills   = job.requiredSkills || application.requiredSkills || [];
-  const applied  = application.appliedAt || application.createdAt;
-
+function StatCard({ icon, title, value, valueColor = TXP, iconBg, description, action }) {
   return (
-    <div style={{
-      border: `1px solid ${BD}`, borderRadius: 10, padding: 16, background: WH,
+    <Card style={{ display: "flex", flexDirection: "column", gap: 6, padding: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 16, fontWeight: 500, color: TXP }}>{title}</span>
+        <IconBox icon={icon} bg={iconBg} />
+      </div>
+      <p style={{ fontSize: 40, fontWeight: 600, color: valueColor, lineHeight: 1, margin: 0 }}>{value}</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+        <span style={{ fontSize: 14, color: TXS }}>{description}</span>
+        {action}
+      </div>
+    </Card>
+  );
+}
+
+function QuickActionCard({ icon, title, description, to, dot }) {
+  return (
+    <Link to={to} style={{
+      display: "flex", alignItems: "center", gap: 12, minHeight: 68,
+      background: WH, border: `1px solid ${BORD}`, borderRadius: 12, padding: "12px 16px",
+      textDecoration: "none", boxShadow: SHADOW_CARD, transition: "box-shadow 180ms ease",
     }}>
-      {/* header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
-        <div>
-          <Badge color={typeStyle.color} bg={typeStyle.bg} border={typeStyle.border}>
-            {typeLabel}
-          </Badge>
-          <p style={{ fontSize: 14, fontWeight: 700, color: TX, marginTop: 6, lineHeight: 1.3 }}>{title}</p>
-          <p style={{ fontSize: 12, color: MT, marginTop: 3 }}>{location || company}</p>
-        </div>
-        <button style={{ background: "none", border: "none", cursor: "pointer", color: FT, padding: 2, flexShrink: 0 }}>
-          <Bookmark style={{ width: 16, height: 16 }} />
-        </button>
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <IconBox icon={icon} size={40} radius={999} iconSize={18} />
+        {dot && (
+          <span style={{
+            position: "absolute", top: -2, right: -2, width: 10, height: 10,
+            borderRadius: "50%", background: YELD, border: `2px solid ${WH}`,
+          }} />
+        )}
       </div>
-
-      {/* skills */}
-      {skills.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 12 }}>
-          {skills.slice(0, 5).map((s, i) => (
-            <Tag key={s} accent={i === 3}>{s}</Tag>
-          ))}
-        </div>
-      )}
-
-      {/* footer */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 10, borderTop: `1px solid ${BD}` }}>
-        <span style={{ fontSize: 12, color: FT }}>Applied {timeAgoShort(applied)}</span>
-        <Link to={`/jobs/${job.slug || job._id || ""}`} style={{
-          display: "inline-flex", alignItems: "center", gap: 4,
-          fontSize: 13, fontWeight: 600, color: TX, textDecoration: "none",
-          border: `1px solid ${BD}`, borderRadius: 6, padding: "4px 12px",
-        }}>
-          View Details <ChevronRight style={{ width: 13, height: 13 }} />
-        </Link>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 16, fontWeight: 500, color: TXP, margin: 0 }}>{title}</p>
+        <p style={{ fontSize: 14, color: TXS, marginTop: 2 }}>{description}</p>
       </div>
-    </div>
+      <ChevronRight style={{ width: 18, height: 18, color: TXM, flexShrink: 0 }} />
+    </Link>
   );
 }
 
@@ -233,7 +142,6 @@ export default function CandidateDashboard() {
   const [greeting,  setGreeting]  = useState(() => indianGreeting());
   const timerRef = useRef(null);
 
-  /* ── fetch ── */
   const load = useCallback(async () => {
     setError("");
     try {
@@ -255,13 +163,11 @@ export default function CandidateDashboard() {
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [load]);
 
-  /* ── greeting clock ── */
   useEffect(() => {
     const id = setInterval(() => setGreeting(indianGreeting()), 60_000);
     return () => clearInterval(id);
   }, []);
 
-  /* ── realtime stage/notification refresh ── */
   useEffect(() => {
     const socket = getSocket(); if (!socket) return;
     const fn = () => load();
@@ -276,15 +182,14 @@ export default function CandidateDashboard() {
     return () => socket.off("notification:new", fn);
   }, [load]);
 
-  /* ── data export ── */
   const handleDownload = async () => {
     try {
       setExporting(true);
       const res = await api.get("/candidate-dashboard/profile/export-data", {
         headers: accountAuthHeader(), responseType: "blob",
       });
-      const url  = window.URL.createObjectURL(new Blob([res.data]));
-      const a    = document.createElement("a");
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
       a.href = url;
       a.setAttribute("download", `AptusHire-Data-${Date.now()}.json`);
       document.body.appendChild(a); a.click(); a.remove();
@@ -292,337 +197,269 @@ export default function CandidateDashboard() {
     finally { setExporting(false); }
   };
 
-  const nowFn = useServerClock(data?.serverTime);
-
-  /* ── error ── */
   if (error) return (
     <div style={{ padding: 32 }}>
-      <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 12, padding: 20 }}>
+      <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 16, padding: 20 }}>
         <p style={{ color: "#DC2626", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
           <AlertTriangle style={{ width: 16, height: 16 }} />{error}
         </p>
-        <button onClick={load} style={{ marginTop: 12, padding: "6px 16px", borderRadius: 8, border: `1px solid ${BD}`, background: WH, cursor: "pointer", fontSize: 13 }}>
+        <button onClick={load} style={{ marginTop: 12, padding: "6px 16px", borderRadius: 10, border: `1px solid ${BORD}`, background: WH, cursor: "pointer", fontSize: 14 }}>
           Try again
         </button>
       </div>
     </div>
   );
 
-  /* ── skeleton ── */
   if (!data) return (
     <>
       <style>{`@keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}`}</style>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }} aria-busy="true">
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }} aria-busy="true">
         <p className="sr-only" role="status">Loading your dashboard…</p>
-        {/* hero */}
-        <div style={{ background: WH, border:`1px solid ${BD}`, borderRadius: 12, padding: 20 }}>
-          <Sk w="50%" h={14} r={4} /><div style={{marginTop:10}}><Sk w="70%" h={28} r={6}/></div>
-          <div style={{marginTop:8}}><Sk w="40%" h={14} r={4}/></div>
+        <div style={{ background: WH, border: `1px solid ${BORD}`, borderRadius: 16, padding: 32, height: 180 }} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+          {[1, 2, 3].map((i) => <div key={i} style={{ borderRadius: 16, height: 170, background: WH, border: `1px solid ${BORD}` }} />)}
         </div>
-        {/* stat cards */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12 }}>
-          {[1,2,3].map(i=><div key={i} style={{borderRadius:12,padding:20,background:i===1?NV:WH,border:`1px solid ${BD}`}}><Sk w="60%" h={12} r={4}/><div style={{marginTop:12}}><Sk w="30%" h={36} r={6}/></div></div>)}
-        </div>
-        {/* pipeline */}
-        <div style={{background:WH,border:`1px solid ${BD}`,borderRadius:12,padding:20}}>
-          <Sk w="40%" h={16} r={4}/><div style={{marginTop:16,display:"flex",gap:12}}>{[1,2,3,4,5].map(i=><div key={i} style={{flex:1}}><Sk h={12} r={3}/><div style={{marginTop:8}}><Sk h={28} r={4}/></div></div>)}</div>
-        </div>
-        {/* chips */}
-        <div style={{display:"flex",gap:8}}>{[1,2,3].map(i=><Sk key={i} w={120} h={36} r={8}/>)}</div>
-        {/* apps */}
-        <div style={{background:WH,border:`1px solid ${BD}`,borderRadius:12,padding:20}}>
-          <Sk w="30%" h={16} r={4}/><div style={{marginTop:16,display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:12}}>{[1,2].map(i=><Sk key={i} h={140} r={10}/>)}</div>
+        <div style={{ background: WH, border: `1px solid ${BORD}`, borderRadius: 16, height: 195 }} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+          {[1, 2, 3].map((i) => <div key={i} style={{ borderRadius: 14, height: 100, background: WH, border: `1px solid ${BORD}` }} />)}
         </div>
       </div>
     </>
   );
 
-  /* ── derived data ── */
   const pct          = data.profile?.profileCompletionPercent ?? 0;
   const applications = data.appliedJobs || [];
   const interviews   = (data.upcomingInterviews?.length || 0) + (data.aiInterviewHistory?.length || 0);
-  const hasUnreadNotif = (data.notifications || []).some(n => !n.read);
+  const notifications = data.notifications || [];
+  const hasUnreadNotif = notifications.some((n) => !n.read);
   const displayName  = user?.name || data.profile?.name || "Candidate";
 
   const STAGES = [
-    { key: "applied",     label: "APPLIED"     },
-    { key: "screening",   label: "SCREENING"   },
-    { key: "interview",   label: "INTERVIEW"   },
-    { key: "shortlisted", label: "SHORTLISTED" },
-    { key: "rejected",    label: "REJECTED"    },
+    { key: "applied",     label: "Applied"     },
+    { key: "screening",   label: "Screening"   },
+    { key: "interview",   label: "Interview"   },
+    { key: "shortlisted", label: "Shortlisted" },
+    { key: "rejected",    label: "Rejected"    },
   ];
-  const pipelineCounts = STAGES.map(s => ({
+  const pipelineCounts = STAGES.map((s) => ({
     ...s,
-    count: applications.filter(a => !a.pipelineExit && pipelineBucket(a.status) === s.key).length,
+    count: applications.filter((a) => !a.pipelineExit && pipelineBucket(a.status) === s.key).length,
   }));
+  const maxStageCount = Math.max(1, ...pipelineCounts.map((s) => s.count));
 
-  /* ═══════════════════════════════════════════════════
-     RENDER
-  ═══════════════════════════════════════════════════ */
   return (
-    <>
-      {/* keyframes for pulse animations */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+      {/* ══════ HERO — compact horizontal banner (not a tall card) ══════ */}
       <style>{`
-        @keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}
-        @keyframes livePing{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.6)}}
+        .dash-hero { flex-wrap: nowrap; }
+        @media (max-width: 980px) {
+          .dash-hero { flex-wrap: wrap !important; }
+          .dash-hero > * { flex-basis: 100% !important; }
+        }
       `}</style>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-        {/* ══════════════════════════════════════════
-            1. HERO WELCOME CARD
-        ══════════════════════════════════════════ */}
-        <Card>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-            {/* left: label + greeting + sub */}
-            <div style={{ flex: 1, minWidth: 200 }}>
-              {/* "● CANDIDATE DASHBOARD" label */}
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: OR, flexShrink: 0 }} />
-                <span style={{
-                  fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
-                  textTransform: "uppercase", color: MT,
-                }}>
-                  Candidate Dashboard
-                </span>
-              </div>
-
-              <h1 style={{ fontSize: 26, fontWeight: 700, color: TX, lineHeight: 1.2, margin: 0 }}>
-                {greeting}, {displayName}{" "}
-                <span role="img" aria-label="wave">👋</span>
-              </h1>
-              <p style={{ fontSize: 13, color: MT, marginTop: 8 }}>
-                Here's your hiring progress and recent updates.
-              </p>
-            </div>
-
-            {/* right: profile completion + download */}
-            <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
-              {/* Profile completion mini section */}
-              <div>
-                <p style={{ fontSize: 11, color: MT, marginBottom: 4 }}>Profile completion</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: TX }}>{pct}%</span>
-                  {/* progress track */}
-                  <div style={{ width: 72, height: 6, background: "#E2E8F0", borderRadius: 999, overflow: "hidden" }}>
-                    <div style={{ width: `${pct}%`, height: "100%", background: OR, borderRadius: 999 }} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Download My Data button */}
-              <OrangeBtn onClick={handleDownload} loading={exporting}>
-                <Download style={{ width: 13, height: 13 }} />
-                {exporting ? "Exporting…" : "Download My Data"}
-              </OrangeBtn>
-            </div>
-          </div>
-        </Card>
-
-        {/* ══════════════════════════════════════════
-            2. THREE STAT CARDS
-        ══════════════════════════════════════════ */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-
-          {/* Applications — dark navy */}
-          <NavyCard>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#94A3B8" }}>Applications</span>
-              {/* briefcase icon box */}
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: "rgba(249,115,22,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Briefcase style={{ width: 17, height: 17, color: OR }} />
-              </div>
-            </div>
-            <p style={{ fontSize: 38, fontWeight: 800, color: WH, lineHeight: 1 }}>
-              {applications.length}
-            </p>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 10 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: OR, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: "#94A3B8" }}>Total submitted applications</span>
-            </div>
-          </NavyCard>
-
-          {/* Interviews — white */}
-          <Card style={{ padding: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: MT }}>Interviews</span>
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: OR_S, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Video style={{ width: 17, height: 17, color: OR }} />
-              </div>
-            </div>
-            <p style={{ fontSize: 38, fontWeight: 800, color: TX, lineHeight: 1 }}>{interviews}</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 10 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: OR, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: MT }}>Scheduled or completed</span>
-            </div>
-          </Card>
-
-          {/* Profile Strength — white with star icon */}
-          <Card style={{ padding: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: MT }}>Profile Strength</span>
-              {/* star — outline, yellow */}
-              <Star style={{ width: 18, height: 18, color: "#FCD34D", strokeWidth: 1.5 }} />
-            </div>
-            <p style={{ fontSize: 38, fontWeight: 800, color: OR, lineHeight: 1 }}>{pct}%</p>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
-              <span style={{ fontSize: 12, color: MT }}>Profile strength</span>
-              <Link to="/profile" style={{
-                display: "inline-flex", alignItems: "center", gap: 2,
-                fontSize: 12, fontWeight: 600, color: OR, textDecoration: "none",
-              }}>
-                Complete profile <ChevronRight style={{ width: 12, height: 12 }} />
-              </Link>
-            </div>
-          </Card>
-        </div>
-
-        {/* ══════════════════════════════════════════
-            3. APPLICATION PIPELINE
-        ══════════════════════════════════════════ */}
-        <Card>
-          {/* header */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {/* navy icon box */}
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: NV, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <ClipboardList style={{ width: 16, height: 16, color: WH }} />
-              </div>
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 700, color: TX }}>Application Pipeline</p>
-                <p style={{ fontSize: 12, color: MT }}>A current count of your applications tracked by hiring stage.</p>
-              </div>
-            </div>
-            {/* Live Updates badge */}
-            <span style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              padding: "4px 10px", borderRadius: 6,
-              background: "#EFF6FF", color: "#3B82F6", fontSize: 12, fontWeight: 600,
-              border: "1px solid #BFDBFE", whiteSpace: "nowrap",
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3B82F6", animation: "livePing 1.4s ease-in-out infinite" }} />
-              Live Updates
+      <div className="dash-hero" style={{
+        backgroundImage: `linear-gradient(to right, ${WH} 0%, ${WH} 45%, rgba(255,255,255,0.55) 68%, rgba(255,255,255,0) 88%), url('/hero-banner.png')`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, right center",
+        backgroundRepeat: "no-repeat, no-repeat",
+        border: `1px solid ${BORD}`, borderRadius: 14, padding: "12px 24px",
+        boxShadow: SHADOW_CARD,
+        display: "flex", gap: 20, alignItems: "center", justifyContent: "space-between",
+      }}>
+        {/* left: eyebrow + greeting + description + actions */}
+        <div style={{ flex: "1 1 300px", minWidth: 240 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: YEL, flexShrink: 0 }} />
+            <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.09em", textTransform: "uppercase", color: TXS }}>
+              Candidate Dashboard
             </span>
           </div>
 
-          {/* stage columns */}
-          <div style={{ display: "flex", gap: 0 }}>
-            {pipelineCounts.map((stage, i) => (
-              <div key={stage.key} style={{
-                flex: 1, paddingLeft: i === 0 ? 0 : 16,
-                borderLeft: i > 0 ? `1px solid ${BD}` : "none",
-                paddingRight: i < pipelineCounts.length - 1 ? 16 : 0,
-              }}>
-                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MT, marginBottom: 8 }}>
-                  {stage.label}
-                </p>
-                <p style={{ fontSize: 26, fontWeight: 700, color: TX, lineHeight: 1 }}>{stage.count}</p>
-                <div style={{ marginTop: 10, height: 3, background: "#E2E8F0", borderRadius: 999 }} />
-              </div>
-            ))}
-          </div>
-        </Card>
+          <h1 style={{ fontSize: 30, fontWeight: 500, lineHeight: 1.15, color: TXP, margin: 0 }}>
+            {greeting},{" "}
+            <span style={{ color: YELD, fontWeight: 600 }}>{displayName}</span> <span role="img" aria-label="wave">👋</span>
+          </h1>
+          <p style={{ fontSize: 14, fontWeight: 400, color: TXS, marginTop: 4 }}>
+            Here's your hiring progress and recent updates.
+          </p>
 
-        {/* ══════════════════════════════════════════
-            4. QUICK-NAV CHIPS
-        ══════════════════════════════════════════ */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          <Chip icon={Search}    to="/">Find Roles</Chip>
-          <Chip icon={UserRound} to="/profile">My Profile &amp; Trust</Chip>
-          <Chip icon={Bell}      to="/notifications" dot={hasUnreadNotif}>Notifications</Chip>
-        </div>
-
-        {/* ══════════════════════════════════════════
-            5. YOUR APPLICATIONS
-        ══════════════════════════════════════════ */}
-        <Card>
-          {/* header row */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: NV, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Briefcase style={{ width: 16, height: 16, color: WH }} />
-              </div>
-              <p style={{ fontSize: 14, fontWeight: 700, color: TX }}>Your applications</p>
-            </div>
-            <Link to="/applied-jobs" style={{
-              display: "inline-flex", alignItems: "center", gap: 3,
-              fontSize: 13, fontWeight: 600, color: OR, textDecoration: "none",
+          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            <Link to="/?recommended=1" style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+              height: 36, padding: "0 16px", borderRadius: 8,
+              background: DARK, color: WH, fontSize: 14, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap",
             }}>
-              View All Applications <ChevronRight style={{ width: 13, height: 13 }} />
+              Find Jobs <ArrowRight style={{ width: 15, height: 15 }} />
+            </Link>
+            <Link to="/profile" style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              height: 36, padding: "0 16px", borderRadius: 8,
+              background: WH, border: `1px solid ${BORD}`, color: TXP, fontSize: 14, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap",
+            }}>
+              Update Profile
             </Link>
           </div>
-
-          {/* job cards */}
-          {applications.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "32px 0" }}>
-              <Briefcase style={{ width: 40, height: 40, color: "#E2E8F0", margin: "0 auto 12px" }} />
-              <p style={{ fontSize: 14, fontWeight: 600, color: TX }}>No applications yet</p>
-              <p style={{ fontSize: 13, color: MT, marginTop: 4 }}>Apply to a role to start tracking progress here.</p>
-              <Link to="/" style={{
-                display: "inline-flex", alignItems: "center", gap: 6, marginTop: 16,
-                padding: "8px 20px", borderRadius: 8, background: OR, color: WH,
-                fontSize: 13, fontWeight: 600, textDecoration: "none",
-              }}>
-                Browse open roles <ArrowRight style={{ width: 14, height: 14 }} />
-              </Link>
-            </div>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-              {applications.slice(0, 4).map(app => (
-                <AppCard key={app._id} application={app} />
-              ))}
-            </div>
-          )}
-        </Card>
-
-        {/* ══════════════════════════════════════════
-            6. BOTTOM CTA BANNER
-        ══════════════════════════════════════════ */}
-        <div style={{
-          background: NV, borderRadius: 12, padding: "22px 24px",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          gap: 20, flexWrap: "wrap",
-          boxShadow: "0 4px 16px rgba(27,42,59,0.22)",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            {/* lightning icon in orange circle */}
-            <div style={{
-              width: 44, height: 44, borderRadius: 10, flexShrink: 0,
-              background: "rgba(249,115,22,0.20)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <Zap style={{ width: 22, height: 22, color: OR }} />
-            </div>
-            <div>
-              <p style={{ fontSize: 15, fontWeight: 700, color: WH, lineHeight: 1.3 }}>
-                Be Part of High-Performing Engineering Teams
-              </p>
-              <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 4 }}>
-                Complete your skill verification assessments to increase profile views by 4×.
-              </p>
-            </div>
-          </div>
-          <OrangeBtn to="/assessments" style={{ whiteSpace: "nowrap" }}>
-            Explore Assessments <ArrowRight style={{ width: 14, height: 14 }} />
-          </OrangeBtn>
         </div>
 
-        {/* ══════════════════════════════════════════
-            7. FOOTER
-        ══════════════════════════════════════════ */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          flexWrap: "wrap", gap: 8, paddingTop: 16, borderTop: `1px solid ${BD}`,
-        }}>
-          <p style={{ fontSize: 12, color: FT }}>© 2026 AptusHire Inc. All rights reserved.</p>
-          <div style={{ display: "flex", gap: 20 }}>
-            {["Privacy Policy", "Terms of Service", "Support Helpdesk"].map(l => (
-              <a key={l} href="#" style={{ fontSize: 12, color: FT, textDecoration: "none" }}>{l}</a>
+        {/* middle: profile completion + download */}
+        <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", gap: 6, minWidth: 170 }}>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 500, color: TXS, marginBottom: 4 }}>Profile completion</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 28, fontWeight: 600, color: TXP }}>{pct}%</span>
+              <div style={{ width: 110, height: 7, background: BORD, borderRadius: 999, overflow: "hidden" }}>
+                <div style={{ width: `${pct}%`, height: "100%", background: YEL, borderRadius: 999 }} />
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={exporting}
+            style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+              height: 36, padding: "0 14px", borderRadius: 9,
+              background: exporting ? YELD : YEL, color: TXP, border: "none", cursor: "pointer",
+              fontSize: 14, fontWeight: 500, whiteSpace: "nowrap",
+            }}
+          >
+            <Download style={{ width: 14, height: 14 }} />
+            {exporting ? "Exporting…" : "Download My Data"}
+          </button>
+        </div>
+
+        {/* right: motivational quote (illustration now lives in the hero background) */}
+        <div style={{ flex: "0 0 auto", display: "flex", alignItems: "center" }}>
+          <div>
+            <p style={{ fontSize: 19, fontWeight: 400, color: TXP, lineHeight: 1.25, margin: 0, maxWidth: 190 }}>
+              &ldquo;Progress today, a brighter tomorrow.&rdquo;
+            </p>
+            <span style={{ display: "block", width: 42, height: 3, background: YEL, borderRadius: 999, marginTop: 6 }} />
+          </div>
+        </div>
+      </div>
+
+      {/* ══════ STAT CARDS ══════ */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+        <StatCard
+          icon={Briefcase}
+          title="Applications"
+          value={applications.length}
+          description="Total submitted applications"
+          action={<ChevronRight style={{ width: 16, height: 16, color: TXM }} />}
+        />
+        <StatCard
+          icon={Video}
+          title="Interviews"
+          value={interviews}
+          iconBg="#F1F5F9"
+          description="Scheduled or completed"
+          action={<ChevronRight style={{ width: 16, height: 16, color: TXM }} />}
+        />
+        <StatCard
+          icon={BarChart3}
+          title="Profile Strength"
+          value={`${pct}%`}
+          valueColor={YELD}
+          description="Profile strength"
+          action={
+            <Link to="/profile" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: YELL }}>
+              <ChevronRight style={{ width: 15, height: 15, color: TXP }} />
+            </Link>
+          }
+        />
+      </div>
+
+      {/* ══════ APPLICATION PIPELINE ══════ */}
+      <Card style={{ padding: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <IconBox icon={ClipboardList} bg={DARK} color={WH} />
+            <div>
+              <p style={{ fontSize: 20, fontWeight: 600, color: TXP, margin: 0 }}>Application Pipeline</p>
+              <p style={{ fontSize: 14, color: TXS, marginTop: 2 }}>A current count of your applications tracked by hiring stage.</p>
+            </div>
+          </div>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            height: 32, padding: "0 14px", borderRadius: 10,
+            background: "#F7F8F9", border: `1px solid ${BORD}`, fontSize: 14, fontWeight: 500, color: TXP,
+            whiteSpace: "nowrap",
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: GRN, flexShrink: 0 }} />
+            Live Updates
+          </span>
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 0 }}>
+          {pipelineCounts.map((stage, i) => (
+            <div key={stage.key} style={{
+              flex: "1 1 18%", minWidth: 110,
+              paddingLeft: i === 0 ? 0 : 16,
+              borderLeft: i > 0 ? `1px solid ${BORD}` : "none",
+              paddingRight: 16,
+            }}>
+              <p style={{ fontSize: 12, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em", color: TXS, marginBottom: 4 }}>
+                {stage.label}
+              </p>
+              <p style={{ fontSize: 30, fontWeight: 600, color: TXP, lineHeight: 1, margin: 0 }}>{stage.count}</p>
+              <div style={{ marginTop: 8, height: 6, background: PBG, borderRadius: 999, overflow: "hidden" }}>
+                <div style={{ width: `${(stage.count / maxStageCount) * 100}%`, height: "100%", background: YEL, borderRadius: 999 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* ══════ QUICK ACTIONS ══════ */}
+      <div>
+        <p style={{ fontSize: 22, fontWeight: 600, color: TXP, margin: "0 0 10px" }}>Quick Actions</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+          <QuickActionCard icon={Search} title="Find Roles" description="Explore new opportunities" to="/?recommended=1" />
+          <QuickActionCard icon={UserRound} title="My Profile & Trust" description="Keep your profile updated" to="/profile" />
+          <QuickActionCard icon={Bell} title="Notifications" description="Stay up to date" to="/notifications" dot={hasUnreadNotif} />
+        </div>
+      </div>
+
+      {/* ══════ RECENT ACTIVITY ══════ */}
+      <Card style={{ padding: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: notifications.length ? 8 : 0 }}>
+          <p style={{ fontSize: 18, fontWeight: 500, color: TXP, margin: 0 }}>Recent Activity</p>
+          {notifications.length > 0 && (
+            <Link to="/notifications" style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 14, fontWeight: 500, color: YELD, textDecoration: "none" }}>
+              View all <ChevronRight style={{ width: 14, height: 14 }} />
+            </Link>
+          )}
+        </div>
+
+        {notifications.length === 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "12px 0" }}>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#F1F3F5", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
+              <Clock style={{ width: 20, height: 20, color: TXM }} />
+            </div>
+            <p style={{ fontSize: 15, fontWeight: 500, color: TXP, margin: 0 }}>No recent activity</p>
+            <p style={{ fontSize: 14, color: TXS, marginTop: 4 }}>Your latest updates will appear here.</p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {notifications.slice(0, 4).map((n, i) => (
+              <div key={n._id || i} style={{
+                display: "flex", alignItems: "center", gap: 10, padding: "8px 0",
+                borderTop: i === 0 ? "none" : `1px solid ${BORD}`,
+              }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#F1F3F5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Bell style={{ width: 15, height: 15, color: TXS }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 15, color: TXP, margin: 0, fontWeight: n.read ? 400 : 500 }}>{n.message || n.title || "Update"}</p>
+                </div>
+                <span style={{ fontSize: 13, color: TXM, flexShrink: 0 }}>{timeAgoShort(n.createdAt)}</span>
+              </div>
             ))}
           </div>
-        </div>
-
-      </div>
-    </>
+        )}
+      </Card>
+    </div>
   );
 }
