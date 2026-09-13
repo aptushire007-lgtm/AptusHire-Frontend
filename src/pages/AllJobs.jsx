@@ -214,20 +214,6 @@ function CompanyAvatar({ company, size = 36 }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   US Flag SVG (inline, matching the original exactly)
-   ───────────────────────────────────────────────────────────── */
-function USFlag() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342" style={{ width: 20, height: 13 }}>
-      <path fill="#FFF" d="M0 0h513v342H0z" />
-      <path d="M0 0h513v26.3H0zm0 52.6h513v26.3H0zm0 52.6h513v26.3H0zm0 52.6h513v26.3H0zm0 52.7h513v26.3H0zm0 52.6h513v26.3H0zm0 52.6h513V342H0z" fill="#D80027" />
-      <path fill="#2E52B2" d="M0 0h256.5v184.1H0z" />
-      <path d="m47.8 138.9-4-12.8-4.4 12.8H26.2l10.7 7.7-4 12.8 10.9-7.9 10.6 7.9-4.1-12.8 10.9-7.7zm56.3 0-4.1-12.8-4.2 12.8H82.6l10.7 7.7-4 12.8 10.7-7.9 10.8 7.9-4-12.8 10.7-7.7zm56.5 0-4.3-12.8-4 12.8h-13.5l11 7.7-4.2 12.8 10.7-7.9 11 7.9-4.2-12.8 10.7-7.7zm56.2 0-4-12.8-4.2 12.8h-13.3l10.8 7.7-4 12.8 10.7-7.9 10.8 7.9-4.3-12.8 11-7.7zM100 75.3l-4.2 12.8H82.6L93.3 96l-4 12.6 10.7-7.8 10.8 7.8-4-12.6 10.7-7.9h-13.4zm-56.2 0-4.4 12.8H26.2L36.9 96l-4 12.6 10.9-7.8 10.6 7.8L50.3 96l10.9-7.9H47.8zm112.5 0-4 12.8h-13.5l11 7.9-4.2 12.6 10.7-7.8 11 7.8-4.2-12.6 10.7-7.9h-13.2zm56.5 0-4.2 12.8h-13.3l10.8 7.9-4 12.6 10.7-7.8 10.8 7.8-4.3-12.6 11-7.9h-13.5zm-169-50.6-4.4 12.6H26.2l10.7 7.9-4 12.7L43.8 50l10.6 7.9-4.1-12.7 10.9-7.9H47.8zm56.2 0-4.2 12.6H82.6l10.7 7.9-4 12.7L100 50l10.8 7.9-4-12.7 10.7-7.9h-13.4zm56.3 0-4 12.6h-13.5l11 7.9-4.2 12.7 10.7-7.9 11 7.9-4.2-12.7 10.7-7.9h-13.2zm56.5 0-4.2 12.6h-13.3l10.8 7.9-4 12.7 10.7-7.9 10.8 7.9-4.3-12.7 11-7.9h-13.5z" fill="#FFF" />
-    </svg>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────
    SVG icons used in job cards (matching Flowmingo exactly)
    ───────────────────────────────────────────────────────────── */
 const IconPin = () => (
@@ -274,6 +260,15 @@ function FMTopNav({ user, isAuthenticated }) {
   const userInitials = auth?.user?.name
     ? auth.user.name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase()
     : "DU";
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e) => { if (!menuRef.current?.contains(e.target)) setMenuOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
 
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 50, background: "#fff", borderBottom: `1px solid ${FM.border}`, height: 56 }}>
@@ -310,24 +305,38 @@ function FMTopNav({ user, isAuthenticated }) {
           </Link>
         </nav>
 
-        {/* Right — flag, user, your-matches */}
+        {/* Right — user, your-matches */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {/* Language / flag selector */}
-          <button type="button" style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 32, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}>
-            <USFlag />
-            <ChevronDown size={12} color={FM.textPrimary} />
-          </button>
-
-          {/* User initials / profile */}
+          {/* User initials / profile — opens a menu linking dashboard + applied jobs */}
           {isAuthenticated ? (
-            <Link to="/account" style={{ textDecoration: "none" }}>
-              <button type="button" style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 32, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}>
+            <div ref={menuRef} style={{ position: "relative" }}>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 32, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}
+              >
                 <span style={{ width: 22, height: 22, borderRadius: 999, background: "#E8E8ED", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span className="fm-text-11" style={{ fontWeight: 700, color: FM.textPrimary }}>{userInitials}</span>
                 </span>
                 <ChevronDown size={13} color={FM.textSecondary} />
               </button>
-            </Link>
+              {menuOpen && (
+                <div className="fm-dropdown" style={{ right: 0, left: "auto", minWidth: 220 }}>
+                  {(user?.name || user?.email) && (
+                    <div style={{ padding: "12px 16px", borderBottom: `1px solid ${FM.borderLight}` }}>
+                      {user?.name && <p className="fm-text-13" style={{ fontWeight: 600, color: FM.textPrimary }}>{user.name}</p>}
+                      {user?.email && <p className="fm-text-12" style={{ color: FM.textSecondary, marginTop: 2 }}>{user.email}</p>}
+                    </div>
+                  )}
+                  <Link to="/?recommended=1" className="fm-dropdown-item" style={{ textDecoration: "none" }} onClick={() => setMenuOpen(false)}>
+                    <span className="fm-text-13">Go to your dashboard</span>
+                  </Link>
+                  <Link to="/applied-jobs" className="fm-dropdown-item" style={{ textDecoration: "none" }} onClick={() => setMenuOpen(false)}>
+                    <span className="fm-text-13">Applied Jobs</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           ) : (
             <Link to="/login" style={{ textDecoration: "none" }}>
               <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>Log in</span>
@@ -608,9 +617,9 @@ function CompanyTicker({ companies, onSelect }) {
             key={`${company.name}-${i}`}
             type="button"
             onClick={() => onSelect(company.name)}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0, height: 52, border: `1px solid ${FM.border}`, borderRadius: 14, background: "#fff", cursor: "pointer", padding: "0 16px", transition: "border-color .12s" }}
           >
-            <CompanyAvatar company={company} size={24} />
+            <CompanyAvatar company={company} size={26} />
             <span className="fm-text-13" style={{ color: FM.textSecondary, whiteSpace: "nowrap", fontWeight: 500 }}>{company.name}</span>
           </button>
         ))}

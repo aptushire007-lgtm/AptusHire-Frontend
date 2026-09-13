@@ -7,7 +7,7 @@
    routing are preserved exactly. Only UI changes here.
    ============================================================ */
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import {
   MapPin, Search, X, Bookmark, Briefcase, DollarSign,
   ArrowRight, Clock, GraduationCap, SlidersHorizontal,
@@ -111,7 +111,7 @@ function MatchBadge({ label }) {
   const isGood   = label === "Good match";
   return (
     <span
-      className={`inline-flex items-center gap-0.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap ${
+      className={`inline-flex items-center gap-0.5 rounded-full px-2.5 py-1 text-[13px] font-semibold whitespace-nowrap ${
         isStrong
           ? "bg-[#DCFCE7] text-[#166534]"
           : isGood
@@ -139,51 +139,52 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
         active ? "bg-[#F4F6F9]" : "hover:bg-[#F8F9FB]"
       }`}
     >
-      {/* Save (shows on hover, out of the way of title/badges) */}
+      {/* Status column (Applied / match badge) — centered on the row's vertical middle */}
+      {(job.alreadyApplied || mLabel) && (
+        <div className="absolute right-12 top-1/2 z-10 flex -translate-y-1/2 flex-col items-end gap-1.5">
+          {job.alreadyApplied && (
+            <span className="text-[13px] font-semibold text-[#2563EB]">Applied</span>
+          )}
+          {mLabel && <MatchBadge label={mLabel} />}
+        </div>
+      )}
+
+      {/* Save — centered on the row's vertical middle */}
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onToggleSave(job); }}
         disabled={saving}
         aria-label={saved ? "Unsave" : "Save"}
-        className={`absolute right-3 top-3 z-10 p-0.5 text-[#94A3B8] transition-colors hover:text-[#F97316] focus-visible:outline-none ${
+        className={`absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] transition-colors hover:bg-white hover:text-[#F97316] focus-visible:outline-none ${
           saved ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
         }`}
       >
         <Bookmark
-          className={`h-3.5 w-3.5 ${saved ? "fill-[#F97316] text-[#F97316]" : ""}`}
+          className={`h-5 w-5 ${saved ? "fill-[#F97316] text-[#F97316]" : ""}`}
           aria-hidden
         />
       </button>
 
-      <div className="flex items-start gap-3">
-        <CompanyLogo company={job.company} size={40} />
+      <div className="flex items-start gap-3 pr-28">
+        <CompanyLogo company={job.company} size={44} />
 
         <div className="min-w-0 flex-1">
-          {/* Title + status column */}
-          <div className="flex items-start justify-between gap-2">
-            <p className="line-clamp-2 text-[13px] font-semibold leading-[1.35] text-[#0F172A]">
-              {job.title}
-            </p>
-            <div className="flex shrink-0 flex-col items-end gap-1 pl-1">
-              {job.alreadyApplied && (
-                <span className="text-[11px] font-semibold text-[#2563EB]">Applied</span>
-              )}
-              {mLabel && <MatchBadge label={mLabel} />}
-            </div>
-          </div>
+          <p className="line-clamp-2 text-[16px] font-bold leading-[1.35] text-[#0F172A]">
+            {job.title}
+          </p>
 
           {/* Company */}
-          <p className="mt-0.5 text-[12px] text-[#64748B]">{job.company?.name}</p>
+          <p className="mt-0.5 text-[14px] text-[#64748B]">{job.company?.name}</p>
 
           {/* Location + Salary */}
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
             {job.location && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-[#94A3B8]">
+              <span className="inline-flex items-center gap-1 text-[13px] text-[#94A3B8]">
                 <MapPin className="h-3 w-3 shrink-0" aria-hidden /> {job.location}
               </span>
             )}
             {salary && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-[#94A3B8]">
+              <span className="inline-flex items-center gap-1 text-[13px] text-[#94A3B8]">
                 <DollarSign className="h-3 w-3 shrink-0" aria-hidden /> {salary}
               </span>
             )}
@@ -224,7 +225,7 @@ function JobDetailPanel({ job, navigate }) {
         <div className="p-6 pb-2">
           {/* Title + 3-dot */}
           <div className="flex items-start justify-between gap-3">
-            <h1 className="text-[22px] font-bold leading-snug text-[#0F172A]">
+            <h1 className="text-[26px] font-bold leading-snug text-[#0F172A]">
               {job.title}
             </h1>
             <button
@@ -240,7 +241,7 @@ function JobDetailPanel({ job, navigate }) {
           <div className="mt-4 flex items-center gap-3">
             <CompanyLogo company={job.company} size={52} />
             <div className="min-w-0">
-              <p className="text-[15px] font-semibold text-[#0F172A]">
+              <p className="text-[17px] font-semibold text-[#0F172A]">
                 {job.company?.name}
               </p>
               <div className="mt-1.5 flex flex-wrap items-center gap-3">
@@ -249,7 +250,7 @@ function JobDetailPanel({ job, navigate }) {
                     href={website}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[12px] text-[#64748B] hover:text-[#F97316]"
+                    className="inline-flex items-center gap-1.5 text-[13px] text-[#64748B] hover:text-[#F97316]"
                   >
                     <Globe className="h-3.5 w-3.5" aria-hidden />
                     {website.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]}
@@ -260,7 +261,7 @@ function JobDetailPanel({ job, navigate }) {
                     href={job.company.linkedin}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-[#BFDBFE] bg-[#EFF6FF] px-2.5 py-0.5 text-[11px] font-semibold text-[#1D4ED8]"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[#BFDBFE] bg-[#EFF6FF] px-2.5 py-0.5 text-[12px] font-semibold text-[#1D4ED8]"
                   >
                     {/* LinkedIn "in" icon */}
                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -278,16 +279,16 @@ function JobDetailPanel({ job, navigate }) {
 
           {/* Description */}
           {job.description && (
-            <div className="mt-5 text-[14px] leading-7 text-[#3D4A45] whitespace-pre-line">
+            <div className="mt-5 text-[15px] leading-8 text-[#3D4A45] whitespace-pre-line">
               {job.description}
             </div>
           )}
 
           {/* Requirements */}
           {job.requirements && (
-            <div className="mt-5">
-              <h2 className="text-[15px] font-bold text-[#0F172A]">Requirements</h2>
-              <div className="mt-2 text-[14px] leading-7 text-[#3D4A45] whitespace-pre-line">
+            <div className="mt-6">
+              <h2 className="text-[17px] font-bold text-[#0F172A]">Requirements</h2>
+              <div className="mt-2.5 text-[15px] leading-8 text-[#3D4A45] whitespace-pre-line">
                 {job.requirements}
               </div>
             </div>
@@ -295,13 +296,13 @@ function JobDetailPanel({ job, navigate }) {
 
           {/* Required Skills */}
           {job.requiredSkills?.length > 0 && (
-            <div className="mt-5">
-              <h2 className="text-[15px] font-bold text-[#0F172A]">Required Skills</h2>
-              <div className="mt-2.5 flex flex-wrap gap-2">
+            <div className="mt-6">
+              <h2 className="text-[17px] font-bold text-[#0F172A]">Required Skills</h2>
+              <div className="mt-3 flex flex-wrap gap-2">
                 {job.requiredSkills.map((skill) => (
                   <span
                     key={skill}
-                    className="rounded-full border border-[#E2E8F0] bg-white px-3 py-1 text-[12px] font-medium text-[#F97316]"
+                    className="rounded-full border border-[#E2E8F0] bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#F97316]"
                   >
                     {skill}
                   </span>
@@ -311,7 +312,7 @@ function JobDetailPanel({ job, navigate }) {
           )}
 
           {/* Meta grid — matches Flowmingo 4-column row */}
-          <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-[#F0F2F4] pt-5 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-[#F0F2F4] pt-6 sm:grid-cols-4">
             {[
               { label: "Salary",           value: salary },
               { label: "Workplace Type",   value: workplace },
@@ -319,8 +320,8 @@ function JobDetailPanel({ job, navigate }) {
               { label: "Seniority Level",  value: seniority },
             ].map(({ label, value }) => (
               <div key={label}>
-                <p className="text-[11px] font-medium text-[#94A3B8]">{label}</p>
-                <p className="mt-1 inline-flex rounded-lg bg-[#EFF6FF] px-2.5 py-1 text-[13px] font-semibold text-[#2563EB]">
+                <p className="text-[13px] font-medium text-[#94A3B8]">{label}</p>
+                <p className="mt-1.5 inline-flex rounded-lg bg-[#EFF6FF] px-3 py-1.5 text-[15px] font-semibold text-[#2563EB]">
                   {value || "—"}
                 </p>
               </div>
@@ -657,7 +658,6 @@ export default function JobListings() {
     experience: "", skills: "", company: "", department: "",
     workArrangement: "", employmentType: "",
   });
-  const [tab,          setTab]         = useState("top");   // "top" | "all"
   const [showFilters,  setShowFilters]  = useState(false);
   const [showSearch,   setShowSearch]   = useState(false);
   const [selectedJobId, setSelectedJobId] = useState(null);
@@ -686,11 +686,8 @@ export default function JobListings() {
   const filteredJobs = useMemo(() => {
     let list = [...jobs];
 
-    // Recommended tab filter
-    if (tab === "top" && recommendedOrder.length > 0) {
-      list = list.filter((j) => recommendedOrder.includes(String(j._id)));
-    }
-    if (recommendationsOnly) {
+    // Split-panel view always shows recommended jobs ("All jobs" navigates to the full browse page).
+    if (recommendedOrder.length > 0) {
       list = list.filter((j) => recommendedOrder.includes(String(j._id)));
     }
 
@@ -719,7 +716,7 @@ export default function JobListings() {
         .filter(({ score }) => score >= 0)
         .sort((a, b) => b.score - a.score)
         .map(({ job }) => job);
-    } else if (tab === "top" || recommendationsOnly) {
+    } else {
       list.sort(
         (a, b) =>
           recommendedOrder.indexOf(String(a._id)) -
@@ -728,14 +725,16 @@ export default function JobListings() {
     }
 
     return list;
-  }, [jobs, tab, recommendationsOnly, recommendedOrder, filters, query]);
+  }, [jobs, recommendedOrder, filters, query]);
 
-  // Auto-select first job when list loads
+  // Keep the selection valid as the list changes (filters, search).
   useEffect(() => {
-    if (!loading && filteredJobs.length > 0 && !selectedJobId) {
+    if (loading) return;
+    if (filteredJobs.length === 0) { setSelectedJobId(null); return; }
+    if (!filteredJobs.some((j) => String(j._id) === selectedJobId)) {
       setSelectedJobId(String(filteredJobs[0]._id));
     }
-  }, [loading, filteredJobs, selectedJobId]);
+  }, [loading, filteredJobs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const topMatches = useMemo(
     () =>
@@ -792,8 +791,14 @@ export default function JobListings() {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // NON-RECOMMENDED: legacy full-page layout (unchanged functionality)
+  // NON-RECOMMENDED: legacy full-page layout — public "Careers" browse
+  // page only. A signed-in candidate landing on "/" (e.g. a stale link)
+  // goes to Recommended Jobs instead; this page is not part of the
+  // authenticated candidate experience anymore.
   // ═══════════════════════════════════════════════════════════════
+  if (!recommendationsOnly && isAuthenticated) {
+    return <Navigate to="/?recommended=1" replace />;
+  }
   if (!recommendationsOnly) {
     return (
       <LegacyFullPageLayout
@@ -829,21 +834,21 @@ export default function JobListings() {
       <div className="shrink-0 border-b border-[#EAEEF0] bg-white px-5 pb-4 pt-5 sm:px-6">
         {/* Title + count badges */}
         <div className="flex flex-wrap items-baseline gap-2.5">
-          <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A]">Recommended Jobs</h1>
+          <h1 className="text-[30px] font-semibold text-[#0F172A]">Recommended Jobs</h1>
           {!loading && (
             <>
-              <span className="rounded-full bg-[#EFF6FF] px-2.5 py-0.5 text-[12px] font-semibold text-[#2563EB]">
+              <span className="rounded-full bg-[#EFF6FF] px-2.5 py-0.5 text-[13px] font-semibold text-[#2563EB]">
                 {filteredJobs.length} Jobs
               </span>
               {newCount > 0 && (
-                <span className="rounded-full bg-[#DCFCE7] px-2.5 py-0.5 text-[12px] font-semibold text-[#16A34A]">
+                <span className="rounded-full bg-[#DCFCE7] px-2.5 py-0.5 text-[13px] font-semibold text-[#16A34A]">
                   +{newCount} New
                 </span>
               )}
             </>
           )}
         </div>
-        <p className="mt-1 text-[13px] leading-5 text-[#64748B]">
+        <p className="mt-1 text-[16px] leading-6 text-[#64748B]">
           Job opportunities matched to your profile. The door is open — apply with your CV.
           New matches arrive every hour.
         </p>
@@ -855,17 +860,17 @@ export default function JobListings() {
               <Zap className="h-4 w-4 fill-[#2563EB] text-[#2563EB]" aria-hidden />
             </div>
             <div>
-              <p className="text-[13px] font-semibold text-[#0F172A]">
+              <p className="text-[16px] font-semibold text-[#0F172A]">
                 Auto-apply to my strong matches
               </p>
-              <p className="text-[12px] text-[#64748B]">
+              <p className="text-[15px] text-[#64748B]">
                 We send your CV the moment a Strong match appears — no more checking back.
               </p>
             </div>
           </div>
           <button
             type="button"
-            className="shrink-0 rounded-full bg-[#0F172A] px-4 py-2 text-[12px] font-semibold text-white hover:opacity-90"
+            className="shrink-0 rounded-full bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:opacity-90"
           >
             Turn it on
           </button>
@@ -885,25 +890,17 @@ export default function JobListings() {
           <div className="shrink-0 border-b border-[#EAEEF0] px-3 py-2.5">
             <div className="flex items-center gap-2">
               {/* Tab segmented control */}
-              <div className="flex flex-1 gap-1 overflow-x-auto rounded-full bg-[#F1F5F9] p-1 scrollbar-none">
-                <button
-                  type="button"
-                  onClick={() => setTab("top")}
-                  className={`rounded-full px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors ${
-                    tab === "top"
-                      ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
-                      : "text-[#64748B] hover:text-[#0F172A]"
-                  }`}
-                >
+              <div className="flex flex-1 gap-1 overflow-x-auto rounded-full bg-[#F1F5F9] p-0.5 scrollbar-none">
+                <span className="rounded-full bg-white px-3.5 py-1 text-[16px] font-semibold whitespace-nowrap text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)]">
                   Top matches{topMatches.length > 0 ? ` (${topMatches.length})` : ""}
-                </button>
+                </span>
                 <a
                   href="/jobs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap text-[#64748B] transition-colors hover:text-[#0F172A]"
+                  className="rounded-full px-3.5 py-1 text-[16px] font-semibold whitespace-nowrap text-[#64748B] transition-colors hover:text-[#0F172A]"
                 >
-                  All jobs
+                  All jobs{jobs.length > 0 ? ` (${jobs.length})` : ""}
                 </a>
               </div>
 
@@ -912,26 +909,26 @@ export default function JobListings() {
                 type="button"
                 onClick={() => setShowSearch((v) => !v)}
                 aria-label={showSearch ? "Close search" : "Search jobs"}
-                className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors ${
                   showSearch
                     ? "border-[#F97316] bg-[#FEF3E8] text-[#F97316]"
                     : "border-[#E2E8F0] text-[#64748B] hover:border-[#F97316] hover:text-[#F97316]"
                 }`}
               >
-                <Search className="h-3.5 w-3.5" aria-hidden />
+                <Search className="h-[18px] w-[18px]" aria-hidden />
               </button>
 
               {/* Filters button */}
               <button
                 type="button"
                 onClick={() => setShowFilters((v) => !v)}
-                className={`flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-semibold transition-colors ${
+                className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[14px] font-semibold whitespace-nowrap transition-colors ${
                   showFilters
                     ? "border-[#F97316] bg-[#FEF3E8] text-[#F97316]"
                     : "border-[#E2E8F0] text-[#64748B] hover:border-[#F97316] hover:text-[#F97316]"
                 }`}
               >
-                <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden />
+                <SlidersHorizontal className="h-[18px] w-[18px]" aria-hidden />
                 Filters
               </button>
             </div>

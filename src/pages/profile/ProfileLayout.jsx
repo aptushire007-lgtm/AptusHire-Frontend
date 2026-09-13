@@ -68,15 +68,6 @@ export default function ProfileLayout() {
   const ver = profile?.verification || {};
   const hasDefaultResume = profileData?.hasDefaultResume || false;
 
-  const setupSections = [
-    { id: "personal", label: "Basic Information", done: Boolean(profile.personal?.firstName && profile.personal?.lastName && profile.user?.email && profile.personal?.phone && (profile.personal?.locationCity || profile.location)) },
-    { id: "education", label: "Education", done: profile.education?.length > 0 },
-    { id: "skills", label: "Skills", done: profile.skills?.length > 0 },
-    { id: "experience", label: "Experience", done: profile.experience?.length > 0 },
-    { id: "preferences", label: "Work Preferences", done: Boolean(profile.preferences?.availabilityWindow) },
-    { id: "resumes", label: "Resumes", done: Boolean(hasDefaultResume) },
-  ];
-
   const handleTabChange = (tabId) => {
     setSearchParams({ tab: tabId });
   };
@@ -114,30 +105,6 @@ export default function ProfileLayout() {
 
   return (
     <div className="candidate-profile-page space-y-6">
-      <section className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)] sm:p-8">
-        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">Candidate profile</p>
-            <h1 className="mt-2 text-2xl font-bold text-[#0F172A]">Complete your profile</h1>
-            <p className="mt-2 max-w-xl text-sm text-[#64748B]">A complete profile helps AptusHire match you with the right opportunities.</p>
-          </div>
-          <div className="text-left sm:text-right">
-            <p className="text-3xl font-bold text-[#EA6C0A]">{strength}%</p>
-            <p className="text-xs text-[#64748B]">profile complete</p>
-          </div>
-        </div>
-        <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#FEF3E8]" role="progressbar" aria-valuenow={strength} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion">
-          <div className="h-full rounded-full bg-[#EA6C0A] transition-[width] duration-500" style={{ width: `${strength}%` }} />
-        </div>
-        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
-          {setupSections.map((section) => (
-            <button key={section.id} type="button" onClick={() => handleTabChange(section.id)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-colors ${section.done ? "border-[#E2E8F0] bg-white text-[#EA6C0A] hover:border-[#FED7AA]" : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#FED7AA]"}`}>
-              <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${section.done ? "bg-[#FEF3E8] text-[#EA6C0A]" : "text-[#94A3B8]"}`}>{section.done ? "✓" : "○"}</span>
-              <span>{section.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
       {/* Tab Header Bar (Horizontal on mobile, rail on desktop) */}
       <div className="flex flex-wrap gap-2 rounded-2xl border border-[#E2E8F0] bg-white p-2 shadow-xs dark:border-[#E2E8F0] dark:bg-white">
         {TABS.map((tab) => {

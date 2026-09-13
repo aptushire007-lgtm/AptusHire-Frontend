@@ -112,7 +112,7 @@ const CSS = `
     linear-gradient(180deg,rgba(11,10,9,0.72) 0%,rgba(11,10,9,0.55) 40%,rgba(11,10,9,0.5) 68%,rgba(11,10,9,0.7) 100%),
     linear-gradient(118deg,rgba(224,51,12,0) 34%,rgba(242,86,10,0.26) 100%),
     linear-gradient(90deg,rgba(11,10,9,0.45) 0%,rgba(11,10,9,0.22) 34%,rgba(11,10,9,0) 58%),
-    url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1920&q=80') center/cover no-repeat;
+    url('/image.png') center/cover no-repeat;
 }
 .fmc-hero-inner{max-width:1120px;margin:0 auto;position:relative;}
 .fmc-hero-grid{display:grid;grid-template-columns:.88fr 1.12fr;gap:48px;align-items:center;}
@@ -442,16 +442,6 @@ const Shield = () => (
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
-const USFlagSVG = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342"
-    style={{ width: "100%", height: "100%", objectFit: "cover" }}>
-    <path fill="#FFF" d="M0 0h513v342H0z" />
-    <path d="M0 0h513v26.3H0zm0 52.6h513v26.3H0zm0 52.6h513v26.3H0zm0 52.6h513v26.3H0zm0 52.7h513v26.3H0zm0 52.6h513v26.3H0zm0 52.6h513V342H0z" fill="#D80027" />
-    <path fill="#2E52B2" d="M0 0h256.5v184.1H0z" />
-    <path d="m47.8 138.9-4-12.8-4.4 12.8H26.2l10.7 7.7-4 12.8 10.9-7.9 10.6 7.9-4.1-12.8 10.9-7.7zm56.3 0-4.1-12.8-4.2 12.8H82.6l10.7 7.7-4 12.8 10.7-7.9 10.8 7.9-4-12.8 10.7-7.7zm56.5 0-4.3-12.8-4 12.8h-13.5l11 7.7-4.2 12.8 10.7-7.9 11 7.9-4.2-12.8 10.7-7.7zm56.2 0-4-12.8-4.2 12.8h-13.3l10.8 7.7-4 12.8 10.7-7.9 10.8 7.9-4.3-12.8 11-7.7zM100 75.3l-4.2 12.8H82.6L93.3 96l-4 12.6 10.7-7.8 10.8 7.8-4-12.6 10.7-7.9h-13.4zm-56.2 0-4.4 12.8H26.2L36.9 96l-4 12.6 10.9-7.8 10.6 7.8L50.3 96l10.9-7.9H47.8zm112.5 0-4 12.8h-13.5l11 7.9-4.2 12.6 10.7-7.8 11 7.8-4.2-12.6 10.7-7.9h-13.2zm56.5 0-4.2 12.8h-13.3l10.8 7.9-4 12.6 10.7-7.8 10.8 7.8-4.3-12.6 11-7.9h-13.5zm-169-50.6-4.4 12.6H26.2l10.7 7.9-4 12.7L43.8 50l10.6 7.9-4.1-12.7 10.9-7.9H47.8zm56.2 0-4.2 12.6H82.6l10.7 7.9-4 12.7L100 50l10.8 7.9-4-12.7 10.7-7.9h-13.4zm56.3 0-4 12.6h-13.5l11 7.9-4.2 12.7 10.7-7.9 11 7.9-4.2-12.7 10.7-7.9h-13.2zm56.5 0-4.2 12.6h-13.3l10.8 7.9-4 12.7 10.7-7.9 10.8 7.9-4.3-12.7 11-7.9h-13.5z" fill="#FFF" />
-  </svg>
-);
-
 /* ── initials helper ── */
 function ini(name) {
   return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
@@ -486,11 +476,6 @@ function Navbar() {
 
         {/* Right */}
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Flag */}
-          <button aria-label="Language"
-            style={{ width: 32, height: 32, borderRadius: "50%", overflow: "hidden", border: "none", cursor: "pointer", boxShadow: "0 0 0 1px rgba(0,0,0,.10)", flexShrink: 0, padding: 0 }}>
-            <USFlagSVG />
-          </button>
           {/* CTA */}
           <Link to="/register" className="fmc-cta-pill s135"
             style={{ fontSize: 13.5 }}>
@@ -518,7 +503,7 @@ function Hero({ jobCount }) {
           <div className="fmc-reveal">
             <span style={{ display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 999, background: "rgba(255,255,255,.10)", padding: "6px 14px" }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: O2, flexShrink: 0 }} />
-              <span className="s11" style={{ fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,.75)" }}>For candidates · free forever</span>
+              <span className="s11" style={{ fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,.75)" }}>For candidates</span>
             </span>
 
             <h1 className="s42" style={{ marginTop: 24, fontWeight: 300, color: "#fff", letterSpacing: "-0.055em", lineHeight: 1.02 }}>
@@ -527,7 +512,7 @@ function Hero({ jobCount }) {
             </h1>
 
             <p className="s16" style={{ marginTop: 24, maxWidth: 460, color: "rgba(255,255,255,.60)", lineHeight: 1.6 }}>
-              Upload your CV once. AptusHire matches it to open jobs, and the hiring companies come to you — automatically. Free forever.
+              Upload your CV once. AptusHire matches it to open jobs, and the hiring companies come to you — automatically.
             </p>
 
             <div style={{ marginTop: 36, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 12 }}>
@@ -1104,7 +1089,7 @@ function ClosingCTA() {
     <section className="fmc-closing">
       <div className="fmc-closing-inner">
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#2a1a0e 0%,#17130E 50%,#0d0a07 100%)" }} />
-        <div style={{ position: "absolute", inset: 0, background: "url('https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1920&q=80') center/cover no-repeat", opacity: 0.35 }} />
+        <div style={{ position: "absolute", inset: 0, background: "url('/image.png') center/cover no-repeat", opacity: 0.35 }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(23,19,14,.40) 0%,rgba(23,19,14,.24) 55%,rgba(23,19,14,.56) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(52% 92% at 50% 50%,rgba(23,19,14,.84) 0%,rgba(23,19,14,.66) 50%,rgba(23,19,14,.28) 76%,transparent 92%)" }} />
         <div className="fmc-glow-bottom" />

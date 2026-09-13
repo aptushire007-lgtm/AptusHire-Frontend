@@ -7,7 +7,6 @@ import {
   LogOut,
   LayoutDashboard,
   FileText,
-  UserRound,
   Briefcase,
   BookOpen,
   Bookmark,
@@ -16,6 +15,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { useAccountAuth } from "../../auth/useAccountAuth.js";
 import { logoutAccount } from "../../auth/logout.js";
@@ -39,18 +39,10 @@ const ACCOUNT_NAV_GROUPS = [
     divider: false,
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
-      { to: "/", label: "Find Jobs", icon: Briefcase, end: true, hideWhenRecommended: true },
-      { to: "/?recommended=1", label: "Recommended", icon: Sparkles, recommendedOnly: true },
+      { to: "/?recommended=1", label: "Recommended", icon: Sparkles, end: true },
       { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
       { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
       { to: "/assessments", label: "Assessment", icon: ClipboardList, badgeKey: "assessments" },
-    ],
-  },
-  {
-    divider: true,
-    items: [
-      { to: "/profile", label: "Profile", icon: UserRound },
-      { to: "/account", label: "Settings", icon: Settings },
     ],
   },
 ];
@@ -175,7 +167,7 @@ function SidebarBrand({ collapsed, onNavigate }) {
   if (collapsed) {
     return (
       <Link
-        to="/"
+        to="/welcome"
         onClick={onNavigate}
         title="AptusHire"
         className="flex h-[68px] shrink-0 items-center justify-center bg-white px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
@@ -190,7 +182,7 @@ function SidebarBrand({ collapsed, onNavigate }) {
     // two strips read as one continuous white bar across the top of the page.
     <div className="flex h-[68px] shrink-0 items-center bg-white px-5">
       <BrandLogo
-        to="/"
+        to="/welcome"
         size="lg"
         textWeight="font-semibold"
         theme="light"
@@ -207,53 +199,94 @@ function SidebarBrand({ collapsed, onNavigate }) {
 function HeaderActions({ onNavigate }) {
   const { isAuthenticated, user } = useAccountAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const handler = (e) => { if (!menuRef.current?.contains(e.target)) setMenuOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
 
   const baseAction =
     "tap-target inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/20";
 
+  const initials = (user?.name || "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase() || "A";
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Link
+          to="/login"
+          onClick={onNavigate}
+          className={`${baseAction} text-[#0F172A] hover:bg-[#F1F5F9]`}
+        >
+          Log In
+        </Link>
+        <Link
+          to="/register"
+          onClick={onNavigate}
+          className="tap-target inline-flex items-center justify-center rounded-full bg-[#F97316] px-5 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/25"
+        >
+          Register
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
-      {!isAuthenticated ? (
-        <>
-          <Link
-            to="/login"
-            onClick={onNavigate}
-            className={`${baseAction} text-[#0F172A] hover:bg-[#F1F5F9]`}
-          >
-            Log In
-          </Link>
-          <Link
-            to="/register"
-            onClick={onNavigate}
-            className="tap-target inline-flex items-center justify-center rounded-full bg-[#F97316] px-5 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/25"
-          >
-            Register
-          </Link>
-        </>
-      ) : (
-        <>
-          <NotificationBell />
-          <Link
-            to="/profile"
-            onClick={onNavigate}
-            className={`${baseAction} text-[#0F172A] hover:bg-[#F1F5F9]`}
-          >
-            <UserRound className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="hidden max-w-[10rem] truncate sm:inline">
-              {user?.name || "Account"}
-            </span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => { logoutAccount(); onNavigate?.(); navigate("/login"); }}
-            className={`${baseAction} text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A]`}
-          >
-            <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="hidden sm:inline">Log Out</span>
-            <span className="sr-only sm:hidden">Log Out</span>
-          </button>
-        </>
-      )}
+      <NotificationBell />
+
+      <div ref={menuRef} className="relative">
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          className="tap-target flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/20"
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FEF3E8] text-[12px] font-bold text-[#F97316]">
+            {initials}
+          </span>
+          <span className="hidden max-w-[10rem] truncate text-[14px] font-semibold text-[#0F172A] sm:inline">
+            {user?.name || "Account"}
+          </span>
+          <ChevronDown className="hidden h-4 w-4 shrink-0 text-[#64748B] sm:inline" aria-hidden="true" />
+        </button>
+
+        {menuOpen && (
+          <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-60 overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_8px_28px_rgba(0,0,0,0.12)]">
+            {(user?.name || user?.email) && (
+              <div className="border-b border-[#F0F2F4] px-4 py-3">
+                {user?.name && <p className="truncate text-[14px] font-semibold text-[#0F172A]">{user.name}</p>}
+                {user?.email && <p className="truncate text-[12px] text-[#64748B]">{user.email}</p>}
+              </div>
+            )}
+            <Link
+              to="/account"
+              onClick={() => { setMenuOpen(false); onNavigate?.(); }}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9]"
+            >
+              <Settings className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
+              Settings
+            </Link>
+            <button
+              type="button"
+              onClick={() => { setMenuOpen(false); logoutAccount(); onNavigate?.(); navigate("/login"); }}
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9]"
+            >
+              <LogOut className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -407,7 +440,7 @@ function ShellInner({ children }) {
             </button>
             {/* Brand on mobile (sidebar hidden) */}
             <BrandLogo
-              to="/"
+              to="/welcome"
               size="md"
               textWeight="font-medium"
               theme="light"
