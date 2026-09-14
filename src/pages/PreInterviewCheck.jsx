@@ -1,10 +1,10 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, XCircle, Circle, Camera, Mic, Maximize, Cpu, Gauge, ScanFace, Smartphone, Laptop, Volume2 } from "lucide-react";
 import { PHONE_PAIRING_ENABLED } from "../lib/features.js";
 import { QRCodeCanvas } from "qrcode.react";
 import api from "../api/client.js";
-import { getAuth, authHeader } from "../portal/portalAuth.js";
+import { getAuth, authHeader, clearAuth } from "../portal/portalAuth.js";
 import * as faceVision from "../portal/faceVision.js";
 import { measureAudioIsolation, MIC_CONSTRAINTS } from "../portal/audioIsolation.js";
 import { Card } from "../components/ui/Card.jsx";
@@ -23,12 +23,12 @@ const VOICE_MIN_MBPS = 1.5;
 // Phase 14.3 — which version of the clip-capture consent wording is in force.
 // Bump when the wording below changes; the accepted version is stored with the
 // consent record.
-const EVIDENCE_CONSENT_VERSION = "2026-07-25.1";
+const EVIDENCE_CONSENT_VERSION = "2026-09-06.1";
 
 // Which version of the FULL-SESSION recording wording is in force. Same rule: bump on any change,
 // and the accepted version is stored with the consent record so a later rewrite never makes an old
 // consent unreadable.
-const RECORDING_CONSENT_VERSION = "2026-08-31.1";
+const RECORDING_CONSENT_VERSION = "2026-09-06.1";
 
 // Hard requirements only — things the interview genuinely cannot run without.
 // Screen share and fullscreen are deliberately NOT here: neither exists on
@@ -51,6 +51,18 @@ function detectDeviceCompatibility() {
 const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 const FULLSCREEN_SUPPORTED = Boolean(document.documentElement.requestFullscreen);
 
+// Paginated so a candidate only ever has to deal with two checks at once. The grouping mirrors
+// the order the checks used to appear in as one long grid — nothing was reordered, it's just cut
+// into pages. Identity Verification keeps its own page because it depends on the camera already
+// being enabled; Camera itself lives on page one.
+const STEPS = [
+  { id: "camera-mic", title: "Camera & Microphone" },
+  { id: "sound-fullscreen", title: "Sound & Fullscreen" },
+  { id: "device-speed", title: "Device & Speed" },
+  { id: "identity", title: "Identity Verification" },
+  { id: "consent", title: "Review & Consent" },
+];
+
 function StatusIcon({ state }) {
   if (state === "ok") return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
   if (state === "failed") return <XCircle className="h-5 w-5 text-red-600" />;
@@ -61,7 +73,7 @@ function CheckCard({ icon: Icon, title, state, children }) {
   return (
     <Card>
       <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-slate-900">
-        <Icon className="h-4.5 w-4.5 text-brand-600" /> {title}
+        <Icon className="h-4.5 w-4.5 text-[#EA6C0A]" /> {title}
         <span className="ml-auto"><StatusIcon state={state} /></span>
       </h3>
       {children}
@@ -73,6 +85,7 @@ export default function PreInterviewCheck() {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const cameraStreamRef = useRef(null);
+  const [step, setStep] = useState(0);
 
   const [camera, setCamera] = useState("pending");
   const [microphone, setMicrophone] = useState("pending");
@@ -94,8 +107,7 @@ export default function PreInterviewCheck() {
   // recorded continuously. Both stay true when this tenant does not record; when it does, both are
   // reworded below and this box is what the candidate is actually agreeing to. Unchecked is a
   // recorded decline and the interview proceeds — the transcript is the evaluated artifact, and
-  // the recording has never been an input to it.
-  const [recordingConsent, setRecordingConsent] = useState(false);
+  const [recordingConsent, setRecordingConsent] = useState(true);
   // Screen-share self-attestation. Not a detector — browsers can't observe a pre-existing
   // third-party screen share — but a timestamped, explicit statement has real evidentiary value if
   // later contradicted by other evidence during review.
@@ -133,7 +145,28 @@ export default function PreInterviewCheck() {
       .then((res) =>
         setFeatures(res.data?.features || { evidenceClips: false, secondaryCam: false, sessionRecording: false })
       )
-      .catch(() => {});
+      .catch((err) => {
+        // The guard above authorises on the PRESENCE of a token, not its validity — and a portal
+        // token dies with its interview window (it is minted with `expiresAt - now` as its TTL),
+        // so a link from a lapsed invitation still passes the guard. `/me` is the first call this
+        // page makes, which makes it the place that finds out. Swallowing it stranded people:
+        // every later check 401'd too, so the camera, speed test and identity steps all failed with
+        // no stated reason and no way out but clearing site data by hand.
+        //
+        // Drop the dead token so the guard can't wave it through again, and say what happened —
+        // the same treatment InterviewDashboard already gives this, and the same reasoning as the
+        // account-side 401 branch in api/client.js.
+        if (err.response?.status === 401) {
+          clearAuth();
+          setError(
+            err.response?.data?.error ||
+              "This interview link has expired. Please check your email for a current invitation."
+          );
+          return;
+        }
+        // Anything else here is non-fatal: `features` keeps its defaults and the optional lanes
+        // (evidence clips, phone cam, recording) simply stay off rather than blocking the check.
+      });
   }, [navigate]);
 
   async function generatePhoneQr() {
@@ -150,6 +183,16 @@ export default function PreInterviewCheck() {
       cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
+
+  // Camera and Identity Verification live on different pages, so the <video> tag backing the
+  // preview unmounts and remounts as the candidate moves between them — but the MediaStream itself
+  // lives in cameraStreamRef and keeps running the whole time. Re-attach it to whichever <video>
+  // node is on screen every time the step changes, otherwise the second one shows nothing.
+  useEffect(() => {
+    if (videoRef.current && cameraStreamRef.current) {
+      videoRef.current.srcObject = cameraStreamRef.current;
+    }
+  }, [step]);
 
   async function requestCamera() {
     try {
@@ -323,7 +366,7 @@ export default function PreInterviewCheck() {
         const form = new FormData();
         form.append("photo", blob, "identity.jpg");
         await api.post("/interview-portal/identity-verification", form, {
-          headers: authHeader(),
+          headers: { ...authHeader(), "Content-Type": "multipart/form-data" },
         });
         // Best-effort: compute a face descriptor from this same frame (entirely client-side) and
         // stash it so the interview room can match the live camera against it. Awaited (not
@@ -362,6 +405,24 @@ export default function PreInterviewCheck() {
     identityStatus === "ok" &&
     consent &&
     noConcurrentShare;
+
+  // What each page requires before "Continue" unlocks. Sound and Fullscreen are recommended-only —
+  // there's nothing to wait for there. Device Compatibility resolves itself on mount, so its page
+  // is really just waiting on the speed test.
+  const stepReady = [
+    camera === "ok" && microphone === "ok",
+    true,
+    deviceCompat.status === "ok" && (speedStatus === "ok" || speedStatus === "slow"),
+    identityStatus === "ok",
+  ];
+
+  function goNext() {
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  }
+
+  function goBack() {
+    setStep((s) => Math.max(s - 1, 0));
+  }
 
   async function handleConfirm() {
     setSubmitting(true);
@@ -446,6 +507,20 @@ export default function PreInterviewCheck() {
         </div>
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{error}</p>}
 
+        <div>
+          <div className="flex gap-1.5">
+            {STEPS.map((s, i) => (
+              <div
+                key={s.id}
+                className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-[#EA6C0A]" : "bg-slate-200"}`}
+              />
+            ))}
+          </div>
+          <p className="mt-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+            Step {step + 1} of {STEPS.length} — {STEPS[step].title}
+          </p>
+        </div>
+
         {IS_MOBILE && (
           <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
             <Laptop className="mt-0.5 h-4 w-4 shrink-0" />
@@ -458,6 +533,8 @@ export default function PreInterviewCheck() {
         )}
 
         <div className="grid gap-4 sm:grid-cols-2">
+        {step === 0 && (
+          <>
           <CheckCard icon={Camera} title="Camera" state={camera}>
             <video
               ref={videoRef}
@@ -489,7 +566,7 @@ export default function PreInterviewCheck() {
                 <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
                   <div
                     className={`h-full rounded-full transition-[width] duration-100 ${
-                      microphone === "ok" ? "bg-emerald-500" : "bg-brand-500"
+                      microphone === "ok" ? "bg-emerald-500" : "bg-[#F97316]"
                     }`}
                     style={{ width: `${Math.round(micLevel * 100)}%` }}
                   />
@@ -511,7 +588,11 @@ export default function PreInterviewCheck() {
               </p>
             )}
           </CheckCard>
+          </>
+        )}
 
+        {step === 1 && (
+          <>
           {/* Sound check — recommended, never required. It answers two things at once: can you
               hear the interviewer, and can your microphone hear it too. The second decides whether
               you'll be able to interrupt mid-question; if your speakers bleed into your mic, the
@@ -593,7 +674,11 @@ export default function PreInterviewCheck() {
               <p className="text-sm text-slate-500">Fullscreen isn't available in this browser — you can start without it.</p>
             )}
           </CheckCard>
+          </>
+        )}
 
+        {step === 2 && (
+          <>
           <CheckCard icon={Cpu} title="Device Compatibility" state={deviceCompat.status}>
             {deviceCompat.status === "ok" && <p className="text-sm text-emerald-700">Your device and browser are compatible.</p>}
             {deviceCompat.status === "failed" && (
@@ -632,8 +717,19 @@ export default function PreInterviewCheck() {
               {speedStatus === "testing" ? "Testing…" : speedMbps !== null ? "Run Again" : "Run Speed Test"}
             </Button>
           </CheckCard>
+          </>
+        )}
 
+        {step === 3 && (
+          <>
           <CheckCard icon={ScanFace} title="Identity Verification" state={identityStatus === "uploading" ? "pending" : identityStatus} >
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="mb-3 w-full max-w-xs rounded-lg bg-slate-900"
+            />
             <p className="mb-2 text-sm text-slate-500">Enable your camera above, then capture a photo for identity verification.</p>
             <Button
               variant={identityStatus === "ok" ? "outline" : "primary"}
@@ -644,80 +740,95 @@ export default function PreInterviewCheck() {
               {identityStatus === "uploading" ? "Uploading…" : identityStatus === "ok" ? "Photo Captured" : "Capture Photo"}
             </Button>
           </CheckCard>
+
+          {/* Two gates, deliberately. `PHONE_PAIRING_ENABLED` is ours and is off:
+              the pairing flow is shelved, not removed. `features.secondaryCam` is
+              the tenant's own server-side setting and stays in the condition so
+              turning the frontend switch back on does not silently override a
+              company that has the feature disabled. */}
+          {PHONE_PAIRING_ENABLED && features.secondaryCam && (
+            <CheckCard icon={Smartphone} title="Phone as Second Camera (optional)" state={phonePair ? "ok" : "pending"}>
+              <p className="mb-3 text-sm text-slate-500">
+                Optionally add your phone as a second camera angle. Scan the QR with your phone — it only sends a
+                presence signal and integrity events; <span className="font-medium text-slate-700">it never streams video</span>.
+              </p>
+              {phonePair ? (
+                <div className="flex flex-col items-start gap-2">
+                  <div className="rounded-lg bg-white p-2 shadow-sm">
+                    <QRCodeCanvas value={phonePair.url} size={148} />
+                  </div>
+                  <p className="text-xs text-slate-400">Scan with your phone camera. The code expires in 10 minutes.</p>
+                </div>
+              ) : (
+                <Button variant="outline" size="sm" onClick={generatePhoneQr}>
+                  Show Pairing QR
+                </Button>
+              )}
+            </CheckCard>
+          )}
+          </>
+        )}
         </div>
 
-        {/* Two gates, deliberately. `PHONE_PAIRING_ENABLED` is ours and is off:
-            the pairing flow is shelved, not removed. `features.secondaryCam` is
-            the tenant's own server-side setting and stays in the condition so
-            turning the frontend switch back on does not silently override a
-            company that has the feature disabled. */}
-        {PHONE_PAIRING_ENABLED && features.secondaryCam && (
-          <CheckCard icon={Smartphone} title="Phone as Second Camera (optional)" state={phonePair ? "ok" : "pending"}>
-            <p className="mb-3 text-sm text-slate-500">
-              Optionally add your phone as a second camera angle. Scan the QR with your phone — it only sends a
-              presence signal and integrity events; <span className="font-medium text-slate-700">it never streams video</span>.
-            </p>
-            {phonePair ? (
-              <div className="flex flex-col items-start gap-2">
-                <div className="rounded-lg bg-white p-2 shadow-sm">
-                  <QRCodeCanvas value={phonePair.url} size={148} />
-                </div>
-                <p className="text-xs text-slate-400">Scan with your phone camera. The code expires in 10 minutes.</p>
-              </div>
-            ) : (
-              <Button variant="outline" size="sm" onClick={generatePhoneQr}>
-                Show Pairing QR
-              </Button>
-            )}
-          </CheckCard>
-        )}
-
+        {step === 4 && (
+        <>
+        {/* ONE REQUIRED BOX, NOT TWO.
+            The monitoring consent and the screen-share attestation are both mandatory — `allDone`
+            below refuses to start without either — so splitting them across two checkboxes asked
+            the candidate to make one decision twice. They are merged into a single tick that sets
+            both, which is what the server still receives: `given` and
+            `noConcurrentShareAttestation` are unchanged fields carrying unchanged meanings.
+            Merging is only defensible BECAUSE both are required; the optional clauses below stay
+            separate for exactly the opposite reason. The detail nobody reads standing up is a
+            click away rather than deleted — a consent has to remain readable to be a consent. */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
           <label className="flex items-start gap-3 text-sm text-slate-600">
             <input
               type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-[#F97316]-500"
+              checked={consent && noConcurrentShare}
+              onChange={(e) => {
+                setConsent(e.target.checked);
+                setNoConcurrentShare(e.target.checked);
+              }}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-[#EA6C0A] focus:ring-[#F97316]"
             />
-            {/* THE SECOND HALF OF THIS SENTENCE IS CONDITIONAL, AND HAS TO BE.
-                "Raw video is not uploaded" is true of the vision pipeline and false the moment
-                the tenant records the session. Leaving it fixed would have made the checkbox the
-                candidate ticks say the opposite of what the product does — which is not a wording
-                problem, it is consent obtained on a false statement. When recording is on, this
-                clause covers monitoring only and points at the clause that covers the video. */}
             <span>
-              This is a <span className="font-medium text-slate-800">monitored interview</span>. I consent to my camera and
-              on-screen activity being monitored for integrity during the session (tab-switching, leaving fullscreen, and
-              camera checks such as face presence and identity matching). Camera analysis runs in my browser
+              This is a <span className="font-medium text-slate-800">monitored interview</span> — I&apos;m happy for my
+              camera and screen activity to be checked for integrity while it runs — and I&apos;m{" "}
+              <span className="font-medium text-slate-800">not screen-sharing</span> or on a call with anyone else.
+            </span>
+          </label>
+          <details className="mt-2 pl-7">
+            <summary className="cursor-pointer text-xs font-medium text-slate-500 hover:text-slate-700">
+              What&apos;s checked
+            </summary>
+            {/* THE SECOND HALF OF THIS IS CONDITIONAL, AND HAS TO BE.
+                "Raw video is not uploaded" is true of the vision pipeline and false the moment the
+                tenant records the session. Leaving it fixed would have made what the candidate
+                agrees to say the opposite of what the product does — which is not a wording
+                problem, it is consent obtained on a false statement. When recording is on, this
+                covers monitoring only and points at the clause that covers the video. */}
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+              Tab-switching, leaving fullscreen, and camera checks such as face presence and identity matching. Camera
+              analysis runs in your browser
               {features.sessionRecording ? (
                 <>
                   {" "}
-                  and only integrity signals — not video — come from it. Whether a video of the session itself is kept is a
-                  separate choice, below.
+                  and only integrity signals — not video — come from it. Whether a video of the session itself is kept is
+                  the separate, optional choice below.
                 </>
               ) : (
-                <> — raw video is not uploaded; only integrity signals are recorded for the hiring team's review.</>
-              )}
-            </span>
-          </label>
+                <> — raw video is not uploaded; only integrity signals are recorded for the hiring team&apos;s review.</>
+              )}{" "}
+              The screen-share confirmation also covers the rest of the interview, not just this moment.
+            </p>
+          </details>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <label className="flex items-start gap-3 text-sm text-slate-600">
-            <input
-              type="checkbox"
-              checked={noConcurrentShare}
-              onChange={(e) => setNoConcurrentShare(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-[#F97316]-500"
-            />
-            <span>
-              I confirm I am <span className="font-medium text-slate-800">not currently screen-sharing</span> or on a call
-              with anyone else, and will not be during this interview.
-            </span>
-          </label>
-        </div>
-
+        {/* THE OPTIONAL CLAUSES STAY THEIR OWN BOXES. Folding either into the required tick above
+            would obtain consent for it from a candidate whose only alternative was not to
+            interview — an unchecked box here is a real, recorded decline, and it has to stay
+            possible to leave it unchecked and still press start. Shortened, not merged. */}
         {features.evidenceClips && (
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
             <label className="flex items-start gap-3 text-sm text-slate-600">
@@ -725,27 +836,33 @@ export default function PreInterviewCheck() {
                 type="checkbox"
                 checked={evidenceConsent}
                 onChange={(e) => setEvidenceConsent(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-[#F97316]-500"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-[#EA6C0A] focus:ring-[#F97316]"
               />
               <span>
-                <span className="font-medium text-slate-800">Optional — short evidence clips.</span> I consent to a short
-                video clip (up to ~15 seconds, at most 6 per session) being saved for the hiring team's review{" "}
-                <span className="font-medium text-slate-700">only if</span> a serious integrity flag is raised (for
-                example, a second person on camera).{" "}
+                <span className="font-medium text-slate-800">Optional.</span> Save a short video clip if something serious
+                is flagged — for example, a second person on camera. Declining changes nothing about my interview.
+              </span>
+            </label>
+            <details className="mt-2 pl-7">
+              <summary className="cursor-pointer text-xs font-medium text-slate-500 hover:text-slate-700">
+                What this means
+              </summary>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                Up to ~15 seconds, at most 6 per session, saved for the hiring team&apos;s review only if a serious
+                integrity flag is raised.{" "}
                 {features.sessionRecording ? (
                   <>
-                    This is separate from the full recording below: clips are kept even if I decline that, and are
-                    discarded unless a flag occurs.
+                    Separate from the full recording below: clips are kept even if you decline that, and are discarded
+                    unless a flag occurs.
                   </>
                 ) : (
                   <>
-                    I am <span className="font-medium text-slate-700">never recorded continuously</span> — video stays in my
-                    browser&rsquo;s memory and is discarded unless such a flag occurs.
+                    You are never recorded continuously — video stays in your browser&rsquo;s memory and is discarded
+                    unless such a flag occurs.
                   </>
-                )}{" "}
-                Declining does not affect my interview.
-              </span>
-            </label>
+                )}
+              </p>
+            </details>
           </div>
         )}
 
@@ -761,23 +878,47 @@ export default function PreInterviewCheck() {
                 type="checkbox"
                 checked={recordingConsent}
                 onChange={(e) => setRecordingConsent(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-[#F97316]-500"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-[#EA6C0A] focus:ring-[#F97316]"
               />
               <span>
-                <span className="font-medium text-slate-800">Optional — record this interview.</span> I consent to video and
-                audio of this session being recorded and saved for the hiring team to review alongside the transcript. The
-                recording is{" "}
-                <span className="font-medium text-slate-700">not used to score or assess me</span> — my answers are, in
-                writing. It is stored with my application, visible only to that hiring team, and deleted when my data is.
-                Declining does not affect my interview.
+                <span className="font-medium text-slate-800">Optional.</span> Record this interview&apos;s video and audio
+                for the hiring team. It is <span className="font-medium text-slate-700">not used to score me</span> — my
+                answers are. Declining changes nothing about my interview.
               </span>
             </label>
+            <details className="mt-2 pl-7">
+              <summary className="cursor-pointer text-xs font-medium text-slate-500 hover:text-slate-700">
+                Where it goes
+              </summary>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                Saved alongside the transcript, stored with your application, visible only to that hiring team, and
+                deleted when your data is.
+              </p>
+            </details>
           </div>
         )}
+        </>
+        )}
 
-        <Button size="lg" onClick={handleConfirm} loading={submitting} disabled={!allDone}>
-          Confirm &amp; Start Interview
-        </Button>
+        <div className="flex items-center justify-between gap-3">
+          {step > 0 ? (
+            <Button variant="outline" onClick={goBack}>
+              Back
+            </Button>
+          ) : (
+            <span />
+          )}
+
+          {step < STEPS.length - 1 ? (
+            <Button onClick={goNext} disabled={!stepReady[step]}>
+              Continue
+            </Button>
+          ) : (
+            <Button size="lg" onClick={handleConfirm} loading={submitting} disabled={!allDone}>
+              Confirm &amp; Start Interview
+            </Button>
+          )}
+        </div>
       </div>
     </InterviewShell>
   );

@@ -1,6 +1,6 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Eye, LogOut } from "lucide-react";
+import { Zap, LogOut } from "lucide-react";
 import Button from "../ui/Button.jsx";
 import { getAuth } from "../../portal/portalAuth.js";
 
@@ -47,7 +47,7 @@ function ExitConfirmDialog({ onStay, onLeave }) {
   }, [onStay]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#F4F6F9]-deep/80 px-4 py-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/50 px-4 py-8">
       <div
         ref={dialogRef}
         role="dialog"
@@ -56,10 +56,10 @@ function ExitConfirmDialog({ onStay, onLeave }) {
         aria-describedby="exit-dialog-description"
         className="w-full max-w-sm rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-soft"
       >
-        <h2 id="exit-dialog-title" className="text-base font-semibold text-[#0F172A]">
+        <h2 id="exit-dialog-title" className="text-base font-semibold text-slate-900">
           Leave this interview?
         </h2>
-        <p id="exit-dialog-description" className="mt-2 text-sm text-[#64748B]">
+        <p id="exit-dialog-description" className="mt-2 text-sm text-slate-600">
           Your answers so far are saved. You can come back and continue before your interview link
           expires, but leaving now ends this monitored session.
         </p>
@@ -78,14 +78,22 @@ function ExitConfirmDialog({ onStay, onLeave }) {
 
 // stage: "setup" (pre-check — nothing at stake yet, exit is immediate) or
 //        "live" (interview — exit is guarded by ExitConfirmDialog).
-// wide: the two-pane call layout (stage + transcript) needs more than the shell's usual
-// reading-width column. Widens the header to match so the brand mark and Exit control still
-// line up with the content edges below them, rather than floating narrower than the room.
-export default function InterviewShell({ stage = "live", wide = false, children }) {
+// wide: the call layout (stage + transcript) needs the full width of the display rather than the
+// shell's usual reading-width column. Widens the header to match so the brand mark and the Exit
+// control still line up with the content edges below them.
+// fill: from `lg` up the room is a fixed-height application surface, not a document — the header
+// pins, the two panes below it divide what is left of the viewport, and only the transcript log
+// scrolls, so the question can never be lost off the top of the screen. Below `lg` the two panes
+// are stacked and there is no viewport left to divide, so the page scrolls normally rather than
+// clipping half the room away.
+// meta: the header's centre slot (question counter, elapsed time). Lives up here rather than in
+// the room because it is chrome — the same status the tab title would carry — and because it must
+// stay put while the panes beneath it change.
+export default function InterviewShell({ stage = "live", wide = false, fill = false, meta = null, children }) {
   const navigate = useNavigate();
   const [confirming, setConfirming] = useState(false);
   const jobTitle = getAuth()?.jobTitle;
-  const measure = wide ? "max-w-6xl" : "max-w-3xl";
+  const measure = wide ? "max-w-[1560px]" : "max-w-3xl";
 
   function requestExit() {
     if (stage === "live") setConfirming(true);
@@ -93,35 +101,52 @@ export default function InterviewShell({ stage = "live", wide = false, children 
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9]">
-      <header className="sticky top-0 z-30 border-b border-[#E2E8F0] bg-white/95 backdrop-blur">
-        <div className={`mx-auto flex h-16 items-center justify-between gap-4 px-5 ${measure}`}>
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F97316] text-white">
-              <Sparkles className="h-4 w-4" />
+    <div className={fill ? "min-h-screen bg-[#F4F6F9] lg:flex lg:h-dvh lg:flex-col lg:overflow-hidden" : "min-h-screen bg-[#F4F6F9]"}>
+      <header className={`${fill ? "sticky top-0 z-30 lg:static lg:shrink-0" : "sticky top-0 z-30"} border-b border-[#E2E8F0] bg-white`}>
+        <div className={`mx-auto flex h-16 items-center gap-3 px-4 sm:gap-4 sm:px-6 ${measure}`}>
+          {/* Brand mark and where you are, read as one breadcrumb: product, then the role this
+              interview is for. The role is the half that matters to the candidate, so it is the
+              half that keeps its weight when the wordmark drops away on a phone. */}
+          <div className="flex min-w-0 flex-1 items-center gap-2.5">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F97316] text-white">
+              <Zap className="h-[18px] w-[18px]" fill="currentColor" strokeWidth={1.5} />
             </span>
-            <span className="truncate text-base font-semibold text-slate-700">
-              {jobTitle ? `Interview · ${jobTitle}` : "AI Interview"}
+            <span className="hidden shrink-0 text-[17px] font-bold tracking-tight text-[#EA6C0A] sm:inline">
+              AptusHire
             </span>
-          </div>
-          <div className="flex shrink-0 items-center gap-4">
-            {stage === "live" && (
-              <span className="hidden items-center gap-1.5 text-sm font-medium text-slate-500 sm:flex">
-                <Eye className="h-4 w-4" /> Monitored
-              </span>
+            {jobTitle && (
+              <>
+                <span aria-hidden="true" className="hidden shrink-0 text-slate-300 sm:inline">
+                  /
+                </span>
+                <span className="truncate text-[15px] font-semibold text-slate-800">{jobTitle}</span>
+              </>
             )}
+          </div>
+
+          {meta}
+
+          <div className="flex shrink-0 flex-1 justify-end">
             <button
               type="button"
               onClick={requestExit}
-              className="flex items-center gap-1 rounded px-1 py-1 text-sm font-medium text-slate-500 hover:text-red-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
+              className="tap-target inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8]"
             >
-              <LogOut className="h-4 w-4" /> Exit
+              <LogOut className="h-4 w-4" aria-hidden="true" /> Exit
             </button>
           </div>
         </div>
       </header>
 
-      <main className={`mx-auto px-5 py-8 ${measure}`}>{children}</main>
+      <main
+        className={
+          fill
+            ? `mx-auto flex w-full flex-col px-4 py-4 sm:px-6 lg:min-h-0 lg:flex-1 ${measure}`
+            : `mx-auto px-5 py-8 ${measure}`
+        }
+      >
+        {children}
+      </main>
 
       {confirming && (
         <ExitConfirmDialog onStay={() => setConfirming(false)} onLeave={() => navigate("/portal/dashboard")} />
