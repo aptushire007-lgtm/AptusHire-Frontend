@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FileText, UploadCloud, Download, Layers, CircleCheck, AlertTriangle, Trash2 } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
@@ -74,7 +74,7 @@ export default function ResumeUpload() {
 
     try {
       const res = await api.post("/resumes", data, {
-        headers: { "Content-Type": "multipart/form-data", ...accountAuthHeader() },
+        headers: accountAuthHeader(),
       });
       setAlreadyThere(Boolean(res.data?.alreadyInLibrary));
       setStatus("uploaded");

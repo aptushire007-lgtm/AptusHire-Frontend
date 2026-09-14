@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -387,7 +387,7 @@ export default function ApplyForm() {
       const form = new FormData();
       form.append("resume", file);
       const uploaded = await api.post("/resumes", form, {
-        headers: { "Content-Type": "multipart/form-data", ...accountAuthHeader() },
+        headers: accountAuthHeader(),
       });
       setResumeId(uploaded.data._id);
 
@@ -463,7 +463,7 @@ export default function ApplyForm() {
 
     try {
       const res = await api.post(`/jobs/${id}/apply`, data, {
-        headers: { "Content-Type": "multipart/form-data", ...accountAuthHeader() },
+        headers: accountAuthHeader(),
       });
       setReceipt(res.data);
       setStatus("submitted");

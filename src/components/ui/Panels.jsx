@@ -72,28 +72,34 @@ export function Chip({
   children,
   icon: Icon,
   trailing: Trailing,
-  active   = false,
+  active = false,
   as: Component = "button",
   className = "",
   ...props
 }) {
   return (
     <Component
+      // `aria-current` rather than relying on the fill alone: "which segment am
+      // I on" is not information a colour change conveys to anyone not looking
+      // at it.
       aria-current={active && Component !== "button" ? "page" : undefined}
       aria-pressed={active && Component === "button" ? "true" : undefined}
-      className={[
-        "tap-target inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium whitespace-nowrap",
-        "transition-colors duration-150 focus-visible:outline-none focus-visible:ring-3",
+      // A filter is a control, not a status badge, so it uses the same rounded
+      // rectangle language as the rest of the interaction system.
+      className={`tap-target inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-4 ${
         active
           ? "border-[#F97316] bg-[#F97316] text-white shadow-[0_1px_2px_rgba(23,107,69,0.20)] focus-visible:ring-[#F97316]/25"
           : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#FED7AA] hover:bg-[#FEF3E8] hover:text-[#F97316] focus-visible:ring-[#F97316]/20",
         className,
       ].join(" ")}
+          ? "border-brand-800 bg-brand-800 text-white focus-visible:ring-brand-300"
+          : "border-hairline bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900 focus-visible:ring-brand-200"
+      } ${className}`}
       {...props}
     >
-      {Icon && <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />}
+      {Icon && <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
       {children}
-      {Trailing && <Trailing className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden="true" />}
+      {Trailing && <Trailing className="h-3 w-3 shrink-0 opacity-70" aria-hidden="true" />}
     </Component>
   );
 }

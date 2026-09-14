@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ConnectionQuality, Room, RoomEvent, Track } from "livekit-client";
+import { ConnectionQuality, DisconnectReason, Room, RoomEvent, Track } from "livekit-client";
 import api from "../api/client.js";
 import { authHeader } from "./portalAuth.js";
 
@@ -47,6 +47,23 @@ const REJOIN_WINDOW_MS = 80_000;
 // screen-sharing to someone else eating the same uplink) — but home wifi/ISP variance explains most
 // of it, so this fires at most once per room and only after a long, uninterrupted "poor" streak.
 const BANDWIDTH_ANOMALY_MS = 20_000;
+
+// A ROOM THAT WAS TORN DOWN IS NOT A DROPPED CONNECTION.
+//
+// The worker deletes the room when the interview closes — complete, withdrawn, halted — and the
+// backend deletes it on an integrity termination or a withdrawal. Every one of those arrives here
+// as a Disconnected event, and every one of them used to be presented as "your connection
+// dropped, rejoin the interview": an offer to rejoin something that is over, standing on screen
+// for the full REJOIN_WINDOW_MS before the state refetch finally corrected it. The reason code is
+// what separates the two, and it always has been — we simply were not reading it.
+//
+// Anything NOT in this set (an unexplained close, a signal failure, a server restart) stays a
+// recoverable drop, because that is the case the grace window exists for.
+const ROOM_ENDED_REASONS = new Set([
+  DisconnectReason.ROOM_DELETED,
+  DisconnectReason.ROOM_CLOSED,
+  DisconnectReason.PARTICIPANT_REMOVED,
+]);
 
 export function useLiveKitInterview({ onEnded, getVideoStream } = {}) {
   const [available, setAvailable] = useState(null);
@@ -231,12 +248,30 @@ export function useLiveKitInterview({ onEnded, getVideoStream } = {}) {
       });
 
       room.on(RoomEvent.TrackSubscribed, (track) => {
-        if (track.kind === Track.Kind.Audio) {
-          const el = track.attach();
-          el.style.display = "none";
-          document.body.appendChild(el);
-          audioElsRef.current.push(el);
-        }
+        if (track.kind !== Track.Kind.Audio) return;
+        const el = track.attach();
+        el.style.display = "none";
+        document.body.appendChild(el);
+        audioElsRef.current.push(el);
+        // START IT EXPLICITLY. attach() sets `autoplay`, but autoplay is a request, not a
+        // guarantee — and a WebRTC audio element plays LIVE, so every millisecond it spends not
+        // playing is a millisecond of the interviewer that is GONE rather than buffered. That is
+        // the reported "it doesn't say 'Hi, I'm Ava', it starts at the second phrase": the
+        // element began playing part-way through the opening line and everything before that was
+        // simply never heard.
+        //
+        // startAudio() below already ran inside the start click's gesture chain, but it ran
+        // BEFORE this element existed — there was nothing yet to unlock. Re-running it here, on
+        // the one failure that matters, is what covers the browsers that refuse a play() on an
+        // element created this late.
+        el.play().catch(() => {
+          room
+            .startAudio()
+            .then(() => el.play())
+            .catch(() => {
+              /* playback will start on the candidate's next interaction with the page */
+            });
+        });
       });
 
       // Live captions: the worker publishes both sides' transcription. Only the interviewer's
@@ -267,13 +302,22 @@ export function useLiveKitInterview({ onEnded, getVideoStream } = {}) {
         }
       });
 
-      room.on(RoomEvent.Disconnected, () => {
+      room.on(RoomEvent.Disconnected, (reason) => {
         // The worker deletes the room when the interview closes (complete, withdrawn, or
         // halted); a mid-interview drop also lands here after reconnect attempts run out. The
         // room refetches the interview state either way — the SERVER knows which one happened,
         // and this client never guesses.
         roomRef.current = null;
         teardownMedia();
+        // Our own disconnect() — it owns the phase from here and closes the billing window itself.
+        if (reason === DisconnectReason.CLIENT_INITIATED) return;
+        // The room was ended, not lost (see ROOM_ENDED_REASONS). Say so, and refetch: the server
+        // is what knows whether that was a completion, a withdrawal or a halt.
+        if (ROOM_ENDED_REASONS.has(reason)) {
+          setPhase((p) => (p === "failed" ? p : "ended"));
+          onEndedRef.current?.();
+          return;
+        }
         if (wasLiveRef.current) {
           // The worker now holds the room open for a grace period after we vanish
           // (AGENT_REJOIN_GRACE_SECONDS in agent-worker/agent.py), so a drop is recoverable and

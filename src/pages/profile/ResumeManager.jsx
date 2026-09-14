@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FileText,
   UploadCloud,
@@ -88,7 +88,7 @@ export default function ResumeManager() {
       setUploading(true);
       setError("");
       const res = await api.post("/candidate-dashboard/resumes/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data", ...accountAuthHeader() },
+        headers: accountAuthHeader(),
       });
 
       const uploaded = res.data;
@@ -426,6 +426,7 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
                 </h3>
                 {version.isDefault && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-[#FEF3E8] px-2 py-0.5 text-[11px] font-extrabold text-[#F97316] shadow-2xs">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#D4F056] px-2 py-0.5 text-[11px] font-extrabold text-[#176B45] shadow-2xs">
                     <Star className="h-3 w-3 fill-current" /> Default
                   </span>
                 )}
@@ -525,3 +526,4 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
     </div>
   );
 }
+

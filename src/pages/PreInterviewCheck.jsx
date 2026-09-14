@@ -323,7 +323,7 @@ export default function PreInterviewCheck() {
         const form = new FormData();
         form.append("photo", blob, "identity.jpg");
         await api.post("/interview-portal/identity-verification", form, {
-          headers: { ...authHeader(), "Content-Type": "multipart/form-data" },
+          headers: authHeader(),
         });
         // Best-effort: compute a face descriptor from this same frame (entirely client-side) and
         // stash it so the interview room can match the live camera against it. Awaited (not
