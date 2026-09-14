@@ -1,10 +1,16 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  build: {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+
+  return {
+    define: {
+      "import.meta.env.VITE_GOOGLE_CLIENT_ID": JSON.stringify(env.VITE_GOOGLE_CLIENT_ID || ""),
+    },
+    plugins: [react(), tailwindcss()],
+    build: {
     // Raised from the 500 kB default for exactly one chunk: `livekit`. It lands
     // at ~530 kB minified (~138 kB gzipped) and cannot be usefully split — it is
     // one dependency, and it is already isolated behind the lazy InterviewRoom
@@ -43,8 +49,8 @@ export default defineConfig({
         },
       },
     },
-  },
-  server: {
+    },
+    server: {
     port: 5174,
     strictPort: true, // fail loud on conflict rather than silently rebinding — see admin/vite.config.js
     host: true, // listen on 0.0.0.0 so LAN devices / tunnels can reach the dev server
@@ -56,5 +62,6 @@ export default defineConfig({
       "/api": { target: "http://localhost:9000", changeOrigin: true },
       "/socket.io": { target: "http://localhost:9000", ws: true, changeOrigin: true },
     },
-  },
+    },
+  };
 });
