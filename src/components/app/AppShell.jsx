@@ -7,7 +7,6 @@ import {
   LogOut,
   LayoutDashboard,
   FileText,
-  UserRound,
   Briefcase,
   BookOpen,
   Bookmark,
@@ -15,6 +14,9 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronRight,
+  ChevronDown,
+  Search,
 } from "lucide-react";
 import { useAccountAuth } from "../../auth/useAccountAuth.js";
 import { logoutAccount } from "../../auth/logout.js";
@@ -35,26 +37,13 @@ const PUBLIC_NAV = [
 
 const ACCOUNT_NAV_GROUPS = [
   {
-    label: "Main",
+    divider: false,
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
-      { to: "/", label: "Find Jobs", icon: Briefcase, end: true, hideWhenRecommended: true },
-      { to: "/?recommended=1", label: "Recommended", icon: Sparkles, recommendedOnly: true },
+      { to: "/?recommended=1", label: "Recommended", icon: Sparkles, end: true },
       { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
       { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
-    ],
-  },
-  {
-    label: "Progress",
-    items: [
       { to: "/assessments", label: "Assessment", icon: ClipboardList, badgeKey: "assessments" },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { to: "/profile", label: "Profile", icon: UserRound },
-      { to: "/account", label: "Settings", icon: Settings },
     ],
   },
 ];
@@ -86,15 +75,10 @@ function SidebarNav({ collapsed, onNavigate, label }) {
     if (!isAuthenticated) return undefined;
     let active = true;
     api
-      .get("/candidate-dashboard", { headers: accountAuthHeader() })
+      .get("/candidate-dashboard/summary", { headers: accountAuthHeader() })
       .then(({ data }) => {
         if (!active) return;
-        const assessments = data.assessments || [];
-        setCounts({
-          assessments: assessments.filter(
-            (a) => !["completed", "expired", "cancelled"].includes(String(a.status || "").toLowerCase())
-          ).length,
-        });
+        setCounts({ assessments: Number(data.assessmentCount) || 0 });
       })
       .catch(() => {});
     return () => { active = false; };
@@ -102,17 +86,13 @@ function SidebarNav({ collapsed, onNavigate, label }) {
 
   const groups = isAuthenticated
     ? ACCOUNT_NAV_GROUPS
-    : [{ label: null, items: PUBLIC_NAV }];
+    : [{ divider: false, items: PUBLIC_NAV }];
 
   return (
     <nav aria-label={label} className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-3">
-      {groups.map((group) => (
-        <div key={group.label || "public"} className="mb-4 last:mb-0">
-          {group.label && !collapsed && (
-            <p className="mb-1 px-3 pt-2 text-[14px] font-semibold uppercase tracking-widest text-[#9BAAA1]">
-              {group.label}
-            </p>
-          )}
+      {groups.map((group, groupIndex) => (
+        <div key={groupIndex} className="contents">
+          {group.divider && <hr className="my-3 border-t border-[#E2E8F0]" />}
           {group.items.map((item) => {
             const isHidden =
               (item.hideWhenRecommended && search.includes("recommended=1")) ||
@@ -128,12 +108,10 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                 className={({ isActive }) => {
                   const active = isActive && !isHidden;
                   return [
-                    "relative flex items-center gap-3 rounded-control py-2.5 text-[16px] font-medium whitespace-nowrap",
-                    "transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                    "group flex items-center gap-3 rounded-xl py-2.5 text-[15px] font-semibold text-[#1E293B] whitespace-nowrap",
+                    "transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]",
                     collapsed ? "justify-center px-2" : "px-3",
-                    active
-                      ? "before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-[#176B45] bg-[#E8F2EC] font-semibold text-[#176B45]"
-                      : "text-[#64736A] hover:bg-[#DDECE3] hover:text-text",
+                    active ? "bg-[#F1F5F9]" : "hover:bg-[#FEF3E8]",
                   ].join(" ");
                 }}
               >
@@ -142,14 +120,20 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                   return (
                     <>
                       <item.icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#176B45]" : "text-[#9BAAA1]"}`}
+                        className={`h-[18px] w-[18px] shrink-0 transition-colors ${active ? "text-[#0F172A]" : "text-[#64748B] group-hover:text-[#F97316]"}`}
                         aria-hidden="true"
                       />
-                      <span className={collapsed ? "sr-only" : "min-w-0 flex-1 whitespace-normal wrap-break-word"}>{item.label}</span>
+                      <span className={collapsed ? "sr-only" : "min-w-0 flex-1 whitespace-normal"}>{item.label}</span>
                       {item.badgeKey && !collapsed && counts[item.badgeKey] > 0 && (
-                        <span className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#176B45] text-[10px] font-bold text-white px-1.5 py-0.5">
+                        <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#F1F5F9] text-[11px] font-bold text-[#475569] px-1.5 py-0.5">
                           {counts[item.badgeKey]}
                         </span>
+                      )}
+                      {!collapsed && (
+                        <ChevronRight
+                          className="h-4 w-4 shrink-0 text-[#F97316] opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                          aria-hidden="true"
+                        />
                       )}
                     </>
                   );
@@ -164,16 +148,30 @@ function SidebarNav({ collapsed, onNavigate, label }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SidebarGreeting
+// ─────────────────────────────────────────────────────────────────────────────
+function SidebarGreeting() {
+  const { isAuthenticated, user } = useAccountAuth();
+  if (!isAuthenticated) return null;
+  const firstName = user?.name?.trim().split(/\s+/)[0] || "there";
+  return (
+    <p className="px-5 pb-1 pt-4 text-[19px] font-bold text-[#0F172A]">
+      Welcome, {firstName}!
+    </p>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SidebarBrand
 // ─────────────────────────────────────────────────────────────────────────────
 function SidebarBrand({ collapsed, onNavigate }) {
   if (collapsed) {
     return (
       <Link
-        to="/"
+        to="/welcome"
         onClick={onNavigate}
         title="AptusHire"
-        className="flex h-16 shrink-0 items-center justify-center border-b border-[#E5EBE7] px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="flex h-[68px] shrink-0 items-center justify-center bg-white px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
       >
         <AptusMark size={32} />
         <span className="sr-only">AptusHire, home</span>
@@ -181,8 +179,15 @@ function SidebarBrand({ collapsed, onNavigate }) {
     );
   }
   return (
-    <div className="flex h-16 shrink-0 items-center border-b border-[#E5EBE7] px-5">
-      <BrandLogo to="/" size="lg" textWeight="font-semibold" theme="light" onClick={onNavigate} />
+    // Same height and border colour as the content header on the right, so the
+    // two strips read as one continuous white bar across the top of the page.
+    <div className="flex h-[68px] shrink-0 items-center bg-white px-5">
+      <BrandLogo
+        to="/welcome"
+        variant="image"
+        size={52}
+        onClick={onNavigate}
+      />
     </div>
   );
 }
@@ -193,53 +198,94 @@ function SidebarBrand({ collapsed, onNavigate }) {
 function HeaderActions({ onNavigate }) {
   const { isAuthenticated, user } = useAccountAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const handler = (e) => { if (!menuRef.current?.contains(e.target)) setMenuOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
 
   const baseAction =
-    "tap-target inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/20";
+    "tap-target inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/20";
+
+  const initials = (user?.name || "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase() || "A";
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Link
+          to="/login"
+          onClick={onNavigate}
+          className={`${baseAction} text-[#0F172A] hover:bg-[#F1F5F9]`}
+        >
+          Log In
+        </Link>
+        <Link
+          to="/register"
+          onClick={onNavigate}
+          className="tap-target inline-flex items-center justify-center rounded-full bg-[#F97316] px-5 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/25"
+        >
+          Register
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
-      {!isAuthenticated ? (
-        <>
-          <Link
-            to="/login"
-            onClick={onNavigate}
-            className={`${baseAction} text-[#17221C] hover:bg-[#DDECE3]`}
-          >
-            Log In
-          </Link>
-          <Link
-            to="/register"
-            onClick={onNavigate}
-            className="tap-target inline-flex items-center justify-center rounded-full bg-[#176B45] px-5 py-2.5 text-[14px] font-semibold text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors hover:bg-[#176B45]-dark focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/25"
-          >
-            Register
-          </Link>
-        </>
-      ) : (
-        <>
-          <NotificationBell />
-          <Link
-            to="/account"
-            onClick={onNavigate}
-            className={`${baseAction} text-[#17221C] hover:bg-[#DDECE3]`}
-          >
-            <UserRound className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="hidden max-w-[10rem] truncate sm:inline">
-              {user?.name || "Account"}
-            </span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => { logoutAccount(); onNavigate?.(); navigate("/login"); }}
-            className={`${baseAction} text-[#64736A] hover:bg-[#DDECE3] hover:text-text`}
-          >
-            <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="hidden sm:inline">Log Out</span>
-            <span className="sr-only sm:hidden">Log Out</span>
-          </button>
-        </>
-      )}
+      <NotificationBell />
+
+      <div ref={menuRef} className="relative">
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          className="tap-target flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/20"
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FEF3E8] text-[12px] font-bold text-[#F97316]">
+            {initials}
+          </span>
+          <span className="hidden max-w-[10rem] truncate text-[14px] font-semibold text-[#0F172A] sm:inline">
+            {user?.name || "Account"}
+          </span>
+          <ChevronDown className="hidden h-4 w-4 shrink-0 text-[#64748B] sm:inline" aria-hidden="true" />
+        </button>
+
+        {menuOpen && (
+          <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-60 overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_8px_28px_rgba(0,0,0,0.12)]">
+            {(user?.name || user?.email) && (
+              <div className="border-b border-[#F0F2F4] px-4 py-3">
+                {user?.name && <p className="truncate text-[14px] font-semibold text-[#0F172A]">{user.name}</p>}
+                {user?.email && <p className="truncate text-[12px] text-[#64748B]">{user.email}</p>}
+              </div>
+            )}
+            <Link
+              to="/account"
+              onClick={() => { setMenuOpen(false); onNavigate?.(); }}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9]"
+            >
+              <Settings className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
+              Settings
+            </Link>
+            <button
+              type="button"
+              onClick={() => { setMenuOpen(false); logoutAccount(); onNavigate?.(); navigate("/login"); }}
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9]"
+            >
+              <LogOut className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -250,10 +296,19 @@ function HeaderActions({ onNavigate }) {
 function ShellInner({ children }) {
   const [collapsed, setCollapsed]   = useState(readCollapsed);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [headerSearch, setHeaderSearch] = useState("");
   const { pathname }                = useLocation();
   const { theme, setTheme }         = useTheme();
+  const { isAuthenticated }         = useAccountAuth();
+  const navigate                    = useNavigate();
   const panelRef                    = useRef(null);
   const closeRef                    = useRef(null);
+
+  const handleHeaderSearch = useCallback((e) => {
+    e.preventDefault();
+    const q = headerSearch.trim();
+    navigate(q ? `/?recommended=1&q=${encodeURIComponent(q)}` : "/?recommended=1");
+  }, [headerSearch, navigate]);
 
   // Lock to light palette
   useEffect(() => {
@@ -310,11 +365,11 @@ function ShellInner({ children }) {
   }, [drawerOpen]);
 
   return (
-    <div className="candidate-side flex min-h-screen bg-[#F8FAF9] text-[#17221C]">
+    <div className="candidate-side flex min-h-screen bg-[#F4F6F9] text-[#0F172A]">
       {/* Skip link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-card focus:bg-[#176B45] focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-soft"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-card focus:bg-[#F97316] focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-soft"
       >
         Skip to main content
       </a>
@@ -322,19 +377,20 @@ function ShellInner({ children }) {
       {/* ── Desktop persistent sidebar ──────────────────────────── */}
       <aside
         id={SIDEBAR_ID}
-        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#E5EBE7] bg-white transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
-          collapsed ? "w-[4.5rem]" : "w-64"
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#E2E8F0] bg-white transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
+          collapsed ? "w-[4.5rem]" : "w-[calc(18rem+1cm)]"
         }`}
       >
         <SidebarBrand collapsed={collapsed} />
+        {!collapsed && <SidebarGreeting />}
         <SidebarNav collapsed={collapsed} label="Main" />
         {/* Collapse toggle */}
-        <div className="border-t border-[#E5EBE7] p-3">
+        <div className="border-t border-[#E2E8F0] p-3">
           <button
             type="button"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="flex w-full items-center justify-center gap-2 rounded-control py-2 text-xs font-medium text-[#9BAAA1] transition-colors hover:bg-[#DDECE3] hover:text-[#64736A]"
+            className="flex w-full items-center justify-center gap-2 rounded-control py-2 text-xs font-medium text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]"
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             {!collapsed && <span>Collapse</span>}
@@ -346,7 +402,7 @@ function ShellInner({ children }) {
       {drawerOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]"
             aria-hidden="true"
             onClick={() => setDrawerOpen(false)}
           />
@@ -356,18 +412,19 @@ function ShellInner({ children }) {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#E5EBE7] bg-white shadow-lift"
+            className="absolute inset-y-0 left-0 flex w-[calc(18rem+1cm)] max-w-[85vw] flex-col border-r border-[#E2E8F0] bg-white shadow-lift"
           >
             <button
               ref={closeRef}
               type="button"
               onClick={() => setDrawerOpen(false)}
               aria-label="Close menu"
-              className="tap-target absolute right-3 top-4 inline-flex h-9 w-9 items-center justify-center rounded-control text-[#64736A] transition-colors hover:bg-[#DDECE3] hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="tap-target absolute right-3 top-4 inline-flex h-9 w-9 items-center justify-center rounded-control text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
             <SidebarBrand onNavigate={() => setDrawerOpen(false)} />
+            <SidebarGreeting />
             <SidebarNav label="Menu" onNavigate={() => setDrawerOpen(false)} />
           </div>
         </div>
@@ -376,7 +433,7 @@ function ShellInner({ children }) {
       {/* ── Main content column ──────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Sticky header */}
-        <header className="sticky top-0 z-40 flex h-[68px] items-center justify-between gap-3 border-b border-[#E5EBE7] bg-white/95 px-5 shadow-[0_1px_4px_rgba(27,67,50,0.07)] backdrop-blur-md sm:px-8">
+        <header className="sticky top-0 z-40 flex h-[68px] items-center justify-between gap-3 border-b border-[#E2E8F0] bg-white/95 px-5 shadow-[0_1px_3px_rgba(0,0,0,0.07)] backdrop-blur-md sm:px-8">
           <div className="flex min-w-0 items-center gap-2">
             {/* Mobile: open drawer */}
             <button
@@ -391,13 +448,29 @@ function ShellInner({ children }) {
             </button>
             {/* Brand on mobile (sidebar hidden) */}
             <BrandLogo
-              to="/"
-              size="md"
-              textWeight="font-medium"
-              theme="light"
+              to="/welcome"
+              variant="image"
+              size={52}
               className="lg:hidden"
             />
           </div>
+
+          {isAuthenticated && (
+            <form onSubmit={handleHeaderSearch} className="hidden min-w-0 flex-1 max-w-md md:block">
+              <label className="sr-only" htmlFor="app-header-search">Search for jobs, roles or companies</label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" aria-hidden="true" />
+                <input
+                  id="app-header-search"
+                  type="search"
+                  value={headerSearch}
+                  onChange={(e) => setHeaderSearch(e.target.value)}
+                  placeholder="Search for jobs, roles or companies..."
+                  className="h-10 w-full rounded-full border border-[#E5E7EB] bg-[#F8FAFC] pl-10 pr-4 text-[14px] text-[#111827] placeholder:text-[#94A3B8] transition-colors focus:border-[#F97316] focus:bg-white focus:outline-none focus:ring-3 focus:ring-[#F97316]/15"
+                />
+              </div>
+            </form>
+          )}
 
           <HeaderActions />
         </header>

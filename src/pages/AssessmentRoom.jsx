@@ -82,7 +82,7 @@ function statusOf(item, responses, marked) {
 // a colour means the same thing in all four places. The green/amber pairing is the
 // exam grammar candidates already arrive knowing; it predates this file and stays.
 const STATUS_STYLE = {
-  current: { chip: "bg-[#176B45] text-white ring-brand-600", dot: "bg-[#176B45]", label: "Current question" },
+  current: { chip: "bg-[#F97316] text-white ring-[#F97316]-600", dot: "bg-[#F97316]", label: "Current question" },
   answered: { chip: "bg-emerald-500 text-white ring-emerald-500", dot: "bg-emerald-500", label: "Answered" },
   marked: { chip: "bg-amber-400 text-amber-950 ring-amber-400", dot: "bg-amber-400", label: "Marked for review" },
   seen: { chip: "bg-white text-slate-600 ring-slate-300", dot: "bg-white ring-1 ring-inset ring-slate-300", label: "Seen, not answered" },
@@ -503,7 +503,7 @@ export default function AssessmentRoom() {
   );
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F8FAF9]">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F4F6F9]">
       <Watermark name={watermarkLabel.name} idFragment={watermarkLabel.idFragment} />
       <span aria-live="polite" className="sr-only">
         {announcement}
@@ -549,7 +549,7 @@ export default function AssessmentRoom() {
         {/* Answered-so-far. A bar, not a ring: this counts work done, and it must
             never be mistaken for a score. */}
         <div className="h-1 w-full bg-slate-100" role="presentation">
-          <div className="h-full bg-[#176B45] transition-[width] duration-300 ease-out" style={{ width: `${progressPct}%` }} />
+          <div className="h-full bg-[#F97316] transition-[width] duration-300 ease-out" style={{ width: `${progressPct}%` }} />
         </div>
       </header>
 
@@ -680,7 +680,7 @@ export default function AssessmentRoom() {
             type="button"
             aria-label="Close the question list"
             onClick={() => setSheetOpen(false)}
-            className="absolute inset-0 bg-[#F8FAF9]-deep/70"
+            className="absolute inset-0 bg-[#F4F6F9]-deep/70"
           />
           <div
             role="dialog"
@@ -705,7 +705,7 @@ export default function AssessmentRoom() {
       )}
 
       {timeUp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F8FAF9]-deep/80 px-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F4F6F9]-deep/80 px-6">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-soft">
             <Clock className="mx-auto mb-3 h-8 w-8 text-slate-400" />
             <h2 className="text-base font-semibold text-slate-900">Time is up</h2>
@@ -888,7 +888,7 @@ function ReviewView({ items, responses, marked, counts, sectionTitle, acknowledg
                     <button
                       type="button"
                       onClick={() => onJump(i)}
-                      className="flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
+                      className="flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
                     >
                       <span
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold tabular-nums ring-1 ring-inset ${STATUS_STYLE[status].chip}`}
@@ -939,7 +939,7 @@ function Palette({ items, responses, marked, visited, index, counts, view, onJum
                 onClick={() => onJump(i)}
                 aria-current={live ? "true" : undefined}
                 aria-label={`Question ${i + 1}, ${STATUS_STYLE[status].label}`}
-                className={`h-11 w-11 rounded-xl text-sm font-bold tabular-nums ring-1 ring-inset transition-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 active:scale-95 ${STATUS_STYLE[status].chip}`}
+                className={`h-11 w-11 rounded-xl text-sm font-bold tabular-nums ring-1 ring-inset transition-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-300 active:scale-95 ${STATUS_STYLE[status].chip}`}
               >
                 {i + 1}
               </button>
@@ -973,7 +973,7 @@ function CountJump({ value, label, tone, onClick }) {
       onClick={onClick}
       disabled={disabled}
       aria-label={disabled ? `${value} ${label}` : `${value} ${label} — go to the first one`}
-      className="tap-target rounded-xl border border-slate-200 px-2 py-1.5 text-center transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100 disabled:cursor-default disabled:hover:bg-transparent"
+      className="tap-target rounded-xl border border-slate-200 px-2 py-1.5 text-center transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100 disabled:cursor-default disabled:hover:bg-transparent"
     >
       <span className={`block text-sm font-bold tabular-nums ${disabled ? "text-slate-300" : tones[tone]}`}>{value}</span>
       <span className="block text-[11px] text-slate-500">{label}</span>
@@ -1006,7 +1006,7 @@ function AnswerWidget({ item, value, onChange }) {
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Type a number"
-          className="w-full max-w-xs rounded-xl border border-slate-300 px-3.5 py-3 text-base focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100"
+          className="w-full max-w-xs rounded-xl border border-slate-300 px-3.5 py-3 text-base focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-[#F97316]-100"
         />
       </div>
     );
@@ -1039,7 +1039,7 @@ function AnswerWidget({ item, value, onChange }) {
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
                   aria-label={`Move "${textById.get(id)}" up`}
-                  className="tap-target flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="tap-target flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100 disabled:opacity-30 disabled:hover:bg-transparent"
                 >
                   <ArrowUp className="h-4 w-4" />
                 </button>
@@ -1048,7 +1048,7 @@ function AnswerWidget({ item, value, onChange }) {
                   onClick={() => move(i, 1)}
                   disabled={i === order.length - 1}
                   aria-label={`Move "${textById.get(id)}" down`}
-                  className="tap-target flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="tap-target flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100 disabled:opacity-30 disabled:hover:bg-transparent"
                 >
                   <ArrowDown className="h-4 w-4" />
                 </button>
@@ -1082,9 +1082,9 @@ function AnswerWidget({ item, value, onChange }) {
           return (
             <label
               key={o.id}
-              className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 text-sm transition-colors has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-100 ${
+              className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 text-sm transition-colors has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[#F97316]-100 ${
                 isSelected
-                  ? "border-brand-500 bg-[#E8F2EC] text-slate-900 ring-1 ring-inset ring-brand-500"
+                  ? "border-brand-500 bg-[#FEF3E8] text-slate-900 ring-1 ring-inset ring-[#F97316]-500"
                   : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
@@ -1098,7 +1098,7 @@ function AnswerWidget({ item, value, onChange }) {
               <span
                 aria-hidden="true"
                 className={`flex h-8 w-8 shrink-0 items-center justify-center text-xs font-bold ${multi ? "rounded-lg" : "rounded-full"} ${
-                  isSelected ? "bg-[#176B45] text-white" : "bg-slate-100 text-slate-500"
+                  isSelected ? "bg-[#F97316] text-white" : "bg-slate-100 text-slate-500"
                 }`}
               >
                 {isSelected && multi ? <Check className="h-4 w-4" /> : optionLabel(i)}

@@ -56,12 +56,19 @@ export default function GoogleButton({ onError, onStart, onFinish }) {
         }
       },
     });
-    window.google.accounts.id.renderButton(containerRef.current, { theme: "outline", size: "large", width: 360, text: "continue_with" });
+    window.google.accounts.id.renderButton(containerRef.current, {
+      theme: "outline",
+      size: "large",
+      width: 384,
+      text: "signin_with",
+      logo_alignment: "left",
+      shape: "pill",
+    });
     return undefined;
   }, [clientId, location.state, navigate, onError, onFinish, onStart, ready]);
 
   if (!clientId) {
-    return <p role="status" className="text-center text-[12px] text-[#64736A]">Google sign-in is not configured. Add a Google OAuth client ID to enable it.</p>;
+    return <p role="status" className="text-center text-[12px] text-[#64748B]">Google sign-in is not configured. Add a Google OAuth client ID to enable it.</p>;
   }
   return <div ref={containerRef} className="flex min-h-11 justify-center" aria-label="Continue with Google" />;
 }

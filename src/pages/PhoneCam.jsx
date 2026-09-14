@@ -286,12 +286,12 @@ export default function PhoneCam() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#F8FAF9] px-6 py-10 text-center text-[#17221C]">
-      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E8F2EC]">
-        <Smartphone className="h-7 w-7 text-[#176B45]" />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#F4F6F9] px-6 py-10 text-center text-[#0F172A]">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FEF3E8]">
+        <Smartphone className="h-7 w-7 text-[#F97316]" />
       </div>
 
-      {state === "connecting" && <p className="text-sm text-[#64736A]">Connecting your phone as a second camera…</p>}
+      {state === "connecting" && <p className="text-sm text-[#64748B]">Connecting your phone as a second camera…</p>}
 
       {/* The heading states what this phone is actually doing. It used to read
           "Second camera active" even when getUserMedia had been refused outright,
@@ -318,12 +318,12 @@ export default function PhoneCam() {
         playsInline
         muted
         className={
-          state === "live" && capability.camera ? "mt-5 w-full max-w-xs rounded-xl bg-[#F8FAF9]" : "hidden"
+          state === "live" && capability.camera ? "mt-5 w-full max-w-xs rounded-xl bg-[#F4F6F9]" : "hidden"
         }
       />
 
       {state === "live" && (
-        <p className="mt-5 max-w-sm text-sm text-[#64736A]">
+        <p className="mt-5 max-w-sm text-sm text-[#64748B]">
           {capability.camera && capability.vision ? (
             <>
               Keep this page open and the phone propped up with you in view. Nothing is streamed — this page only sends

@@ -12,9 +12,9 @@ const ICONS = {
 
 // Light, on-brand toast surfaces
 const TONES = {
-  success: "border-[#C7DDD1] bg-[#E8F2EC] text-[#176B45]",
-  error:   "border-verdict-negative/20 bg-[#F8EAEA] text-[#C95C5C]",
-  info:    "border-[#E5EBE7] bg-white text-[#17221C]",
+  success: "border-[#BBF7D0] bg-[#DCFCE7] text-[#16A34A]",
+  error:   "border-[#FECACA] bg-[#FEE2E2] text-[#DC2626]",
+  info:    "border-[#E2E8F0] bg-white text-[#0F172A]",
 };
 
 export function ToastProvider({ children }) {

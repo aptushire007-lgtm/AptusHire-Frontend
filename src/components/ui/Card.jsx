@@ -1,18 +1,17 @@
 ﻿/**
  * AptusHire shared surface primitives.
- * Premium light theme: white cards, green brand, gold accent, charcoal text.
- * No dark surfaces, no black boxes.
+ * Orange #F97316 + Navy #1B2A3B design system.
  */
 
-// ── Card tone system ────────────────────────────────────────────────────────
+// ── Card tone system ──────────────────────────────────────────────────────────
 const cardTones = {
-  default:       { border: "border-[#E5EBE7]",        surface: "bg-white" },
-  brand:         { border: "border-[#C7DDD1]",      surface: "bg-white" },
-  ember:         { border: "border-accent-orange/30", surface: "bg-[#E8F2EC]" },
-  "filled-brand":{ border: "border-transparent",    surface: "bg-[#176B45] text-white" },
-  "filled-gold": { border: "border-transparent",    surface: "bg-[#176B45] text-white" },
-  // backward-compat alias
-  "filled-ember":{ border: "border-transparent",    surface: "bg-[#176B45] text-white" },
+  default:        { border: "border-[#E2E8F0]",          surface: "bg-white" },
+  brand:          { border: "border-[#FED7AA]",           surface: "bg-white" },
+  ember:          { border: "border-[#FED7AA]",           surface: "bg-[#FEF3E8]" },
+  "filled-brand": { border: "border-transparent",        surface: "bg-[#F97316] text-white" },
+  "filled-gold":  { border: "border-transparent",        surface: "bg-[#F97316] text-white" },
+  "filled-ember": { border: "border-transparent",        surface: "bg-[#F97316] text-white" },
+  navy:           { border: "border-transparent",        surface: "bg-[#1B2A3B] text-white" },
 };
 
 const OWN_SURFACE  = /(^|\s)(bg-|surface-|fill-)/;
@@ -27,12 +26,13 @@ function ownsBorderColor(cn) {
 }
 
 export function toneText(tone) {
-  if (tone === "filled-brand") return { strong: "text-white",         soft: "text-white/80",    tile: "on-fill" };
-  if (tone === "filled-gold")  return { strong: "text-white",         soft: "text-white/80",    tile: "on-fill" };
-  if (tone === "filled-ember") return { strong: "text-white",         soft: "text-white/80",    tile: "on-fill" };
-  if (tone === "ember")        return { strong: "text-[#17221C]",   soft: "text-[#64736A]",  tile: "ember" };
-  if (tone === "brand")        return { strong: "text-[#17221C]",   soft: "text-[#64736A]",  tile: "brand" };
-  return                              { strong: "text-[#17221C]",   soft: "text-[#64736A]",  tile: "brand" };
+  if (tone === "filled-brand") return { strong: "text-white",       soft: "text-white/80", tile: "on-fill" };
+  if (tone === "filled-gold")  return { strong: "text-white",       soft: "text-white/80", tile: "on-fill" };
+  if (tone === "filled-ember") return { strong: "text-white",       soft: "text-white/80", tile: "on-fill" };
+  if (tone === "navy")         return { strong: "text-white",       soft: "text-white/70", tile: "on-fill" };
+  if (tone === "ember")        return { strong: "text-[#0F172A]",   soft: "text-[#64748B]", tile: "brand" };
+  if (tone === "brand")        return { strong: "text-[#0F172A]",   soft: "text-[#64748B]", tile: "brand" };
+  return                              { strong: "text-[#0F172A]",   soft: "text-[#64748B]", tile: "brand" };
 }
 
 const cardPadding = { default: "p-6", compact: "p-4", none: "p-0" };
@@ -50,7 +50,7 @@ export function Card({
   return (
     <Component
       className={[
-        "min-w-0 rounded-card border shadow-[0_1px_4px_rgba(27,67,50,0.07)]",
+        "min-w-0 rounded-card border shadow-[0_1px_3px_rgba(0,0,0,0.07)]",
         cardPadding[padding] ?? cardPadding.default,
         ownsBorderColor(className) ? "" : t.border,
         OWN_SURFACE.test(className)  ? "" : t.surface,
@@ -68,16 +68,17 @@ export function Card({
   );
 }
 
-// ── Icon Tile ───────────────────────────────────────────────────────────────
+// ── Icon Tile ─────────────────────────────────────────────────────────────────
 const tileTones = {
-  brand:        "bg-[#E8F2EC] text-[#176B45]",
-  ember:        "bg-[#176B45]-light text-[#176B45]",
-  slate:        "bg-[#F8FAF9] text-[#64736A]",
-  positive:     "bg-[#E8F2EC] text-[#176B45]",
-  pending:      "bg-[#176B45]-light text-[#176B45]",
-  negative:     "bg-[#F8EAEA] text-[#C95C5C]",
-  "on-fill":    "bg-white/20 text-white",
-  "on-fill-ink":"bg-slate-950/10 text-slate-900",
+  brand:         "bg-[#FEF3E8] text-[#F97316]",
+  ember:         "bg-[#FEF3E8] text-[#F97316]",
+  slate:         "bg-[#F1F5F9] text-[#64748B]",
+  positive:      "bg-[#DCFCE7] text-[#16A34A]",
+  pending:       "bg-[#FEF3C7] text-[#D97706]",
+  negative:      "bg-[#FEE2E2] text-[#DC2626]",
+  navy:          "bg-[#1B2A3B] text-white",
+  "on-fill":     "bg-white/20 text-white",
+  "on-fill-ink": "bg-slate-950/10 text-slate-900",
 };
 
 const tileSizes = {
@@ -103,7 +104,7 @@ export function IconTile({ icon: Icon, tone = "brand", size = "md", className = 
   );
 }
 
-// ── Avatar ──────────────────────────────────────────────────────────────────
+// ── Avatar ────────────────────────────────────────────────────────────────────
 export function Avatar({ name, size = "md", className = "" }) {
   const initials =
     String(name || "")
@@ -123,7 +124,7 @@ export function Avatar({ name, size = "md", className = "" }) {
     <span
       aria-hidden="true"
       className={[
-        "inline-flex shrink-0 items-center justify-center rounded-full bg-[#E8F2EC] font-semibold text-[#176B45]",
+        "inline-flex shrink-0 items-center justify-center rounded-full bg-[#1B2A3B] font-semibold text-white",
         sizes[size] ?? sizes.md,
         className,
       ].join(" ")}
@@ -133,15 +134,18 @@ export function Avatar({ name, size = "md", className = "" }) {
   );
 }
 
-// ── Badge ───────────────────────────────────────────────────────────────────
+// ── Badge ─────────────────────────────────────────────────────────────────────
 export function Badge({ children, tone = "slate", className = "" }) {
   const tones = {
-    slate:  "bg-[#F8FAF9] text-[#64736A] border border-[#E5EBE7]",
-    green:  "bg-[#E8F2EC] text-[#176B45]",
-    amber:  "bg-[#E8F2EC] text-[#176B45]",
-    red:    "bg-[#F8EAEA] text-[#C95C5C]",
-    brand:  "bg-[#E8F2EC] text-[#176B45]",
-    gold:   "bg-[#176B45]-light text-[#176B45]",
+    slate:   "bg-[#F1F5F9] text-[#64748B] border border-[#E2E8F0]",
+    green:   "bg-[#DCFCE7] text-[#16A34A]",
+    amber:   "bg-[#FEF3C7] text-[#D97706]",
+    red:     "bg-[#FEE2E2] text-[#DC2626]",
+    brand:   "bg-[#FEF3E8] text-[#F97316]",
+    gold:    "bg-[#FEF3C7] text-[#D97706]",
+    navy:    "bg-[#1B2A3B] text-white",
+    blue:    "bg-[#EFF6FF] text-[#3B82F6]",
+    indigo:  "bg-[#EEF2FF] text-[#6366F1]",
   };
   return (
     <span
@@ -158,7 +162,7 @@ export function Badge({ children, tone = "slate", className = "" }) {
 
 export { Badge as StatusBadge };
 
-// ── StatCard ────────────────────────────────────────────────────────────────
+// ── StatCard ──────────────────────────────────────────────────────────────────
 export function StatCard({ label, value, icon: Icon, tone = "default", note, action, className = "", ...props }) {
   const t = toneText(tone);
   return (
@@ -176,15 +180,15 @@ export function StatCard({ label, value, icon: Icon, tone = "default", note, act
 
 export { StatCard as KpiCard };
 
-// ── SectionHeader ───────────────────────────────────────────────────────────
+// ── SectionHeader ─────────────────────────────────────────────────────────────
 export function SectionHeader({ title, description, action, icon: Icon, className = "" }) {
   return (
     <div className={`flex flex-wrap items-start justify-between gap-x-6 gap-y-3 ${className}`}>
       <div className="flex min-w-0 items-start gap-3">
         {Icon && <IconTile icon={Icon} size="sm" />}
         <div className="min-w-0">
-          <h2 className="text-base font-bold text-[#17221C]">{title}</h2>
-          {description && <p className="mt-1 max-w-prose text-sm text-[#64736A]">{description}</p>}
+          <h2 className="text-base font-bold text-[#0F172A]">{title}</h2>
+          {description && <p className="mt-1 max-w-prose text-sm text-[#64748B]">{description}</p>}
         </div>
       </div>
       {action && <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div>}
@@ -192,24 +196,24 @@ export function SectionHeader({ title, description, action, icon: Icon, classNam
   );
 }
 
-// ── Skeleton ────────────────────────────────────────────────────────────────
+// ── Skeleton ──────────────────────────────────────────────────────────────────
 export function Skeleton({ className = "" }) {
   return (
     <div className={`animate-pulse motion-reduce:animate-none rounded-lg bg-slate-200/70 ${className}`} />
   );
 }
 
-// ── EmptyState ───────────────────────────────────────────────────────────────
+// ── EmptyState ────────────────────────────────────────────────────────────────
 export function EmptyState({ icon: Icon, title, description, action }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-card border border-dashed border-[#E5EBE7] bg-white px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center rounded-card border border-dashed border-[#E2E8F0] bg-white px-6 py-14 text-center">
       {Icon && (
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#E8F2EC] text-[#176B45]">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FEF3E8] text-[#F97316]">
           <Icon className="h-6 w-6" aria-hidden="true" />
         </div>
       )}
-      <h3 className="text-base font-bold text-[#17221C]">{title}</h3>
-      {description && <p className="mt-1.5 max-w-sm text-sm text-[#64736A]">{description}</p>}
+      <h3 className="text-base font-bold text-[#0F172A]">{title}</h3>
+      {description && <p className="mt-1.5 max-w-sm text-sm text-[#64748B]">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );

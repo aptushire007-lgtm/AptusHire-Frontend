@@ -18,23 +18,23 @@ export default function VerificationTick({
 }) {
   const configs = {
     verified: {
-      bg: "bg-[#E8F2EC] dark:bg-[#E8F2EC]",
-      text: "text-[#176B45] dark:text-[#176B45]",
-      border: "border-[#C7DDD1] dark:border-[#C7DDD1]",
+      bg: "bg-[#FFF1C7] dark:bg-[#FFF1C7]",
+      text: "text-[#E5A514] dark:text-[#E5A514]",
+      border: "border-[#F5B51B] dark:border-[#F5B51B]",
       icon: CheckCircle2,
       label: "Verified",
     },
     pending: {
-      bg: "bg-[#E8F2EC] dark:bg-[#E8F2EC]",
-      text: "text-[#176B45] dark:text-[#176B45]",
-      border: "border-[#C7DDD1] dark:border-[#C7DDD1]",
+      bg: "bg-[#FFF1C7] dark:bg-[#FFF1C7]",
+      text: "text-[#E5A514] dark:text-[#E5A514]",
+      border: "border-[#F5B51B] dark:border-[#F5B51B]",
       icon: Clock,
       label: "Pending Verification",
     },
     missing: {
-      bg: "bg-[#F8FAF9] dark:bg-[#F8FAF9]",
-      text: "text-[#64736A] dark:text-[#64736A]",
-      border: "border-[#C7DDD1] dark:border-[#C7DDD1]",
+      bg: "bg-[#F4F6F9] dark:bg-[#F4F6F9]",
+      text: "text-[#64748B] dark:text-[#64748B]",
+      border: "border-[#E2E8F0] dark:border-[#E2E8F0]",
       icon: Minus,
       label: "Not Verified",
     },
@@ -74,7 +74,7 @@ export default function VerificationTick({
         <button
           type="button"
           onClick={onFix}
-          className="text-sm font-bold text-[#176B45] hover:text-[#176B45] dark:text-[#176B45]"
+          className="text-sm font-bold text-[#E5A514] hover:text-[#E5A514] dark:text-[#E5A514]"
         >
           {fixLabel}
         </button>

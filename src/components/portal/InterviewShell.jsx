@@ -47,19 +47,19 @@ function ExitConfirmDialog({ onStay, onLeave }) {
   }, [onStay]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#F8FAF9]-deep/80 px-4 py-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#F4F6F9]-deep/80 px-4 py-8">
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="exit-dialog-title"
         aria-describedby="exit-dialog-description"
-        className="w-full max-w-sm rounded-2xl border border-[#E5EBE7] bg-white p-6 shadow-soft"
+        className="w-full max-w-sm rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-soft"
       >
-        <h2 id="exit-dialog-title" className="text-base font-semibold text-[#17221C]">
+        <h2 id="exit-dialog-title" className="text-base font-semibold text-[#0F172A]">
           Leave this interview?
         </h2>
-        <p id="exit-dialog-description" className="mt-2 text-sm text-[#64736A]">
+        <p id="exit-dialog-description" className="mt-2 text-sm text-[#64748B]">
           Your answers so far are saved. You can come back and continue before your interview link
           expires, but leaving now ends this monitored session.
         </p>
@@ -93,11 +93,11 @@ export default function InterviewShell({ stage = "live", wide = false, children 
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAF9]">
-      <header className="sticky top-0 z-30 border-b border-[#E5EBE7] bg-white/95 backdrop-blur">
+    <div className="min-h-screen bg-[#F4F6F9]">
+      <header className="sticky top-0 z-30 border-b border-[#E2E8F0] bg-white/95 backdrop-blur">
         <div className={`mx-auto flex h-16 items-center justify-between gap-4 px-5 ${measure}`}>
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#176B45] text-white">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F97316] text-white">
               <Sparkles className="h-4 w-4" />
             </span>
             <span className="truncate text-base font-semibold text-slate-700">
@@ -113,7 +113,7 @@ export default function InterviewShell({ stage = "live", wide = false, children 
             <button
               type="button"
               onClick={requestExit}
-              className="flex items-center gap-1 rounded px-1 py-1 text-sm font-medium text-slate-500 hover:text-red-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-100"
+              className="flex items-center gap-1 rounded px-1 py-1 text-sm font-medium text-slate-500 hover:text-red-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
             >
               <LogOut className="h-4 w-4" /> Exit
             </button>

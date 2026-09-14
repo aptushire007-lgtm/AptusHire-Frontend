@@ -43,7 +43,7 @@ function timeAgo(date) {
 }
 
 export default function NotificationCenter() {
-  const { refreshUnreadCount, refreshRecent } = useNotifications() || {};
+  const { refreshUnreadCount, markRead: markNotificationRead, markAllRead: markAllNotificationsRead } = useNotifications() || {};
   const [data, setData] = useState(null);
   const [page, setPage] = useState(1);
   const [type, setType] = useState("");
@@ -69,24 +69,23 @@ export default function NotificationCenter() {
   }, [load]);
 
   async function markRead(id) {
-    await api.patch(`/notifications/${id}/read`, {}, { headers: accountAuthHeader() });
+    if (markNotificationRead) await markNotificationRead(id);
+    else await api.patch(`/notifications/${id}/read`, {}, { headers: accountAuthHeader() });
     await load();
-    refreshUnreadCount?.();
-    refreshRecent?.();
+    if (!markNotificationRead) refreshUnreadCount?.();
   }
 
   async function markAllRead() {
-    await api.patch("/notifications/read-all", {}, { headers: accountAuthHeader() });
+    if (markAllNotificationsRead) await markAllNotificationsRead();
+    else await api.patch("/notifications/read-all", {}, { headers: accountAuthHeader() });
     await load();
-    refreshUnreadCount?.();
-    refreshRecent?.();
+    if (!markAllNotificationsRead) refreshUnreadCount?.();
   }
 
   async function remove(id) {
     await api.delete(`/notifications/${id}`, { headers: accountAuthHeader() });
     await load();
     refreshUnreadCount?.();
-    refreshRecent?.();
   }
 
   return (
@@ -106,7 +105,7 @@ export default function NotificationCenter() {
       <Card>
         {/* The filter bar reads as one control group rather than three loose
             fields dropped above the list. */}
-        <div className="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-[#F8FAF9] p-4 sm:grid-cols-3">
+        <div className="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-[#F4F6F9] p-4 sm:grid-cols-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
@@ -166,7 +165,7 @@ export default function NotificationCenter() {
               <li
                 key={n._id}
                 className={`flex items-start gap-3 rounded-xl border p-4 ${
-                  n.read ? "border-slate-200 bg-white" : "border-[#C7DDD1] bg-[#E8F2EC]/50"
+                  n.read ? "border-slate-200 bg-white" : "border-[#FED7AA] bg-[#FEF3E8]/50"
                 }`}
               >
                 <IconTile icon={Bell} size="sm" tone={n.read ? "slate" : "brand"} />
@@ -189,7 +188,7 @@ export default function NotificationCenter() {
                     <button
                       type="button"
                       onClick={() => markRead(n._id)}
-                      className="tap-target rounded-lg px-2 py-1 text-xs font-semibold text-[#176B45] hover:bg-[#DDECE3]"
+                      className="tap-target rounded-lg px-2 py-1 text-xs font-semibold text-[#F97316] hover:bg-[#FEF3E8]"
                     >
                       Mark read
                     </button>

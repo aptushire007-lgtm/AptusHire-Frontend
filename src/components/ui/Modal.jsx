@@ -94,18 +94,18 @@ export default function Modal({
         tabIndex={-1}
         className={
           centred
-            ? `relative max-h-[88vh] w-full overflow-y-auto rounded-panel border border-[#E5EBE7] bg-white p-6 shadow-lift focus:outline-none ${SIZES[size] ?? SIZES.lg} ${panelClassName}`
+            ? `relative max-h-[88vh] w-full overflow-y-auto rounded-panel border border-[#E2E8F0] bg-white p-6 shadow-lift focus:outline-none ${SIZES[size] ?? SIZES.lg} ${panelClassName}`
             : `absolute inset-y-0 left-0 flex flex-col bg-white shadow-deep focus:outline-none ${panelClassName}`
         }
       >
         {title && (
           <div className="mb-5 flex items-start justify-between gap-3">
             <div>
-              <h2 id={headingId} className="text-base font-bold text-[#17221C]">
+              <h2 id={headingId} className="text-base font-bold text-[#0F172A]">
                 {title}
               </h2>
               {description && (
-                <p className="mt-1 text-sm text-[#64736A]">{description}</p>
+                <p className="mt-1 text-sm text-[#64748B]">{description}</p>
               )}
             </div>
             {showClose && (
@@ -113,7 +113,7 @@ export default function Modal({
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="-m-1.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#64736A] transition-colors hover:bg-[#F8FAF9] hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="-m-1.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>

@@ -27,13 +27,13 @@ function useFieldA11y(explicitId, error) {
   };
 }
 
-// Base chrome — white bg, charcoal text, green focus ring
+// Base chrome — white bg, charcoal text, orange focus ring
 const fieldChrome = [
-  "box-border min-w-0 max-w-full rounded-control border border-[#E5EBE7] bg-white",
-  "text-sm text-[#17221C] placeholder:text-[#9BAAA1]",
-  "shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors duration-150",
-  "focus:border-[#176B45] focus:outline-none focus:ring-3 focus:ring-primary/15",
-  "disabled:bg-[#F8FAF9] disabled:text-[#64736A] disabled:cursor-not-allowed",
+  "box-border min-w-0 max-w-full rounded-control border border-[#E2E8F0] bg-white",
+  "text-sm text-[#0F172A] placeholder:text-[#94A3B8]",
+  "shadow-sm transition-colors duration-150",
+  "focus:border-[#F97316] focus:outline-none focus:ring-3 focus:ring-[#F97316]/15",
+  "disabled:bg-[#F8FAFC] disabled:text-[#64748B] disabled:cursor-not-allowed",
 ].join(" ");
 
 const fieldClass        = `${fieldChrome} px-3.5 py-2.5`;
@@ -88,7 +88,7 @@ export const Search = forwardRef(function Search({ className = "", id, ...props 
   return (
     <div className="relative">
       <SearchIcon
-        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9BAAA1]"
+        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]"
         aria-hidden="true"
       />
       <Input ref={ref} id={id} type="search" className={`pl-10 ${className}`} {...props} />
@@ -106,7 +106,7 @@ export const Checkbox = forwardRef(function Checkbox({ className = "", error, id
       ref={ref}
       {...useFieldA11y(id, error)}
       type="checkbox"
-      className={`h-4 w-4 rounded border-[#E5EBE7] text-[#176B45] accent-primary focus:ring-2 focus:ring-primary/20 ${className}`}
+      className={`h-4 w-4 rounded border-[#E2E8F0] text-[#F97316] accent-[#F97316] focus:ring-2 focus:ring-[#F97316]/20 ${className}`}
       {...props}
     />
   );
@@ -118,7 +118,7 @@ export const Radio = forwardRef(function Radio({ className = "", error, id, ...p
       ref={ref}
       {...useFieldA11y(id, error)}
       type="radio"
-      className={`h-4 w-4 border-[#E5EBE7] text-[#176B45] accent-primary focus:ring-2 focus:ring-primary/20 ${className}`}
+      className={`h-4 w-4 border-[#E2E8F0] text-[#F97316] accent-[#F97316] focus:ring-2 focus:ring-[#F97316]/20 ${className}`}
       {...props}
     />
   );
@@ -138,17 +138,17 @@ export const Switch = forwardRef(function Switch(
       onClick={() => onChange?.(!checked)}
       className={[
         "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors",
-        "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/20",
+        "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F97316]/20",
         "disabled:cursor-not-allowed disabled:opacity-50",
         checked
-          ? "border-[#176B45] bg-[#176B45]"
-          : "border-[#E5EBE7] bg-[#F8FAF9]",
+          ? "border-[#F97316] bg-[#F97316]"
+          : "border-[#E2E8F0] bg-[#F8FAFC]",
         className,
       ].join(" ")}
       {...props}
     >
       <span
-        className={`h-4 w-4 rounded-full bg-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-transform ${
+        className={`h-4 w-4 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.07)] transition-transform ${
           checked ? "translate-x-6" : "translate-x-1"
         }`}
       />
@@ -161,12 +161,12 @@ export function Label({ children, required, htmlFor, className = "" }) {
   return (
     <label
       htmlFor={htmlFor || ctx?.id}
-      className={`mb-1.5 block text-xs font-semibold text-[#17221C] ${className}`}
+      className={`mb-1.5 block text-xs font-semibold text-[#0F172A] ${className}`}
     >
       {children}
       {required && (
         <>
-          <span aria-hidden="true" className="ml-0.5 text-[#C95C5C]"> *</span>
+          <span aria-hidden="true" className="ml-0.5 text-[#DC2626]"> *</span>
           <span className="sr-only"> (required)</span>
         </>
       )}
@@ -180,7 +180,7 @@ export function FieldError({ children, id }) {
   return (
     <p
       id={id || ctx?.errorId}
-      className="mt-1 text-xs font-medium text-[#C95C5C]"
+      className="mt-1 text-xs font-medium text-[#DC2626]"
     >
       {children}
     </p>

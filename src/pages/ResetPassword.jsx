@@ -32,14 +32,14 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#F8FAF9] px-5 py-12 transition-colors">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#F4F6F9] px-5 py-12 transition-colors">
       <div className="absolute right-6 top-6">
         <ThemeToggle />
       </div>
 
       <div className="w-full max-w-md">
         <div className="mb-6 flex justify-center">
-          <BrandLogo to="/welcome" size="lg" />
+          <BrandLogo to="/welcome" variant="image" size={52} />
         </div>
 
         <Card className="rounded-3xl border border-slate-200/90 bg-white p-6 text-center shadow-soft/90 sm:p-8">
@@ -50,12 +50,12 @@ export default function ResetPassword() {
               </div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Password Reset</h1>
               <p className="mt-2 text-xs text-slate-500">
-                Your password has been reset. Redirecting you to <Link to="/login" className="font-semibold text-[#176B45]">login</Link>…
+                Your password has been reset. Redirecting you to <Link to="/login" className="font-semibold text-[#F97316]">login</Link>…
               </p>
             </>
           ) : (
             <>
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F2EC] text-[#176B45]/60">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FEF3E8] text-[#F97316]/60">
                 <KeyRound className="h-6 w-6" />
               </div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Choose a New Password</h1>

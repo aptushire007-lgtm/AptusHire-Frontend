@@ -1,493 +1,147 @@
+/* =============================================================
+   CandidateDashboard.jsx  —  /dashboard
+   Content-only redesign (yellow/charcoal design system) matching
+   the "AptusHire Candidate Dashboard" reference. The shared sidebar
+   and header (AppShell.jsx) are NOT part of this file and keep
+   their existing orange/navy styling — this page's own content is:
+     1. Hero welcome card (greeting, profile %, actions, illustration)
+     2. Three stat cards (Applications · Interviews · Profile Strength)
+     3. Application Pipeline (5 stage buckets)
+     4. Quick Actions (Find Roles · My Profile & Trust · Notifications)
+     5. Recent Activity
+   ============================================================= */
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useEffect, useState, useCallback, useId, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Bell,
-  History,
-  Sparkles,
-  ListChecks,
-  AlertTriangle,
-  CircleCheck,
-  Hourglass,
-  ChevronDown,
-  ClipboardList,
-  Video,
-  Briefcase,
-  UserRound,
-  CircleDot,
-  ArrowRight,
-  Search,
+  AlertTriangle, ArrowRight, BarChart3, Bell, Briefcase,
+  ChevronRight, ClipboardList, Clock, Download, Search,
+  UserRound, Video,
 } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader, clearAccountAuth } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
-// The two portals are separate identities from the account (see portalAuth.js),
-// so entering one from here means minting and storing ITS token — not reusing
-// the account's.
-import { saveAuth as savePortalAuth, clearAuth as clearPortalAuth } from "../portal/portalAuth.js";
-import { saveAuth as saveAssessmentAuth, clearAuth as clearAssessmentAuth } from "../portal/assessmentAuth.js";
 import { getSocket } from "../lib/socket.js";
-import { Card, Badge, Skeleton, EmptyState, IconTile, SectionHeader } from "../components/ui/Card.jsx";
-import { Chip, ChipRow, HeroStat, PageHero, StepTrack } from "../components/ui/Panels.jsx";
-import Button from "../components/ui/Button.jsx";
-import { stageLabel, stageTone, stageProgress, isRejected, STAGES, STAGE_LABELS } from "../lib/pipeline.js";
-import VerificationTick from "../components/profile/VerificationTick.jsx";
-import ActivityHeatmap from "../components/dashboard/ActivityHeatmap.jsx";
-import ApplyVersionModal from "../components/jobs/ApplyVersionModal.jsx";
-import { Download, ShieldCheck } from "lucide-react";
+import { isRejected } from "../lib/pipeline.js";
 
-// --- time -------------------------------------------------------------------
+/* ─── design tokens (spec §3/§40) ───────────────────────────────── */
+const TXP  = "#111827";  // primary text
+const TXS  = "#64748B";  // secondary text
+const TXM  = "#94A3B8";  // muted text
+const BORD = "#E5E7EB";  // border
+const YEL  = "#F5B51B";  // yellow
+const YELD = "#E5A514";  // dark yellow
+const YELL = "#FFF1C7";  // light yellow
+const YELS = "#FFF9E8";  // very light yellow
+const DARK = "#172334";  // dark charcoal
+const PBG  = "#E7EBEF";  // progress track background
+const WH   = "#FFFFFF";
+const GRN  = "#65A30D";  // Live Updates dot only
 
-// Deadlines here decide outcomes, so they are measured against the SERVER's
-// clock, not the browser's. A device that is hours fast would otherwise tell a
-// candidate a window had closed when it had not, or worse, the reverse.
-function useServerClock(serverTime) {
-  const [offset, setOffset] = useState(0);
-  const [tick, setTick] = useState(0);
+const SHADOW_CARD  = "0 2px 8px rgba(15,23,42,0.04)";
+const SHADOW_HOVER = "0 6px 18px rgba(15,23,42,0.07)";
 
-  useEffect(() => {
-    if (serverTime) setOffset(new Date(serverTime).getTime() - Date.now());
-  }, [serverTime]);
-
-  // Re-render once a minute so a countdown does not go stale while the page
-  // sits open — which is exactly how someone misses a window.
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 60_000);
-    return () => clearInterval(id);
-  }, []);
-
-  return useCallback(() => Date.now() + offset, [offset, tick]);
-}
-
-const MIN = 60_000;
-const HOUR = 60 * MIN;
-const DAY = 24 * HOUR;
-
-function formatAbsolute(value) {
-  if (!value) return "";
-  return new Date(value).toLocaleString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
+/* ─── helpers ────────────────────────────────────────────────────── */
 function indianGreeting(now = new Date()) {
-  const hour = Number(new Intl.DateTimeFormat("en-IN", {
-    timeZone: "Asia/Kolkata",
-    hour: "numeric",
-    hourCycle: "h23",
+  const h = Number(new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata", hour: "numeric", hourCycle: "h23",
   }).format(now));
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
   return "Good evening";
 }
 
-// "in 3 hours" / "5 days ago". Always rendered next to the absolute timestamp —
-// a relative phrase alone is not something you can plan around.
-function formatRelative(value, now) {
-  if (!value) return "";
-  const diff = new Date(value).getTime() - now;
-  const past = diff < 0;
-  const abs = Math.abs(diff);
-
-  let phrase;
-  if (abs < MIN) phrase = "less than a minute";
-  else if (abs < HOUR) {
-    const m = Math.round(abs / MIN);
-    phrase = `${m} minute${m === 1 ? "" : "s"}`;
-  } else if (abs < DAY) {
-    const h = Math.round(abs / HOUR);
-    phrase = `${h} hour${h === 1 ? "" : "s"}`;
-  } else {
-    const d = Math.round(abs / DAY);
-    phrase = `${d} day${d === 1 ? "" : "s"}`;
-  }
-  return past ? `${phrase} ago` : `in ${phrase}`;
+function timeAgoShort(ds) {
+  if (!ds) return "";
+  const d = Math.floor((Date.now() - new Date(ds).getTime()) / 86_400_000);
+  if (d === 0) return "Today";
+  if (d === 1) return "1 day ago";
+  if (d < 7)  return `${d} days ago`;
+  return `${Math.floor(d / 7)}w ago`;
 }
 
-// --- action presentation ----------------------------------------------------
-
-const ACTION_ICONS = {
-  assessment: ClipboardList,
-  interview: Video,
-  offer: Sparkles,
-  review: Hourglass,
-  closed: CircleCheck,
-};
-
-// Tone is driven by state, not by kind: what matters is whether the candidate
-// is blocked, running out of time, or free to wait.
-function actionTone(action, now) {
-  if (action.state === "missed") return "red";
-  if (action.owner !== "candidate") return "slate";
-  const due = action.dueAt ? new Date(action.dueAt).getTime() : null;
-  if (due !== null && due - now <= DAY) return "amber";
-  return "brand";
-}
-
-// Wrap / icon / text triples for the four urgency states. The text tones read
-// from the verdict tokens rather than raw Tailwind hues, so this map and the
-// Badge sitting next to it cannot describe the same state in two different
-// colours — and the amber moves off 4.35:1, which was under AA at this size.
-const TONE_STYLES = {
-  red: {
-    wrap: "border-red-200 bg-red-50",
-    icon: "bg-[#F8EAEA] text-[#C95C5C]",
-    text: "text-[#C95C5C]",
-  },
-  amber: {
-    wrap: "border-amber-200 bg-amber-50",
-    icon: "bg-[#E8F2EC] text-[#176B45]",
-    text: "text-[#176B45]",
-  },
-  brand: {
-    wrap: "border-[#C7DDD1] bg-[#E8F2EC]",
-    icon: "bg-[#E8F2EC] text-[#176B45]",
-    text: "text-[#176B45]",
-  },
-  slate: {
-    wrap: "border-slate-200 bg-slate-50",
-    icon: "bg-slate-100 text-slate-600",
-    text: "text-slate-600",
-  },
-};
-
-// Inline text actions — "Mark as read", "Remove", "Save". They stay text, but
-// they get a real hit area: 24px is the WCAG 2.2 AA target floor and
-// `tap-target` lifts it to 44px on a thumb. The negative margin cancels the
-// padding so nothing shifts optically, and the focus ring is added because a
-// bare <button> here previously had no visible focus state of its own.
-const INLINE_ACTION =
-  "tap-target -m-1 inline-flex items-center gap-1 rounded-lg p-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2";
-
-// Session statuses arrive as backend identifiers. Every other piece of stage
-// copy on this page comes from pipeline.js; these were the one place a raw enum
-// was reformatted into UI text, so a schema rename would have surfaced straight
-// to the candidate. Unknown values still fall through to the old formatting
-// rather than disappearing.
-const SESSION_STATUS_LABELS = {
-  pending: "Not started",
-  scheduled: "Scheduled",
-  in_progress: "In progress",
-  completed: "Completed",
-  submitted: "Submitted",
-  expired: "Expired",
-  cancelled: "Cancelled",
-};
-
-function sessionStatusLabel(status) {
-  if (!status) return "Unknown";
-  return SESSION_STATUS_LABELS[status] || String(status).replace(/_/g, " ");
-}
-
-// Short badge text for an application that left the pipeline because the role
-// itself went away (Phase 17 pipelineExit) — a closed state, like rejected, but
-// not a decision about the candidate.
-const PIPELINE_EXIT_LABELS = {
-  hired_for_other_role: "Hired elsewhere",
-  job_filled: "Role filled",
-  job_closed: "Role closed",
-  job_deleted: "Role removed",
-};
-function exitLabel(exit) {
-  return (exit && (PIPELINE_EXIT_LABELS[exit.reason] || "Closed")) || "Closed";
-}
-
-function applicationPipelineBucket(status) {
+function pipelineBucket(status) {
   if (isRejected(status)) return "rejected";
-  if (["shortlisted"].includes(status)) return "shortlisted";
-  if (["interview_scheduled", "ai_interview_completed", "hr_interview", "technical_interview", "manager_interview"].includes(status)) return "interview";
-  if (["ats_passed", "assessment_scheduled", "assessment_completed", "under_review"].includes(status)) return "screening";
+  if (status === "shortlisted") return "shortlisted";
+  if (["interview_scheduled","ai_interview_completed","hr_interview","technical_interview","manager_interview"].includes(status))
+    return "interview";
+  if (["ats_passed","assessment_scheduled","assessment_completed","under_review"].includes(status))
+    return "screening";
   return "applied";
 }
 
-// A progress bar is a measurement, so it names what it measures. Without the
-// role and the value it is a styled empty div — and on an application card it
-// is the only thing that says how far along the process actually is.
-function ProgressBar({ value, label, className = "", trackClassName = "h-1.5" }) {
-  const pct = Math.max(0, Math.min(100, Math.round(value || 0)));
+/* ─── primitives ─────────────────────────────────────────────────── */
+const Card = ({ children, style }) => (
+  <div style={{
+    background: WH, border: `1px solid ${BORD}`, borderRadius: 16, padding: 24,
+    boxShadow: SHADOW_CARD, transition: "box-shadow 180ms ease",
+    ...style,
+  }}>
+    {children}
+  </div>
+);
+
+const IconBox = ({ icon: Icon, size = 40, radius = 10, bg = YELL, color = TXP, iconSize = 22 }) => (
+  <div style={{
+    width: size, height: size, borderRadius: radius, background: bg, flexShrink: 0,
+    display: "flex", alignItems: "center", justifyContent: "center",
+  }}>
+    <Icon style={{ width: iconSize, height: iconSize, color }} strokeWidth={1.75} />
+  </div>
+);
+
+function StatCard({ icon, title, value, valueColor = TXP, iconBg, description, action }) {
   return (
-    <div
-      role="progressbar"
-      aria-valuenow={pct}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-label={label}
-      className={`w-full overflow-hidden rounded-full bg-slate-100 ${trackClassName} ${className}`}
-    >
-      <div
-        className="h-full rounded-full bg-[#176B45] transition-[width] duration-500 ease-out motion-reduce:transition-none"
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
-}
-
-// The line that names who the step is waiting on. Every other candidate portal
-// shows a status label with no owner, which is why "Under Review" tells you
-// nothing — it is equally true on day 1 and day 60.
-function OwnerLine({ action, now }) {
-  if (action.owner === "candidate") {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-        <UserRound className="h-3.5 w-3.5" aria-hidden="true" /> Waiting on you
-      </span>
-    );
-  }
-  if (action.owner === "company") {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
-        <Hourglass className="h-3.5 w-3.5" aria-hidden="true" /> Waiting on the hiring team
-        {action.since ? ` · for ${formatRelative(action.since, now).replace(" ago", "")}` : ""}
-      </span>
-    );
-  }
-  return null;
-}
-
-// Label for the button that enters a session. Naming the thing beats a generic
-// "Open" — the candidate is deciding whether they have time for this right now.
-function openLabel(action) {
-  if (action.kind === "interview") return action.state === "in_progress" ? "Resume interview" : "Start interview";
-  return action.state === "in_progress" ? "Resume assessment" : "Start assessment";
-}
-
-// One thing the candidate must do, with its real deadline and — while the
-// window is open — the way in. The link itself is never displayed: only its
-// hash is stored server-side, so it cannot be reproduced, and minting a new one
-// would break the link already sitting in the candidate's inbox. The button
-// instead exchanges the account session for this session's portal token.
-function ActionRow({ action, jobTitle, companyName, now, onOpen, opening }) {
-  const Icon = ACTION_ICONS[action.kind] || CircleDot;
-  const tone = TONE_STYLES[actionTone(action, now)];
-  const due = action.dueAt;
-
-  return (
-    // 16px is the container radius; 12px is the control radius. This panel is a
-    // container, and at `rounded-xl` it read as an oversized button — see
-    // DESIGN.md § The 12/16 Rule.
-    <div className={`rounded-2xl border p-4 ${tone.wrap}`}>
-      <div className="flex items-start gap-3">
-        <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone.icon}`}>
-          {action.state === "missed" ? (
-            <AlertTriangle className="h-4.5 w-4.5" aria-hidden="true" />
-          ) : (
-            <Icon className="h-4.5 w-4.5" aria-hidden="true" />
-          )}
-        </span>
-
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-slate-900">{action.title}</p>
-          {jobTitle && (
-            <p className="truncate text-xs text-slate-500">
-              {jobTitle}
-              {companyName ? ` · ${companyName}` : ""}
-            </p>
-          )}
-          <p className="mt-1.5 text-sm text-slate-600">{action.detail}</p>
-
-          {action.scheduledAt && (
-            <p className="mt-1.5 text-xs text-slate-500">
-              Scheduled for <span className="font-medium text-slate-700">{formatAbsolute(action.scheduledAt)}</span>
-            </p>
-          )}
-
-          {due && (
-            <p className={`mt-1.5 text-xs font-semibold ${tone.text}`}>
-              {action.state === "missed" ? "Closed" : "Closes"} {formatRelative(due, now)}
-              <span className="ml-1 font-normal text-slate-500">· {formatAbsolute(due)}</span>
-            </p>
-          )}
-
-          {action.canOpen && (
-            <div className="mt-3">
-              <Button size="sm" variant="orange" loading={opening} onClick={() => onOpen(action)}>
-                {openLabel(action)} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </Button>
-            </div>
-          )}
-        </div>
+    <Card style={{ display: "flex", flexDirection: "column", gap: 6, padding: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 16, fontWeight: 500, color: TXP }}>{title}</span>
+        <IconBox icon={icon} bg={iconBg} />
       </div>
-    </div>
-  );
-}
-
-// --- application tracking ---------------------------------------------------
-
-// The full ordered pipeline with the reached point marked. A candidate can see
-// not just where they are but what the remaining process actually is — which
-// the single status label they get everywhere else never tells them.
-function StageTrack({ status, stageHistory }) {
-  const reached = useMemo(() => {
-    const set = new Set((stageHistory || []).map((h) => h.stage));
-    set.add(status);
-    return set;
-  }, [status, stageHistory]);
-
-  const atIndex = STAGES.indexOf(status);
-  const dates = useMemo(() => {
-    const map = {};
-    for (const h of stageHistory || []) if (h.at && !map[h.stage]) map[h.stage] = h.at;
-    return map;
-  }, [stageHistory]);
-
-  // Only stages this application has actually touched, plus the next two, so a
-  // 15-step pipeline does not drown the three steps that matter.
-  const visible = STAGES.filter((s, i) => reached.has(s) || (atIndex >= 0 && i > atIndex && i <= atIndex + 2));
-
-  // The numbers are the position in the VISIBLE run, not in the full pipeline —
-  // "Step 01" is where this candidate's story starts, not where the schema's
-  // enum does. The dates come straight from stageHistory, so a step that has
-  // been reached says when, and one that has not says nothing rather than
-  // guessing.
-  const steps = visible.map((stage) => ({
-    key: stage,
-    label: STAGE_LABELS[stage] || stage,
-    meta: dates[stage] ? formatAbsolute(dates[stage]) : null,
-  }));
-
-  return (
-    <StepTrack
-      className="mt-4"
-      label="Application progress"
-      steps={steps}
-      currentKey={status}
-      reached={reached}
-    />
-  );
-}
-
-function ApplicationCard({ application, next, now, onOpen, openingId }) {
-  const [open, setOpen] = useState(false);
-  const trackId = useId();
-  const { job, status, stageHistory = [], offer, pipelineExit } = application;
-  // A closed application, whether by a recruiter decision (rejected) or because
-  // the role was removed/filled (pipelineExit): no live progress, no actions.
-  const exited = Boolean(pipelineExit);
-  const rejected = isRejected(status) || exited;
-  const pct = Math.round(stageProgress(status) * 100);
-  const primary = next?.primary;
-
-  return (
-    // Container radius, not control radius — DESIGN.md § The 12/16 Rule.
-    //
-    // `min-w-0` for the reason <Card> carries it in the primitive (see
-    // components/ui/Card.jsx): this is a GRID ITEM, and a grid item's automatic
-    // minimum size is its min-content — which, for the `truncate` job title and
-    // company name below, is the FULL untruncated string. Measured at 601px
-    // inside a 320px viewport, and because index.css clips overflow-x rather
-    // than scrolling it, the excess was silently CUT OFF rather than reachable.
-    // This card is hand-rolled rather than a <Card> (it is nested inside one and
-    // deliberately carries no second shadow), so it does not inherit that fix.
-    <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          {/* Slate, not brand: this chip marks "an application" on a card whose
-              actual signal — the stage badge beside it — is the thing meant to
-              catch the eye. A violet tile competing with it would be the second
-              loudest element saying nothing. */}
-          <IconTile icon={Briefcase} tone="slate" size="sm" />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">{job?.title || "Application"}</p>
-            <p className="truncate text-xs text-slate-500">{job?.company?.name}</p>
-          </div>
-        </div>
-        {exited ? (
-          <Badge tone="slate">{exitLabel(pipelineExit)}</Badge>
-        ) : (
-          <Badge tone={stageTone(status)}>{stageLabel(status)}</Badge>
-        )}
+      <p style={{ fontSize: 40, fontWeight: 600, color: valueColor, lineHeight: 1, margin: 0 }}>{value}</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+        <span style={{ fontSize: 14, color: TXS }}>{description}</span>
+        {action}
       </div>
-
-      {!rejected && (
-        <ProgressBar
-          className="mt-3"
-          value={pct}
-          label={`${job?.title || "Application"}: ${stageLabel(status)}, ${pct}% through the process`}
-        />
-      )}
-
-      {primary && (
-        <div className="mt-3">
-          <OwnerLine action={primary} now={now} />
-          <p className="mt-1 text-sm text-slate-600">{primary.detail}</p>
-          {primary.dueAt && primary.owner === "candidate" && (
-            <p className={`mt-1 text-xs font-semibold ${TONE_STYLES[actionTone(primary, now)].text}`}>
-              {primary.state === "missed" ? "Closed" : "Closes"} {formatRelative(primary.dueAt, now)}
-            </p>
-          )}
-        </div>
-      )}
-
-      {offer?.status && offer.status !== "none" && (
-        <p className="mt-2 text-xs font-medium text-amber-700">
-          Offer {offer.status}
-          {offer.sentAt ? ` · sent ${formatAbsolute(offer.sentAt)}` : ""}
-        </p>
-      )}
-
-      {primary?.canOpen && (
-        <div className="mt-3">
-          <Button size="sm" variant="orange" loading={openingId === primary.sessionId} onClick={() => onOpen(primary)}>
-            {openLabel(primary)} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </Button>
-        </div>
-      )}
-
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-controls={trackId}
-        className={`${INLINE_ACTION} mt-3 text-[#176B45] hover:bg-[#DDECE3] hover:underline focus-visible:ring-brand-300`}
-      >
-        <ChevronDown
-          aria-hidden="true"
-          className={`h-3.5 w-3.5 transition-transform duration-200 motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
-        />
-        {open ? "Hide" : "Show"} full progress
-      </button>
-
-      <div id={trackId} hidden={!open}>
-        {open && <StageTrack status={status} stageHistory={stageHistory} />}
-      </div>
-    </div>
-  );
-}
-
-// --- page -------------------------------------------------------------------
-
-// These cards are siblings of the "Needs you" panel, not children of it, so
-// they sit at the same heading level. They were <h3> under an <h1>, which skips
-// a level and leaves a screen-reader user's section list with a hole in it.
-function SectionCard({ title, icon: Icon, description, children, action, ...props }) {
-  return (
-    <Card as="section" {...props} className="border-[#E5EBE7] !bg-white text-[#17221C] dark:border-[#E5EBE7] dark:!bg-white">
-      {/* Composes <SectionHeader> rather than re-rolling a title row, so the
-          icon chip, heading size, and action alignment match every other
-          section in both apps instead of drifting one screen at a time. */}
-      <SectionHeader icon={Icon} title={title} description={description} action={action} />
-      <div className="mt-5">{children}</div>
     </Card>
   );
 }
 
+function QuickActionCard({ icon, title, description, to, dot }) {
+  return (
+    <Link to={to} style={{
+      display: "flex", alignItems: "center", gap: 12, minHeight: 68,
+      background: WH, border: `1px solid ${BORD}`, borderRadius: 12, padding: "12px 16px",
+      textDecoration: "none", boxShadow: SHADOW_CARD, transition: "box-shadow 180ms ease",
+    }}>
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <IconBox icon={icon} size={40} radius={999} iconSize={18} />
+        {dot && (
+          <span style={{
+            position: "absolute", top: -2, right: -2, width: 10, height: 10,
+            borderRadius: "50%", background: YELD, border: `2px solid ${WH}`,
+          }} />
+        )}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 16, fontWeight: 500, color: TXP, margin: 0 }}>{title}</p>
+        <p style={{ fontSize: 14, color: TXS, marginTop: 2 }}>{description}</p>
+      </div>
+      <ChevronRight style={{ width: 18, height: 18, color: TXM, flexShrink: 0 }} />
+    </Link>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+═══════════════════════════════════════════════════════════════ */
 export default function CandidateDashboard() {
   const navigate = useNavigate();
   const { user } = useAccountAuth();
-  const [data, setData] = useState(null);
-  const [error, setError] = useState("");
-  const [openingId, setOpeningId] = useState(null);
-  const [openError, setOpenError] = useState("");
-  const redirectTimerRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
-    };
-  }, []);
+  const [data,      setData]      = useState(null);
+  const [error,     setError]     = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [greeting,  setGreeting]  = useState(() => indianGreeting());
+  const timerRef = useRef(null);
 
   const load = useCallback(async () => {
     setError("");
@@ -495,520 +149,321 @@ export default function CandidateDashboard() {
       const res = await api.get("/candidate-dashboard", { headers: accountAuthHeader() });
       setData(res.data);
     } catch (err) {
-      // Only an authentication failure is allowed to end the account session.
-      // Network errors and server failures are recoverable and must not erase a
-      // valid login or bounce the candidate out of their dashboard flow.
       if (err.response?.status === 401) {
         clearAccountAuth();
-        setError("Your session has expired. Please log in again.");
-        if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
-        redirectTimerRef.current = setTimeout(() => navigate("/login", { replace: true }), 1200);
+        setError("Session expired. Redirecting to login…");
+        timerRef.current = setTimeout(() => navigate("/login", { replace: true }), 1200);
         return;
       }
-      setError(err.response?.data?.error || "We couldn't load your dashboard. Please try again.");
+      setError(err.response?.data?.error || "Couldn't load your dashboard. Please try again.");
     }
   }, [navigate]);
 
   useEffect(() => {
     load();
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [load]);
 
-  const nowFn = useServerClock(data?.serverTime);
-  const now = nowFn();
-
-  const [selectedApplyJob, setSelectedApplyJob] = useState(null);
-  const [exporting, setExporting] = useState(false);
-
-  const handleDownloadData = async () => {
-    try {
-      setExporting(true);
-      const res = await api.get("/candidate-dashboard/profile/export-data", {
-        headers: accountAuthHeader(),
-        responseType: "blob",
-      });
-
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `AptusHire-Data-Export-${Date.now()}.json`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      console.error("Export error:", err);
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const [greeting, setGreeting] = useState(() => indianGreeting());
-
   useEffect(() => {
-    const updateGreeting = () => setGreeting(indianGreeting());
-    const id = setInterval(updateGreeting, 60_000);
+    const id = setInterval(() => setGreeting(indianGreeting()), 60_000);
     return () => clearInterval(id);
   }, []);
 
-  // Live-refresh when an admin moves this candidate's stage — no page refresh
-  // required (Module 11 realtime requirement).
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
-    const onStage = () => load();
-    socket.on("candidate:stage", onStage);
-    return () => socket.off("candidate:stage", onStage);
+    const socket = getSocket(); if (!socket) return;
+    const fn = () => load();
+    socket.on("candidate:stage", fn);
+    return () => socket.off("candidate:stage", fn);
   }, [load]);
 
-  // A resend/reschedule rotates the session's token and expiry without
-  // touching the application's stage, so the "candidate:stage" event above
-  // never fires for it. Without this, the toast from NotificationContext says
-  // a fresh link exists, but the "Needs you" card and Interviews list here
-  // keep showing the old, already-expired one until a manual reload.
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
-    const onNotification = (notification) => {
-      if (notification?.type === "interview_invite") load();
-    };
-    socket.on("notification:new", onNotification);
-    return () => socket.off("notification:new", onNotification);
+    const socket = getSocket(); if (!socket) return;
+    const fn = (n) => { if (n?.type === "interview_invite") load(); };
+    socket.on("notification:new", fn);
+    return () => socket.off("notification:new", fn);
   }, [load]);
 
-  async function markNotificationRead(id) {
-    await api.patch(`/notifications/${id}/read`, {}, { headers: accountAuthHeader() });
-    await load();
-  }
-
-  // Enter this session's portal using the account as proof of ownership. The
-  // server re-checks that this account's email owns the application and applies
-  // the same expiry/cancellation rules the emailed link would, then returns the
-  // portal's own short-lived token. The emailed link keeps working: nothing is
-  // rotated here.
-  //
-  // The previous portal session is cleared first — the stored jobTitle/token may
-  // belong to a different interview, and carrying it over would label this one
-  // with the wrong job.
-  async function openSession(action) {
-    if (!action?.sessionId) return;
-    setOpeningId(action.sessionId);
-    setOpenError("");
+  const handleDownload = async () => {
     try {
-      const res = await api.post(
-        `/candidate-dashboard/sessions/${action.kind}/${action.sessionId}/open`,
-        {},
-        { headers: accountAuthHeader() }
-      );
-      const identity = {
-        jwt: res.data.token,
-        jobTitle: res.data.session?.jobTitle,
-        candidateName: res.data.session?.candidateName,
-      };
-      if (action.kind === "interview") {
-        clearPortalAuth();
-        savePortalAuth(identity);
-        navigate("/portal/dashboard");
-      } else {
-        clearAssessmentAuth();
-        saveAssessmentAuth(identity);
-        navigate("/assessment-portal/hub");
-      }
-    } catch (err) {
-      // Includes the honest refusals — expired, cancelled — in the portal's own
-      // words, so the dashboard never promises a way in that does not exist.
-      setOpenError(err?.response?.data?.error || "We couldn't open that right now. Please try again shortly.");
-      setOpeningId(null);
-      await load();
-    }
-  }
+      setExporting(true);
+      const res = await api.get("/candidate-dashboard/profile/export-data", {
+        headers: accountAuthHeader(), responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.setAttribute("download", `AptusHire-Data-${Date.now()}.json`);
+      document.body.appendChild(a); a.click(); a.remove();
+    } catch (e) { console.error(e); }
+    finally { setExporting(false); }
+  };
 
-  const applicationsById = useMemo(() => {
-    const map = new Map();
-    for (const a of data?.appliedJobs || []) map.set(String(a._id), a);
-    return map;
-  }, [data]);
-
-  // Which sessions can be entered right now, keyed by session id. The server
-  // decides this (canOpen) rather than the browser re-deriving it from status +
-  // expiry — a device with a skewed clock must not be the thing that offers, or
-  // withholds, a way into an interview.
-  const openableSessions = useMemo(() => {
-    const map = new Map();
-    for (const entry of data?.nextActions || []) {
-      for (const action of entry.actions || []) {
-        if (action.canOpen && action.sessionId) map.set(String(action.sessionId), action);
-      }
-    }
-    return map;
-  }, [data]);
-
-  const nextByApplication = useMemo(() => {
-    const map = new Map();
-    for (const n of data?.nextActions || []) map.set(String(n.applicationId), n);
-    return map;
-  }, [data]);
-
-  // Everything the candidate is personally blocking, across all applications,
-  // most urgent first. This is the whole point of the screen.
-  const needsYou = useMemo(() => {
-    const rows = [];
-    for (const entry of data?.nextActions || []) {
-      const application = applicationsById.get(String(entry.applicationId));
-      for (const action of entry.actions || []) {
-        if (action.owner !== "candidate") continue;
-        rows.push({ action, application });
-      }
-      // Offers have no session object, so they only appear as `primary`.
-      if (entry.primary?.owner === "candidate" && entry.primary.kind === "offer") {
-        rows.push({ action: entry.primary, application });
-      }
-    }
-    const rank = { missed: 0, in_progress: 1, due: 2 };
-    return rows.sort((a, b) => {
-      const r = (rank[a.action.state] ?? 9) - (rank[b.action.state] ?? 9);
-      if (r !== 0) return r;
-      const at = a.action.dueAt ? new Date(a.action.dueAt).getTime() : Infinity;
-      const bt = b.action.dueAt ? new Date(b.action.dueAt).getTime() : Infinity;
-      return at - bt;
-    });
-  }, [data, applicationsById]);
-
-  if (error) {
-    return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-slate-900">My Dashboard</h1>
-        <Card role="alert" className="border-red-200 bg-red-50">
-          <p className="flex items-start gap-2.5 text-sm font-semibold text-[#C95C5C]">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            {error}
-          </p>
-          <Button type="button" size="sm" variant="outline" className="mt-4" onClick={load}>
-            Try again
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      // The shape of the page that is about to arrive, not two generic blocks.
-      // A skeleton that does not match what loads is just a second layout shift
-      // wearing a loading costume.
-      <div className="space-y-6" aria-busy="true">
-        <p className="sr-only" role="status">
-          Loading your dashboard…
+  if (error) return (
+    <div style={{ padding: 32 }}>
+      <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 16, padding: 20 }}>
+        <p style={{ color: "#DC2626", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+          <AlertTriangle style={{ width: 16, height: 16 }} />{error}
         </p>
+        <button onClick={load} style={{ marginTop: 12, padding: "6px 16px", borderRadius: 10, border: `1px solid ${BORD}`, background: WH, cursor: "pointer", fontSize: 14 }}>
+          Try again
+        </button>
+      </div>
+    </div>
+  );
 
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-52" />
-          <Skeleton className="h-4 w-96 max-w-full" />
+  if (!data) return (
+    <>
+      <style>{`@keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}`}</style>
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }} aria-busy="true">
+        <p className="sr-only" role="status">Loading your dashboard…</p>
+        <div style={{ background: WH, border: `1px solid ${BORD}`, borderRadius: 16, padding: 32, height: 180 }} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+          {[1, 2, 3].map((i) => <div key={i} style={{ borderRadius: 16, height: 170, background: WH, border: `1px solid ${BORD}` }} />)}
         </div>
-
-        <Card>
-          <Skeleton className="h-5 w-28" />
-          <Skeleton className="mt-4 h-20 w-full rounded-2xl" />
-          <Skeleton className="mt-3 h-20 w-full rounded-2xl" />
-        </Card>
-
-        <Card>
-          <Skeleton className="h-5 w-40" />
-          <div className="mt-4 grid gap-3 lg:grid-cols-2">
-            <Skeleton className="h-28 w-full rounded-2xl" />
-            <Skeleton className="h-28 w-full rounded-2xl" />
-          </div>
-        </Card>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          {["assessments", "interviews", "resume", "notifications"].map((key) => (
-            <Card key={key}>
-              <Skeleton className="h-5 w-36" />
-              <Skeleton className="mt-4 h-16 w-full" />
-            </Card>
-          ))}
+        <div style={{ background: WH, border: `1px solid ${BORD}`, borderRadius: 16, height: 195 }} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+          {[1, 2, 3].map((i) => <div key={i} style={{ borderRadius: 14, height: 100, background: WH, border: `1px solid ${BORD}` }} />)}
         </div>
       </div>
-    );
-  }
+    </>
+  );
 
-  const pct = data.profile.profileCompletionPercent;
+  const pct          = data.profile?.profileCompletionPercent ?? 0;
   const applications = data.appliedJobs || [];
-  // "Open" excludes both a recruiter decision and a role that was removed/filled
-  // (Phase 17 pipelineExit) — a closed application in either case.
-  const activeApplications = applications.filter((a) => !isRejected(a.status) && !a.pipelineExit);
-  const interviewCount = (data.upcomingInterviews?.length || 0) + (data.aiInterviewHistory?.length || 0);
-  const pipeline = [
-    { key: "applied", label: "Applied" },
-    { key: "screening", label: "Screening" },
-    { key: "interview", label: "Interview" },
+  const interviews   = (data.upcomingInterviews?.length || 0) + (data.aiInterviewHistory?.length || 0);
+  const notifications = data.notifications || [];
+  const hasUnreadNotif = notifications.some((n) => !n.read);
+  const displayName  = user?.name || data.profile?.name || "Candidate";
+
+  const STAGES = [
+    { key: "applied",     label: "Applied"     },
+    { key: "screening",   label: "Screening"   },
+    { key: "interview",   label: "Interview"   },
     { key: "shortlisted", label: "Shortlisted" },
-    { key: "rejected", label: "Rejected" },
-  ].map((stage) => ({
-    ...stage,
-    // A role that was removed/filled (pipelineExit) is off the pipeline — it
-    // must not still be counted under "Interview" or "Applied".
-    count: applications.filter(
-      (application) => !application.pipelineExit && applicationPipelineBucket(application.status) === stage.key
-    ).length,
+    { key: "rejected",    label: "Rejected"    },
+  ];
+  const pipelineCounts = STAGES.map((s) => ({
+    ...s,
+    count: applications.filter((a) => !a.pipelineExit && pipelineBucket(a.status) === s.key).length,
   }));
+  const maxStageCount = Math.max(1, ...pipelineCounts.map((s) => s.count));
 
   return (
-    <div className="candidate-dashboard space-y-6 text-[#176B45]">
-      <section className="flex flex-col justify-between gap-4 rounded-2xl border border-[#E5EBE7] bg-white p-6 text-[#17221C] shadow-[0_1px_4px_rgba(27,67,50,0.07)] sm:flex-row sm:items-end sm:p-8">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64736A]">Candidate dashboard</p>
-          <h1 className="mt-2 text-2xl font-bold text-[#17221C]">{greeting}, {user?.name || "Candidate"} <span aria-hidden="true">👋</span></h1>
-          <p className="mt-2 text-sm text-[#64736A]">Here's your hiring progress.</p>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+      {/* ══════ HERO — compact horizontal banner (not a tall card) ══════ */}
+      <style>{`
+        .dash-hero { flex-wrap: nowrap; }
+        @media (max-width: 980px) {
+          .dash-hero { flex-wrap: wrap !important; }
+          .dash-hero > * { flex-basis: 100% !important; }
+        }
+      `}</style>
+      <div className="dash-hero" style={{
+        backgroundImage: `linear-gradient(to right, ${WH} 0%, ${WH} 45%, rgba(255,255,255,0.55) 68%, rgba(255,255,255,0) 88%), url('/hero-banner.png')`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, right center",
+        backgroundRepeat: "no-repeat, no-repeat",
+        border: `1px solid ${BORD}`, borderRadius: 14, padding: "12px 24px",
+        boxShadow: SHADOW_CARD,
+        display: "flex", gap: 20, alignItems: "center", justifyContent: "space-between",
+      }}>
+        {/* left: eyebrow + greeting + description + actions */}
+        <div style={{ flex: "1 1 300px", minWidth: 240 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: YEL, flexShrink: 0 }} />
+            <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.09em", textTransform: "uppercase", color: TXS }}>
+              Candidate Dashboard
+            </span>
+          </div>
+
+          <h1 style={{ fontSize: 30, fontWeight: 500, lineHeight: 1.15, color: TXP, margin: 0 }}>
+            {greeting},{" "}
+            <span style={{ color: YELD, fontWeight: 600 }}>{displayName}</span> <span role="img" aria-label="wave">👋</span>
+          </h1>
+          <p style={{ fontSize: 14, fontWeight: 400, color: TXS, marginTop: 4 }}>
+            Here's your hiring progress and recent updates.
+          </p>
+
+          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            <Link to="/?recommended=1" style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+              height: 36, padding: "0 16px", borderRadius: 8,
+              background: DARK, color: WH, fontSize: 14, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap",
+            }}>
+              Find Jobs <ArrowRight style={{ width: 15, height: 15 }} />
+            </Link>
+            <Link to="/profile" style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              height: 36, padding: "0 16px", borderRadius: 8,
+              background: WH, border: `1px solid ${BORD}`, color: TXP, fontSize: 14, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap",
+            }}>
+              Update Profile
+            </Link>
+          </div>
         </div>
+
+        {/* middle: profile completion + download */}
+        <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", gap: 6, minWidth: 170 }}>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 500, color: TXS, marginBottom: 4 }}>Profile completion</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 28, fontWeight: 600, color: TXP }}>{pct}%</span>
+              <div style={{ width: 110, height: 7, background: BORD, borderRadius: 999, overflow: "hidden" }}>
+                <div style={{ width: `${pct}%`, height: "100%", background: YEL, borderRadius: 999 }} />
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={exporting}
+            style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+              height: 36, padding: "0 14px", borderRadius: 9,
+              background: exporting ? YELD : YEL, color: TXP, border: "none", cursor: "pointer",
+              fontSize: 14, fontWeight: 500, whiteSpace: "nowrap",
+            }}
+          >
+            <Download style={{ width: 14, height: 14 }} />
+            {exporting ? "Exporting…" : "Download My Data"}
+          </button>
         <div className="flex flex-wrap items-center gap-3">
           <Link to="/profile" className="rounded-[9px] border border-[#C7DDD1] bg-[#E8F2EC] px-3 py-2 text-xs font-semibold text-[#176B45] hover:bg-[#E4F8C6]">Profile completion: {pct}%</Link>
           <button onClick={handleDownloadData} disabled={exporting} className="inline-flex items-center gap-2 rounded-[9px] bg-[#176B45] px-4 py-2 text-xs font-semibold text-white shadow-[0_1px_4px_rgba(27,67,50,0.07)] transition-colors hover:bg-[#176B45]-dark"><Download className="h-4 w-4" /><span>{exporting ? "Exporting…" : "Download My Data"}</span></button>
         </div>
-      </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Hiring progress summary">
-        {[
-          { label: "Applications", value: applications.length, detail: "Total submitted", icon: Briefcase },
-          { label: "Interviews", value: interviewCount, detail: "Scheduled or completed", icon: Video },
-          { label: "Profile completion", value: pct, detail: "Profile strength", icon: UserRound },
-        ].map(({ label, value, detail, icon: Icon }) => (
-          <Card key={label} className="border-[#E5EBE7] !bg-white p-5 text-[#17221C] shadow-xs dark:border-[#E5EBE7] ">
-            <div className="flex items-center justify-between gap-3"><span className="text-xs font-semibold text-[#64736A]">{label}</span><Icon className="h-4 w-4 text-[#176B45]" aria-hidden="true" /></div>
-            <p className="mt-3 text-3xl font-bold text-[#176B45]">{value}{label === "Profile completion" ? "%" : ""}</p>
-            <p className="mt-1 text-xs text-[#64736A]">{detail}</p>
-          </Card>
-        ))}
-      </section>
-
-      <SectionCard id="pipeline" title="Application pipeline" icon={ListChecks} description="A current count of your applications by stage.">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {pipeline.map((stage) => <div key={stage.key} className="rounded-xl border border-[#E5EBE7] bg-white p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-[#64736A]">{stage.label}</p><p className="mt-2 text-2xl font-bold text-[#176B45]">{stage.count}</p></div>)}
+        {/* right: motivational quote (illustration now lives in the hero background) */}
+        <div style={{ flex: "0 0 auto", display: "flex", alignItems: "center" }}>
+          <div>
+            <p style={{ fontSize: 19, fontWeight: 400, color: TXP, lineHeight: 1.25, margin: 0, maxWidth: 190 }}>
+              &ldquo;Progress today, a brighter tomorrow.&rdquo;
+            </p>
+            <span style={{ display: "block", width: 42, height: 3, background: YEL, borderRadius: 999, marginTop: 6 }} />
+          </div>
         </div>
-      </SectionCard>
-
-      {/* Quick Navigation Chips */}
-      <ChipRow label="Jump to">
-        <Chip as={Link} to="/" icon={Search}>
-          Find Roles
-        </Chip>
-        <Chip as={Link} to="/profile" icon={UserRound}>
-          My Profile &amp; Trust
-        </Chip>
-        <Chip as={Link} to="/notifications" icon={Bell}>
-          Notifications
-        </Chip>
-      </ChipRow>
-
-      {/* Brand, not ember — the opposite call from the recruiter dashboard, and
-          for a reason specific to this screen. "Still open" is a state, and the
-          list directly below it states per-application stages in the reserved
-          pending amber. An ember panel sitting on top of that column is exactly
-          the adjacency the containment rule exists to prevent.
-
-          The basis line is required by the component and earns its place here:
-          "3" means nothing without "of 7 you've submitted". */}
-      {data.appliedJobs.length > 0 && (
-        <HeroStat
-          tone="brand"
-          label="Applications still open"
-          value={activeApplications.length}
-          basis={`Of ${data.appliedJobs.length} you've submitted. An application counts as open until a decision is recorded — closed ones stay in the list below with their outcome.`}
-          action={
-            <Button as={Link} to="/" size="sm" variant="secondary">
-              Browse more roles
-            </Button>
-          }
-        />
-      )}
-
-      {/* Brand tone on the card below, never ember or amber: this is the
-          candidate's own to-do list, and the reserved pending channel means "a
-          recruiter has not got to you yet". Those two must not look alike — one
-          is work you can do now, the other is waiting you cannot affect. */}
-      {needsYou.length > 0 ? (
-        <Card as="section" tone="brand">
-          <div className="flex min-w-0 items-start gap-3">
-            <IconTile icon={ListChecks} size="sm" />
-            <div className="min-w-0">
-              <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-                Needs you
-                <Badge tone="brand">{needsYou.length}</Badge>
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                These are waiting on you. Deadlines are shown in your local time.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 space-y-3">
-            {needsYou.map(({ action, application }) => (
-              <ActionRow
-                key={`${action.kind}-${action.sessionId || application?._id}`}
-                action={action}
-                jobTitle={application?.job?.title}
-                companyName={application?.job?.company?.name}
-                now={now}
-                onOpen={openSession}
-                opening={openingId === action.sessionId}
-              />
-            ))}
-          </div>
-        </Card>
-      ) : (
-        data.appliedJobs.length > 0 && (
-          <Card as="section" className="border-emerald-200 bg-emerald-50/50">
-            <div className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#E8F2EC] text-[#176B45]">
-                <CircleCheck className="h-4.5 w-4.5" aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900">Nothing needs you right now</h2>
-                <p className="mt-0.5 text-sm text-slate-600">
-                  Every open application is with the hiring team. You'll be emailed and notified here the moment
-                  that changes.
-                </p>
-              </div>
-            </div>
-          </Card>
-        )
-      )}
-
-      <SectionCard
-        id="applications"
-        title="Your applications"
-        icon={ListChecks}
-        action={
-          activeApplications.length > 0 ? (
-            <span className="text-xs text-slate-500">
-              {activeApplications.length} active · {data.appliedJobs.length} total
-            </span>
-          ) : null
-        }
-      >
-        {data.appliedJobs.length === 0 ? (
-          <EmptyState
-            icon={ListChecks}
-            title="No applications yet"
-            description="Apply to a job and you'll be able to track exactly where it stands — and what's waiting on who."
-            action={
-              <Link to="/">
-                <Button size="sm" variant="orange">Browse open roles</Button>
-              </Link>
-            }
-          />
-        ) : (
-          <div className="grid gap-3 lg:grid-cols-2">
-            {data.appliedJobs.map((application) => (
-              <ApplicationCard
-                key={application._id}
-                application={application}
-                next={nextByApplication.get(String(application._id))}
-                now={now}
-                onOpen={openSession}
-                openingId={openingId}
-              />
-            ))}
-          </div>
-        )}
-      </SectionCard>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard id="interviews" title="Interviews" icon={Video}>
-          {data.upcomingInterviews.length === 0 && data.aiInterviewHistory.length === 0 ? (
-            <p className="text-sm text-slate-500">No interviews scheduled yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {[...data.upcomingInterviews, ...data.aiInterviewHistory].map((s) => (
-                <div key={s._id} className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-[#C7DDD1]">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="min-w-0 truncate text-sm font-semibold text-slate-800">{s.job?.title}</p>
-                    <Badge tone={s.status === "completed" ? "green" : s.status === "expired" ? "red" : "brand"}>
-                      {sessionStatusLabel(s.status)}
-                    </Badge>
-                  </div>
-                  <p className="mt-1 text-xs text-slate-500">{formatAbsolute(s.interviewAt)}</p>
-                  {openableSessions.has(String(s._id)) && (
-                    <Button
-                      size="sm"
-                      variant="orange"
-                      className="mt-2"
-                      loading={openingId === s._id}
-                      onClick={() => openSession(openableSessions.get(String(s._id)))}
-                    >
-                      {openLabel(openableSessions.get(String(s._id)))} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
-
-        <SectionCard title="Notifications" icon={Bell}>
-          {data.notifications.length === 0 && <p className="text-sm text-slate-500">No notifications yet.</p>}
-          <div className="space-y-3">
-            {data.notifications.slice(0, 5).map((n) => (
-              <div key={n._id} className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-[#C7DDD1]">
-                <p className="text-sm font-semibold text-slate-800">{n.title}</p>
-                <p className="text-xs text-slate-500">{n.message}</p>
-                {!n.read && (
-                  <button
-                    type="button"
-                    onClick={() => markNotificationRead(n._id)}
-                    className={`${INLINE_ACTION} mt-1 text-[#176B45] hover:bg-[#DDECE3] hover:underline focus-visible:ring-brand-300`}
-                  >
-                    Mark as read
-                    {/* Three notifications in a row all offering "Mark as read"
-                        is unnavigable by voice or by screen reader without this. */}
-                    <span className="sr-only">: {n.title}</span>
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-          <Link to="/notifications">
-            <Button variant="outline" size="sm" className="mt-3">
-              View All Notifications
-            </Button>
-          </Link>
-        </SectionCard>
-
       </div>
 
-      <SectionCard title="Past interviews" icon={History}>
-        {data.aiInterviewHistory.length === 0 ? (
-          <p className="text-sm text-slate-500">No past interviews yet.</p>
+      {/* ══════ STAT CARDS ══════ */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+        <StatCard
+          icon={Briefcase}
+          title="Applications"
+          value={applications.length}
+          description="Total submitted applications"
+          action={<ChevronRight style={{ width: 16, height: 16, color: TXM }} />}
+        />
+        <StatCard
+          icon={Video}
+          title="Interviews"
+          value={interviews}
+          iconBg="#F1F5F9"
+          description="Scheduled or completed"
+          action={<ChevronRight style={{ width: 16, height: 16, color: TXM }} />}
+        />
+        <StatCard
+          icon={BarChart3}
+          title="Profile Strength"
+          value={`${pct}%`}
+          valueColor={YELD}
+          description="Profile strength"
+          action={
+            <Link to="/profile" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: YELL }}>
+              <ChevronRight style={{ width: 15, height: 15, color: TXP }} />
+            </Link>
+          }
+        />
+      </div>
+
+      {/* ══════ APPLICATION PIPELINE ══════ */}
+      <Card style={{ padding: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <IconBox icon={ClipboardList} bg={DARK} color={WH} />
+            <div>
+              <p style={{ fontSize: 20, fontWeight: 600, color: TXP, margin: 0 }}>Application Pipeline</p>
+              <p style={{ fontSize: 14, color: TXS, marginTop: 2 }}>A current count of your applications tracked by hiring stage.</p>
+            </div>
+          </div>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            height: 32, padding: "0 14px", borderRadius: 10,
+            background: "#F7F8F9", border: `1px solid ${BORD}`, fontSize: 14, fontWeight: 500, color: TXP,
+            whiteSpace: "nowrap",
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: GRN, flexShrink: 0 }} />
+            Live Updates
+          </span>
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 0 }}>
+          {pipelineCounts.map((stage, i) => (
+            <div key={stage.key} style={{
+              flex: "1 1 18%", minWidth: 110,
+              paddingLeft: i === 0 ? 0 : 16,
+              borderLeft: i > 0 ? `1px solid ${BORD}` : "none",
+              paddingRight: 16,
+            }}>
+              <p style={{ fontSize: 12, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em", color: TXS, marginBottom: 4 }}>
+                {stage.label}
+              </p>
+              <p style={{ fontSize: 30, fontWeight: 600, color: TXP, lineHeight: 1, margin: 0 }}>{stage.count}</p>
+              <div style={{ marginTop: 8, height: 6, background: PBG, borderRadius: 999, overflow: "hidden" }}>
+                <div style={{ width: `${(stage.count / maxStageCount) * 100}%`, height: "100%", background: YEL, borderRadius: 999 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* ══════ QUICK ACTIONS ══════ */}
+      <div>
+        <p style={{ fontSize: 22, fontWeight: 600, color: TXP, margin: "0 0 10px" }}>Quick Actions</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+          <QuickActionCard icon={Search} title="Find Roles" description="Explore new opportunities" to="/?recommended=1" />
+          <QuickActionCard icon={UserRound} title="My Profile & Trust" description="Keep your profile updated" to="/profile" />
+          <QuickActionCard icon={Bell} title="Notifications" description="Stay up to date" to="/notifications" dot={hasUnreadNotif} />
+        </div>
+      </div>
+
+      {/* ══════ RECENT ACTIVITY ══════ */}
+      <Card style={{ padding: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: notifications.length ? 8 : 0 }}>
+          <p style={{ fontSize: 18, fontWeight: 500, color: TXP, margin: 0 }}>Recent Activity</p>
+          {notifications.length > 0 && (
+            <Link to="/notifications" style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 14, fontWeight: 500, color: YELD, textDecoration: "none" }}>
+              View all <ChevronRight style={{ width: 14, height: 14 }} />
+            </Link>
+          )}
+        </div>
+
+        {notifications.length === 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "12px 0" }}>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#F1F3F5", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
+              <Clock style={{ width: 20, height: 20, color: TXM }} />
+            </div>
+            <p style={{ fontSize: 15, fontWeight: 500, color: TXP, margin: 0 }}>No recent activity</p>
+            <p style={{ fontSize: 14, color: TXS, marginTop: 4 }}>Your latest updates will appear here.</p>
+          </div>
         ) : (
-          <div className="space-y-3">
-            {data.aiInterviewHistory.map((s) => (
-              <div key={s._id} className="flex items-center justify-between gap-2 rounded-xl border border-[#E5EBE7] !bg-white p-4 transition-colors hover:border-[#C7DDD1] dark:border-[#E5EBE7] ">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{s.job?.title}</p>
-                  <p className="truncate text-xs text-slate-500">{formatAbsolute(s.interviewAt)}</p>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {notifications.slice(0, 4).map((n, i) => (
+              <div key={n._id || i} style={{
+                display: "flex", alignItems: "center", gap: 10, padding: "8px 0",
+                borderTop: i === 0 ? "none" : `1px solid ${BORD}`,
+              }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#F1F3F5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Bell style={{ width: 15, height: 15, color: TXS }} />
                 </div>
-                <Badge tone={s.status === "completed" ? "green" : "slate"}>{sessionStatusLabel(s.status)}</Badge>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 15, color: TXP, margin: 0, fontWeight: n.read ? 400 : 500 }}>{n.message || n.title || "Update"}</p>
+                </div>
+                <span style={{ fontSize: 13, color: TXM, flexShrink: 0 }}>{timeAgoShort(n.createdAt)}</span>
               </div>
             ))}
           </div>
         )}
-      </SectionCard>
-
-      {/* 12-Week Application & Interview Activity Heatmap */}
-      <ActivityHeatmap
-        applications={data.appliedJobs || []}
-        interviews={[...(data.upcomingInterviews || []), ...(data.aiInterviewHistory || [])]}
-      />
-
-      {/* Apply with Resume Version Modal */}
-      {selectedApplyJob && (
-        <ApplyVersionModal
-          job={selectedApplyJob}
-          isOpen={Boolean(selectedApplyJob)}
-          onClose={() => setSelectedApplyJob(null)}
-          onSuccess={() => {
-            load();
-          }}
-        />
-      )}
+      </Card>
     </div>
   );
 }
