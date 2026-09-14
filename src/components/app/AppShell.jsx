@@ -11,6 +11,7 @@ import {
   BookOpen,
   Bookmark,
   ClipboardList,
+  Video,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
@@ -43,6 +44,12 @@ const ACCOUNT_NAV_GROUPS = [
       { to: "/?recommended=1", label: "Recommended", icon: Sparkles, end: true },
       { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
       { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
+      // The /interviews route has always existed and rendered scheduled
+      // interviews correctly — nothing in the signed-in app linked to it, so a
+      // candidate with an interview booked had no door to it and reported the
+      // interview as "not showing". The badge carries the same count the page
+      // lists, so a waiting interview is visible from every screen.
+      { to: "/interviews", label: "Interviews", icon: Video, badgeKey: "interviews" },
       { to: "/assessments", label: "Assessment", icon: ClipboardList, badgeKey: "assessments" },
     ],
   },
@@ -69,7 +76,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [ta
 function SidebarNav({ collapsed, onNavigate, label }) {
   const { isAuthenticated } = useAccountAuth();
   const { search }          = useLocation();
-  const [counts, setCounts] = useState({ assessments: 0 });
+  const [counts, setCounts] = useState({ assessments: 0, interviews: 0 });
 
   useEffect(() => {
     if (!isAuthenticated) return undefined;
@@ -78,7 +85,10 @@ function SidebarNav({ collapsed, onNavigate, label }) {
       .get("/candidate-dashboard/summary", { headers: accountAuthHeader() })
       .then(({ data }) => {
         if (!active) return;
-        setCounts({ assessments: Number(data.assessmentCount) || 0 });
+        setCounts({
+          assessments: Number(data.assessmentCount) || 0,
+          interviews: Number(data.interviewCount) || 0,
+        });
       })
       .catch(() => {});
     return () => { active = false; };

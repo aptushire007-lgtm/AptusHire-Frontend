@@ -9,6 +9,11 @@
 @theme {
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Lexend", Inter, system-ui, sans-serif;
+  /* A NUMERIC face, not a third text face — no prose is ever set in it. The
+     interview room stacks figures that have to line up as they tick (question
+     counter, elapsed clock, the answer character count), and Inter's
+     proportional digits make them jitter on every change. See `.num` below. */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --text-xs:              0.875rem;
   --text-xs--line-height: 1.5;
@@ -265,6 +270,18 @@
 @layer utilities {
   .tap-target {
     @media (pointer: coarse) { min-height: 44px; min-width: 44px; }
+  }
+
+  /* Every figure that changes in place — the question counter, the elapsed
+     clock, the character count — set in the mono face with tabular figures and
+     pulled tight. One class rather than three utilities because the three only
+     work together: `tabular-nums` alone stays ragged (Inter's digits are
+     already tabular), the mono face is what actually holds the column, and the
+     negative tracking corrects how loose mono looks at display sizes. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
   }
   .candidate-side { color-scheme: light; }
   .ring-brand { box-shadow: var(--shadow-glow); }

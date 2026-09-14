@@ -50,6 +50,58 @@ function indianGreeting(now = new Date()) {
   return "Good evening";
 }
 
+/* ─── "Action needed" panel ──────────────────────────────────────
+   The API has always returned `nextActions` — per application, what is
+   waiting on the candidate and by when — and nothing rendered it. The
+   dashboard showed an interview COUNT and no way to act on it, which is
+   why a scheduled interview read as "not showing" to candidates.
+   Kinds that can be owned by the candidate: interview · assessment · offer. */
+const ACTION_ICON = { interview: Video, assessment: ClipboardList, offer: Briefcase };
+const ACTION_LINK = { interview: "/interviews", assessment: "/assessments", offer: "/applied-jobs" };
+const ACTION_TONE = {
+  overdue:   { bg: "#FEF2F2", border: "#FECACA", text: "#B91C1C" },
+  soon:      { bg: YELS,      border: YELL,      text: YELD    },
+  scheduled: { bg: WH,        border: BORD,      text: TXS     },
+  none:      { bg: WH,        border: BORD,      text: TXS     },
+};
+
+function actionTiming(item) {
+  const when = (v) => new Date(v).toLocaleString(undefined, {
+    month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+  });
+  if (item.state === "missed") return item.dueAt ? `Window closed ${when(item.dueAt)}` : "Window closed";
+  const parts = [];
+  if (item.scheduledAt) parts.push(`Scheduled ${when(item.scheduledAt)}`);
+  if (item.dueAt) parts.push(`${item.urgency === "overdue" ? "Closed" : "Closes"} ${when(item.dueAt)}`);
+  return parts.join(" · ") || "Ready when you are";
+}
+
+// Flatten the per-application payload to the candidate's own obligations,
+// most urgent first — the same ranking the server applies within one
+// application, applied across all of them.
+function toActionItems(nextActions) {
+  const rank = { missed: 0, in_progress: 1, due: 2 };
+  return (nextActions || [])
+    .flatMap((entry) => {
+      const mine = (entry.actions || []).filter((action) => action.owner === "candidate");
+      // An offer is derived from the stage, not from a session, so it appears as
+      // `primary` only and is absent from `actions` — take it from there or it
+      // is silently dropped.
+      const primary = entry.primary;
+      if (primary?.owner === "candidate" && !mine.some((a) => a.kind === primary.kind && a.sessionId === primary.sessionId)) {
+        mine.push(primary);
+      }
+      return mine.map((action) => ({ ...action, applicationId: entry.applicationId }));
+    })
+    .sort((a, b) => {
+      const r = (rank[a.state] ?? 9) - (rank[b.state] ?? 9);
+      if (r !== 0) return r;
+      const at = a.dueAt ? new Date(a.dueAt).getTime() : Infinity;
+      const bt = b.dueAt ? new Date(b.dueAt).getTime() : Infinity;
+      return at - bt;
+    });
+}
+
 function timeAgoShort(ds) {
   if (!ds) return "";
   const d = Math.floor((Date.now() - new Date(ds).getTime()) / 86_400_000);
@@ -230,6 +282,7 @@ export default function CandidateDashboard() {
   const pct          = data.profile?.profileCompletionPercent ?? 0;
   const applications = data.appliedJobs || [];
   const interviews   = (data.upcomingInterviews?.length || 0) + (data.aiInterviewHistory?.length || 0);
+  const actionItems  = toActionItems(data.nextActions);
   const notifications = data.notifications || [];
   const hasUnreadNotif = notifications.some((n) => !n.read);
   const displayName  = user?.name || data.profile?.name || "Candidate";
@@ -340,6 +393,46 @@ export default function CandidateDashboard() {
         </div>
       </div>
 
+      {/* ══════ ACTION NEEDED ══════ */}
+      {actionItems.length > 0 && (
+        <Card style={{ padding: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <IconBox icon={Clock} bg={DARK} color={WH} />
+            <div>
+              <p style={{ fontSize: 20, fontWeight: 600, color: TXP, margin: 0 }}>Action needed</p>
+              <p style={{ fontSize: 14, color: TXS, marginTop: 2 }}>Things waiting on you, soonest first.</p>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {actionItems.map((item) => {
+              const tone = ACTION_TONE[item.urgency] || ACTION_TONE.scheduled;
+              return (
+                <div key={`${item.kind}-${item.sessionId || item.applicationId}`} style={{
+                  display: "flex", alignItems: "center", flexWrap: "wrap", gap: 12,
+                  border: `1px solid ${tone.border}`, background: tone.bg, borderRadius: 12, padding: "12px 14px",
+                }}>
+                  <IconBox icon={ACTION_ICON[item.kind] || Clock} size={40} radius={999} iconSize={18} />
+                  <div style={{ flex: "1 1 240px", minWidth: 200 }}>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: TXP, margin: 0 }}>{item.title}</p>
+                    <p style={{ fontSize: 13, color: TXS, marginTop: 2 }}>{item.detail}</p>
+                    <p style={{ fontSize: 12, color: tone.text, fontWeight: 600, marginTop: 4 }}>{actionTiming(item)}</p>
+                  </div>
+                  <Link to={ACTION_LINK[item.kind] || "/applied-jobs"} style={{
+                    display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    height: 36, padding: "0 16px", borderRadius: 8, whiteSpace: "nowrap",
+                    background: DARK, color: WH, fontSize: 14, fontWeight: 500, textDecoration: "none",
+                  }}>
+                    {item.state === "missed" ? "See options" : item.kind === "offer" ? "View offer" : "Open"}
+                    <ArrowRight style={{ width: 15, height: 15 }} />
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+
       {/* ══════ STAT CARDS ══════ */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
         <StatCard
@@ -355,7 +448,11 @@ export default function CandidateDashboard() {
           value={interviews}
           iconBg="#F1F5F9"
           description="Scheduled or completed"
-          action={<ChevronRight style={{ width: 16, height: 16, color: TXM }} />}
+          action={
+            <Link to="/interviews" aria-label="View your interviews" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: "#F1F5F9" }}>
+              <ChevronRight style={{ width: 15, height: 15, color: TXP }} />
+            </Link>
+          }
         />
         <StatCard
           icon={BarChart3}
