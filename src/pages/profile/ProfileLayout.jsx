@@ -156,7 +156,6 @@ export default function ProfileLayout() {
             <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-[#F1F3F5]">
               <div
                 className="h-full rounded-full bg-[#F5B51B] transition-all duration-500"
-                className="h-full rounded-full bg-gradient-to-r from-[#2F574A] via-[#4E7567] to-[#D4F056] transition-all duration-500"
                 style={{ width: `${strength}%` }}
               />
             </div>
@@ -188,8 +187,6 @@ export default function ProfileLayout() {
           {/* Recruiter View Preview (Trust Badge) */}
           <div className="rounded-3xl border border-[#E5A514] bg-[#F5B51B] p-5 text-[#172334] shadow-soft">
             <div className="flex items-center gap-2 text-[#172334]">
-          <div className="rounded-3xl border border-[#244B3F] bg-[#145B40] p-5 text-white shadow-soft">
-            <div className="flex items-center gap-2 text-[#E4F8C6]">
               <ShieldCheck className="h-4 w-4" />
               <span className="text-xs font-bold uppercase tracking-wider">Recruiter View Preview</span>
             </div>
@@ -197,7 +194,6 @@ export default function ProfileLayout() {
             <div className="mt-3 rounded-2xl border border-black/5 bg-white/40 p-4 backdrop-blur-xs">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white font-bold text-[#E5A514]">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#D4F056] font-bold text-[#145B40]">
                   {(profile.personal?.firstName || "S")[0]}
                 </div>
                 <div>
@@ -211,9 +207,6 @@ export default function ProfileLayout() {
               <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-2.5 text-[11px]">
                 <span className="text-[#3F3620]">Trust Credential</span>
                 <span className="font-bold text-[#172334]">
-              <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-2.5 text-[11px]">
-                <span className="text-slate-300">Trust Credential</span>
-                <span className="font-bold text-[#E4F8C6]">
                   {ver.govDocVerified ? "✓ Aptus Verified (6/6)" : "Self-Reported"}
                 </span>
               </div>
