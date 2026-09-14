@@ -120,7 +120,7 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                   return (
                     <>
                       <item.icon
-                        className={`h-[18px] w-[18px] shrink-0 transition-colors ${active ? "text-[#0F172A]" : "text-[#64748B] group-hover:text-[#F97316]"}`}
+                        className={`h-[18px] w-[18px] shrink-0 transition-colors ${active ? "text-[#0F172A]" : "text-[#64748B] group-hover:text-[#7C3F10]"}`}
                         aria-hidden="true"
                       />
                       <span className={collapsed ? "sr-only" : "min-w-0 flex-1 whitespace-normal"}>{item.label}</span>

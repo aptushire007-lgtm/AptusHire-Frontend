@@ -50,7 +50,7 @@ function SourceQuote({ spans }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="tap-target inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#F97316]"
+        className="tap-target inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#172334]"
       >
         <Quote className="h-3.5 w-3.5" />
         {open ? "Hide source" : "Show where this came from"}
@@ -151,7 +151,7 @@ function Repeatable({ title, items, setItems, empty, renderFields, addLabel }) {
       <button
         type="button"
         onClick={() => setItems([...items, { ...empty }])}
-        className="tap-target mt-3 flex items-center gap-1.5 text-sm font-semibold text-[#F97316] hover:underline"
+        className="tap-target mt-3 flex items-center gap-1.5 text-sm font-semibold text-[#172334] hover:underline"
       >
         <Plus className="h-4 w-4" /> {addLabel}
       </button>
@@ -486,7 +486,7 @@ export default function ApplyForm() {
         <Button className="mt-5" onClick={() => window.location.reload()}>
           Try again
         </Button>
-        <Link to="/" className="mt-3 block text-sm font-medium text-brand-600 hover:text-[#F97316]">
+        <Link to="/" className="mt-3 block text-sm font-medium text-[#172334] hover:text-[#7C3F10]">
           Back to job listings
         </Link>
       </Card>
@@ -558,12 +558,12 @@ export default function ApplyForm() {
 
   return (
     <div className="application-form-page mx-auto max-w-6xl space-y-6 pb-10">
-      <Link to={`/jobs/${job.slug || id}`} className="inline-flex items-center gap-2 text-[15px] font-semibold text-[#F97316] hover:text-[#F97316]">
+      <Link to={`/jobs/${job.slug || id}`} className="inline-flex items-center gap-2 text-[15px] font-semibold text-[#172334] hover:text-[#7C3F10]">
         <ArrowLeft className="h-4 w-4" /> Back to job
       </Link>
       <div>
         <h1 className="font-display text-[26px] leading-8 font-semibold tracking-tight text-[#0F172A] sm:text-[30px]">Apply for {job.title}</h1>
-        <p className="mt-2 text-[15px] text-[#F97316]">
+        <p className="mt-2 text-[15px] text-[#5B5335]">
           {job.company?.name ? `${job.company.name} · ` : ""}Screening starts as soon as you submit.
         </p>
       </div>
@@ -584,15 +584,15 @@ export default function ApplyForm() {
 
           <div className="mb-6 rounded-xl border border-[#E2E8F0] bg-white p-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[15px] font-semibold text-[#F97316]">Resume</p>
-              {resumeId && <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#F97316]"><Check className="h-4 w-4" /> Selected Resume</span>}
+              <p className="text-[15px] font-semibold text-[#172334]">Resume</p>
+              {resumeId && <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-800"><Check className="h-4 w-4" /> Selected Resume</span>}
             </div>
             {savedResumes.length > 0 ? (
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <select value={resumeId || ""} onChange={selectSavedResume} className="min-h-11 flex-1 rounded-xl border border-[#E2E8F0] bg-white px-3 text-[13px] text-[#0F172A]">
                   {savedResumes.map((version) => <option key={version._id} value={version._id}>{version.label || "Saved resume"}{version.isDefault ? " (Default)" : ""}</option>)}
                 </select>
-                <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-[9px] border border-[#E2E8F0] bg-white px-4 text-[13px] font-semibold text-[#F97316] hover:bg-[#FEF3E8]">
+                <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-[9px] border border-[#E2E8F0] bg-white px-4 text-[13px] font-semibold text-[#172334] hover:bg-[#FEF3E8]">
                   Change Resume
                   <input type="file" name="resume" accept=".pdf,.docx" className="hidden" onChange={handleResumeChange} />
                 </label>
@@ -605,12 +605,12 @@ export default function ApplyForm() {
             )}
             {resume && <p className="mt-2 text-xs text-[#64748B]">New resume selected: {resume.name}</p>}
             {parseState === "working" && (
-              <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#F97316]">
+              <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#64748B]">
                 <Loader2 className="h-4 w-4 animate-spin" /> Importing information from your resume...
               </p>
             )}
             {parseState === "done" && !autofill?.degraded && (
-              <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#F97316]" role="status">
+              <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800" role="status">
                 <Check className="h-4 w-4" /> Information imported from your resume. You can edit it before submitting.
               </p>
             )}
@@ -627,7 +627,7 @@ export default function ApplyForm() {
           </div>
 
           <div className="mb-6 rounded-xl border border-[#E2E8F0] bg-white p-4">
-            <p className="text-[13px] font-semibold text-[#F97316]">Application readiness</p>
+            <p className="text-[13px] font-semibold text-[#172334]">Application readiness</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
               {[
                 ["Resume", Boolean(resume || resumeId)],
@@ -635,11 +635,11 @@ export default function ApplyForm() {
                 ["Education", education.length > 0],
                 ["Skills", skills.length > 0],
                 ["Experience", experience.length > 0],
-              ].map(([item, complete]) => <span key={item} className={`inline-flex items-center gap-1.5 text-xs font-medium ${complete ? "text-[#F97316]" : "text-[#64748B]"}`}><span aria-hidden="true">{complete ? "✓" : "○"}</span> {item}</span>)}
+              ].map(([item, complete]) => <span key={item} className={`inline-flex items-center gap-1.5 text-xs font-medium ${complete ? "text-[#475569]" : "text-[#64748B]"}`}><span aria-hidden="true">{complete ? "✓" : "○"}</span> {item}</span>)}
             </div>
           </div>
 
-          <p className="mb-5 text-lg font-semibold text-[#F97316]">Profile information</p>
+          <p className="mb-5 text-lg font-semibold text-[#172334]">Profile information</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormGroup>
               <Label required>Full Name</Label>
@@ -688,7 +688,7 @@ export default function ApplyForm() {
             </p>
 
             {parseState === "working" && (
-              <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#F97316]">
+              <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#64748B]">
                 <Loader2 className="h-4 w-4 animate-spin" /> Reading your résumé…
               </p>
             )}
@@ -905,7 +905,7 @@ export default function ApplyForm() {
           </FormGroup>
 
           {pendingReview > 0 && (
-            <p className="mb-3 text-sm font-medium text-amber-800">
+            <p className="mb-3 text-sm font-medium text-[#5B5335]">
               {pendingReview} entr{pendingReview === 1 ? "y" : "ies"} still need{pendingReview === 1 ? "s" : ""} your
               check before you can submit.
             </p>

@@ -58,7 +58,7 @@ export default function SkillsTab({ profile, onRefresh }) {
           <p className="mt-1 text-[11px] text-slate-500">The existing profile API stores these as one searchable skills list.</p>
         </div>
         <div className="flex justify-end pt-2">
-          <Button type="submit" loading={saving}><Save className="h-4 w-4" /> Save Skills</Button>
+          <Button type="submit" data-profile-action="true" loading={saving}><Save className="h-4 w-4" /> Save Skills</Button>
         </div>
       </form>
     </div>

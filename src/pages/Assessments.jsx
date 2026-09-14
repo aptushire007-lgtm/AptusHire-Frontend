@@ -8,11 +8,11 @@ import { Card, EmptyState, Skeleton } from "../components/ui/Card.jsx";
 import Button from "../components/ui/Button.jsx";
 
 const STATUS = {
-  scheduled: { label: "Invited", tone: "bg-[#FEF3E8] text-[#F97316]" },
-  not_started: { label: "Assigned", tone: "bg-[#FEF3E8] text-[#F97316]" },
-  in_progress: { label: "In progress", tone: "bg-[#FEF3E8] text-[#F97316]" },
-  completed: { label: "Completed", tone: "bg-[#FEF3E8] text-[#F97316]" },
-  submitted: { label: "Completed", tone: "bg-[#FEF3E8] text-[#F97316]" },
+  scheduled: { label: "Invited", tone: "bg-[#FEF3E8] text-[#92400E]" },
+  not_started: { label: "Assigned", tone: "bg-[#FEF3E8] text-[#92400E]" },
+  in_progress: { label: "In progress", tone: "bg-[#FEF3E8] text-[#92400E]" },
+  completed: { label: "Completed", tone: "bg-[#FEF3E8] text-[#92400E]" },
+  submitted: { label: "Completed", tone: "bg-[#FEF3E8] text-[#92400E]" },
   expired: { label: "Expired", tone: "bg-red-50 text-red-700" },
   cancelled: { label: "Cancelled", tone: "bg-[#F3F5F3] text-[#64748B]" },
 };
@@ -35,12 +35,12 @@ function AssessmentCard({ assessment, onOpen, opening }) {
   return (
     <Card className="border-[#E2E8F0] bg-white dark:border-[#E2E8F0] dark:bg-white">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-start gap-3"><span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${completed ? "bg-[#FEF3E8] text-[#F97316]" : "bg-[#F3F5F3] text-[#64748B]"}`}><ClipboardList className="h-5 w-5" /></span><div className="min-w-0"><h3 className="truncate text-[15px] font-semibold text-[#0F172A]">{title}</h3><p className="mt-1 truncate text-xs text-[#64748B]">{assessment.job?.company?.name || "Company"} · {assessment.job?.title || "AptusHire assessment"}</p></div></div>
+        <div className="flex min-w-0 items-start gap-3"><span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${completed ? "bg-[#FEF3E8] text-[#92400E]" : "bg-[#F3F5F3] text-[#64748B]"}`}><ClipboardList className="h-5 w-5" /></span><div className="min-w-0"><h3 className="truncate text-[15px] font-semibold text-[#0F172A]">{title}</h3><p className="mt-1 truncate text-xs text-[#64748B]">{assessment.job?.company?.name || "Company"} · {assessment.job?.title || "AptusHire assessment"}</p></div></div>
         <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${info.tone}`}>{info.label}</span>
       </div>
       <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#64748B]"><span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4" />Invited {dateTime(date)}</span>{assessment.expiresAt && <span>Deadline {dateTime(assessment.expiresAt)}</span>}{assessment.progress && <span>{assessment.progress.completedSections} of {assessment.progress.totalSections} sections complete</span>}</div>
       {completed && <p className="mt-3 text-xs font-semibold text-[#0F172A]">Overall score: {assessment.overallScore == null ? "Not available" : `${assessment.overallScore}%`}</p>}
-      {assessment.progress?.totalItems > 0 && <div className="mt-4"><div className="h-1.5 overflow-hidden rounded-full bg-[#FEF3E8]"><div className="h-full rounded-full bg-[#F97316]" style={{ width: `${Math.min(100, Math.round((assessment.progress.answered / assessment.progress.totalItems) * 100))}%` }} /></div><p className="mt-1 text-[11px] text-[#64748B]">{assessment.progress.answered} of {assessment.progress.totalItems} answered</p></div>}
+      {assessment.progress?.totalItems > 0 && <div className="mt-4"><div className="h-1.5 overflow-hidden rounded-full bg-[#FEF3E8]"><div className="h-full rounded-full bg-[#E5A514]" style={{ width: `${Math.min(100, Math.round((assessment.progress.answered / assessment.progress.totalItems) * 100))}%` }} /></div><p className="mt-1 text-[11px] text-[#64748B]">{assessment.progress.answered} of {assessment.progress.totalItems} answered</p></div>}
       <div className="mt-5 flex items-center justify-between border-t border-[#E2E8F0] pt-4">
         {completed ? <span className="text-xs text-[#64748B]">Results are reviewed by the hiring team.</span> : <span className="text-xs text-[#64748B]">{active ? "Continue where you left off." : "Use your invitation link to begin."}</span>}
         {completed && <Button as={Link} to={`/assessments/${assessment._id}/result`} size="sm" variant="outline">View Result <ArrowRight className="h-3.5 w-3.5" /></Button>}
@@ -103,7 +103,7 @@ export default function Assessments() {
 
   return (
     <div className="min-h-[calc(100vh-7rem)] w-full space-y-6 pb-10">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">My progress</p><h1 className="mt-2 text-2xl font-bold text-[#0F172A]">Assessments</h1><p className="mt-2 text-sm text-[#64748B]">Review assigned assessments and track what you have completed.</p></div><div className="flex flex-wrap items-center gap-2"><label className="flex min-h-10 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-3.5 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E]"><Search className="h-4 w-4" /><span className="sr-only">Search assessments</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-28 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-36" /></label><Button type="button" variant="outline" size="sm" onClick={load}><RotateCcw className="h-3.5 w-3.5" /> Refresh</Button></div></div>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">My progress</p><h1 className="mt-2 text-2xl font-bold text-[#0F172A]">Assessments</h1><p className="mt-2 text-sm text-[#64748B]">Review assigned assessments and track what you have completed.</p></div><div className="flex flex-wrap items-center gap-2"><label className="flex min-h-10 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-3.5 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E]"><Search className="h-4 w-4" /><span className="sr-only">Search assessments</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-28 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-36" /></label><Button type="button" variant="outline" size="sm" onClick={load} className="!border-[#7C3F10] !text-[#7C3F10] hover:!bg-[#FEF3E8] hover:!text-[#7C3F10] focus-visible:!ring-[#7C3F10]/20"><RotateCcw className="h-3.5 w-3.5" /> Refresh</Button></div></div>
       {state === "loading" && <div className="grid gap-4 md:grid-cols-2">{[1, 2].map((item) => <Card key={item}><Skeleton className="h-5 w-2/3" /><Skeleton className="mt-3 h-4 w-1/3" /><Skeleton className="mt-6 h-10 w-full" /></Card>)}</div>}
       {state === "error" && <Card role="alert" className="border-red-200 bg-red-50"><p className="text-sm font-semibold text-red-700">{error}</p><Button size="sm" variant="outline" className="mt-4" onClick={load}>Try again</Button></Card>}
       {state === "ready" && assessments.length === 0 && <EmptyState icon={ClipboardList} title="No assessments yet" description="Assigned assessments will appear here when a hiring team sends one to you." action={<Button as={Link} to="/" size="sm">Find jobs</Button>} />}

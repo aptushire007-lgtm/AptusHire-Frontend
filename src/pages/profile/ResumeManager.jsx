@@ -244,6 +244,7 @@ export default function ResumeManager() {
             />
             <label
               htmlFor="resume-version-upload"
+              data-profile-action="true"
               onClick={() => setReplaceTarget(null)}
               className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold !text-white transition-all shadow-xs ${
                 activeVersions.length >= 5
@@ -320,7 +321,7 @@ export default function ResumeManager() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => handleSetDefault(av._id)}>
+                    <Button size="sm" variant="ghost" data-profile-action="true" onClick={() => handleSetDefault(av._id)}>
                       Restore &amp; Set Default
                     </Button>
                   </div>
@@ -374,7 +375,7 @@ export default function ResumeManager() {
                     placeholder="Add tag (e.g. Frontend, Clinical)"
                     className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-900 dark:text-white"
                   />
-                  <Button size="sm" variant="secondary" onClick={addTag}>Add</Button>
+                  <Button size="sm" variant="secondary" data-profile-action="true" onClick={addTag}>Add</Button>
                 </div>
               </div>
 
@@ -392,8 +393,8 @@ export default function ResumeManager() {
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setReviewModalOpen(false)}>Cancel</Button>
-              <Button onClick={handleSaveReview}>Save Version</Button>
+              <Button variant="outline" data-profile-action="true" onClick={() => setReviewModalOpen(false)}>Cancel</Button>
+              <Button data-profile-action="true" onClick={handleSaveReview}>Save Version</Button>
             </div>
           </div>
         </div>
@@ -466,7 +467,7 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
           {!version.isDefault ? (
             <button
               onClick={onSetDefault}
-              className="tap-target inline-flex items-center gap-1 text-xs font-bold text-[#F97316] hover:text-[#F97316]"
+              className="tap-target inline-flex items-center gap-1 text-xs font-bold text-[#7C3F10] hover:text-[#7C3F10]"
             >
               <Star className="h-3.5 w-3.5" /> Set as Default
             </button>

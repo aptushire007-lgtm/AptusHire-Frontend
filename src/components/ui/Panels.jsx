@@ -89,7 +89,7 @@ export function Chip({
       className={`tap-target inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-4 ${
         active
           ? "border-[#F97316] bg-[#F97316] text-white shadow-[0_1px_2px_rgba(23,107,69,0.20)] focus-visible:ring-[#F97316]/25"
-          : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#FED7AA] hover:bg-[#FEF3E8] hover:text-[#F97316] focus-visible:ring-[#F97316]/20"
+          : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#FED7AA] hover:bg-[#FEF3E8] hover:text-[#7C3F10] focus-visible:ring-[#7C3F10]/20"
       } ${className}`}
       {...props}
     >
@@ -248,7 +248,7 @@ export function ListRow({
       </span>
       {trailing}
       <ChevronRight
-        className="h-4 w-4 shrink-0 text-[#94A3B8] transition-colors group-hover:text-[#F97316]"
+        className="h-4 w-4 shrink-0 text-[#94A3B8] transition-colors group-hover:text-[#7C3F10]"
         aria-hidden="true"
       />
     </Component>
@@ -422,7 +422,7 @@ function RecordLink({ link, children }) {
   const { as: Component = "a", className = "", ...rest } = link;
   return (
     <Component
-      className={`rounded-sm transition-colors after:absolute after:inset-0 after:rounded-card hover:text-[#F97316] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316] ${className}`}
+      className={`rounded-sm transition-colors after:absolute after:inset-0 after:rounded-card hover:text-[#7C3F10] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7C3F10] ${className}`}
       {...rest}
     >
       {children}

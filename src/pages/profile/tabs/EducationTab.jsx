@@ -49,7 +49,7 @@ export default function EducationTab({ profile, onRefresh }) {
             List your academic degrees, certifications, and institutions.
           </p>
         </div>
-        <Button size="sm" variant="secondary" onClick={addEntry}>
+        <Button size="sm" variant="secondary" data-profile-action="true" onClick={addEntry}>
           <Plus className="h-4 w-4" /> Add Degree
         </Button>
       </div>
@@ -67,7 +67,7 @@ export default function EducationTab({ profile, onRefresh }) {
             <GraduationCap className="mx-auto h-10 w-10 text-slate-400" />
             <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">No education added</p>
             <p className="mt-0.5 text-xs text-slate-500">Adding at least one education entry awards 10% profile strength.</p>
-            <Button size="sm" className="mt-4" onClick={addEntry}>Add Education</Button>
+            <Button size="sm" data-profile-action="true" className="mt-4" onClick={addEntry}>Add Education</Button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -146,7 +146,7 @@ export default function EducationTab({ profile, onRefresh }) {
               <p className="text-[11px] text-slate-500">
                 ★ Claims may be explored in AI interviews — verified claims raise your evidence score.
               </p>
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" data-profile-action="true" disabled={saving}>
                 {saving ? "Saving…" : "Save Education"}
               </Button>
             </div>

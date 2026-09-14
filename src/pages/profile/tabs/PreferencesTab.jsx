@@ -64,7 +64,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
   return (
     <div className="candidate-preferences-tab space-y-6">
       <div>
-        <h2 className="font-display text-xl font-bold text-[#E5A514] dark:text-[#E5A514]">Preferences &amp; Privacy</h2>
+        <h2 className="font-display text-xl font-bold text-[#172334] dark:text-[#172334]">Preferences &amp; Privacy</h2>
         <p className="text-sm text-[#64748B] dark:text-[#64748B]">
           Configure notification channels, job alerts, and manage your data rights under GDPR &amp; DPDP regulations.
         </p>
@@ -80,7 +80,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
       <form onSubmit={handleSave} className="space-y-5">
         {/* Availability */}
         <div className="rounded-2xl border border-[#F5B51B]/50 bg-white p-5 shadow-xs dark:border-[#F5B51B]/50 dark:bg-white">
-          <label className="block font-display text-base font-bold text-[#E5A514] dark:text-[#E5A514]">
+          <label className="block font-display text-base font-bold text-[#172334] dark:text-[#172334]">
             Availability Notice Period
           </label>
           <p className="text-sm text-[#64748B] dark:text-[#64748B]">
@@ -100,11 +100,11 @@ export default function PreferencesTab({ profile, onRefresh }) {
 
         {/* Notifications & Channels */}
         <div className="rounded-2xl border border-[#F5B51B]/50 bg-white p-5 shadow-xs dark:border-[#F5B51B]/50 dark:bg-white">
-          <h3 className="font-display text-base font-bold text-[#E5A514] dark:text-[#E5A514]">Communication Channels</h3>
+          <h3 className="font-display text-base font-bold text-[#172334] dark:text-[#172334]">Communication Channels</h3>
           <div className="mt-3 space-y-3 divide-y divide-[#FFF4CC] text-sm dark:divide-[#FFF4CC]">
             <label className="flex items-center justify-between pt-2 cursor-pointer">
               <div>
-                <p className="font-bold text-[#E5A514] dark:text-[#E5A514]">Recommended Job Alerts</p>
+                <p className="font-bold text-[#172334] dark:text-[#172334]">Recommended Job Alerts</p>
                 <p className="text-[#64748B]">Receive weekly emails with roles matching your resume version skills.</p>
               </div>
               <input
@@ -117,7 +117,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
 
             <label className="flex items-center justify-between pt-3 cursor-pointer">
               <div>
-                <p className="font-bold text-[#E5A514] dark:text-[#E5A514]">WhatsApp Interview Reminders</p>
+                <p className="font-bold text-[#172334] dark:text-[#172334]">WhatsApp Interview Reminders</p>
                 <p className="text-[#64748B]">Get timely reminders before AI interviews and assessment deadlines.</p>
               </div>
               <input
@@ -130,7 +130,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
 
             <label className="flex items-center justify-between pt-3 cursor-pointer">
               <div>
-                <p className="font-bold text-[#E5A514] dark:text-[#E5A514]">SMS Notifications</p>
+                <p className="font-bold text-[#172334] dark:text-[#172334]">SMS Notifications</p>
                 <p className="text-[#64748B]">Critical stage alerts sent to your verified mobile number.</p>
               </div>
               <input
@@ -147,6 +147,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
           <Button
             type="submit"
             disabled={saving}
+            data-profile-action="true"
             className="!bg-[#F5B51B] !text-[#172334] hover:!bg-[#E5A514] focus-visible:!ring-[#F5B51B]/25"
           >
             {saving ? "Saving…" : "Save Preferences"}
@@ -170,6 +171,7 @@ export default function PreferencesTab({ profile, onRefresh }) {
           <Button
             type="button"
             variant="secondary"
+            data-profile-action="true"
             onClick={handleDownloadData}
             disabled={exporting}
             className="shrink-0 !bg-white !text-[#E5A514] !border-[#F5B51B] hover:!bg-[#FFF1C7] font-bold"

@@ -120,6 +120,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
             />
             <label
               htmlFor="gov-doc-upload"
+              data-profile-action="true"
               className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#F97316] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#F97316]-dark dark:bg-[#F97316] dark:text-white"
             >
               {uploading ? (
@@ -192,7 +193,7 @@ export default function DocumentsTab({ profile, documents = [], onRefresh }) {
                 <CheckCircle2 className="h-3.5 w-3.5" /> Linked
               </span>
             ) : (
-              <Button size="sm" variant="secondary" onClick={() => alert("LinkedIn OAuth connected.")}>
+              <Button size="sm" variant="secondary" data-profile-action="true" onClick={() => alert("LinkedIn OAuth connected.")}>
                 Connect LinkedIn
               </Button>
             )}

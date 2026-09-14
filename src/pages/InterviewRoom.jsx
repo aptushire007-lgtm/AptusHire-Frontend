@@ -1559,7 +1559,7 @@ export default function InterviewRoom() {
                       <button
                         type="button"
                         onClick={switchToVoice}
-                        className="tap-target rounded py-1 text-xs font-medium text-brand-600 hover:text-[#F97316] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
+                        className="tap-target rounded py-1 text-xs font-medium text-[#7C3F10] hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20"
                       >
                         <Mic className="mr-1 inline h-3 w-3" /> Use voice instead
                       </button>
@@ -1682,7 +1682,7 @@ export default function InterviewRoom() {
                   <button
                     type="button"
                     onClick={keepListening}
-                    className="tap-target rounded-full border border-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-700 hover:border-brand-400 hover:text-[#F97316]"
+                    className="tap-target rounded-full border border-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-700 hover:border-[#7C3F10] hover:text-[#7C3F10]"
                   >
                     I'm still thinking
                   </button>
@@ -1759,7 +1759,7 @@ export default function InterviewRoom() {
                 <button
                   type="button"
                   onClick={() => submitAnswer(pending.payload)}
-                  className="tap-target flex items-center gap-1 rounded py-1 font-semibold text-brand-600 hover:text-[#F97316] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
+                  className="tap-target flex items-center gap-1 rounded py-1 font-semibold text-[#7C3F10] hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20"
                 >
                   <RotateCcw className="h-3 w-3" /> Retry
                 </button>

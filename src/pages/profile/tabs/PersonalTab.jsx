@@ -107,7 +107,7 @@ export default function PersonalTab({ profile, onRefresh }) {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="e.g. Sankalp"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
             />
           </div>
 
@@ -126,7 +126,7 @@ export default function PersonalTab({ profile, onRefresh }) {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="e.g. Joshi"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
             />
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function PersonalTab({ profile, onRefresh }) {
                 type="email"
                 disabled
                 value={profile?.user?.email || "candidate@aptushire.com"}
-                className="w-full rounded-xl border border-slate-200 bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-600/60"
+                className="w-full rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-500"
               />
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function PersonalTab({ profile, onRefresh }) {
               value={formData.phone}
               onChange={handleChange}
               placeholder="e.g. +91 98765 43210"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
             />
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function PersonalTab({ profile, onRefresh }) {
               name="dob"
               value={formData.dob}
               onChange={handleChange}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
             />
           </div>
 
@@ -202,7 +202,7 @@ export default function PersonalTab({ profile, onRefresh }) {
               value={formData.locationCity}
               onChange={handleChange}
               placeholder="e.g. Bengaluru, India"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
             />
           </div>
         </div>
@@ -215,7 +215,7 @@ export default function PersonalTab({ profile, onRefresh }) {
             value={formData.headline}
             onChange={handleChange}
             placeholder="e.g. Senior Clinical Psychologist · 6+ yrs experience"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
+            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
           />
         </div>
 
@@ -227,7 +227,7 @@ export default function PersonalTab({ profile, onRefresh }) {
             value={formData.bio}
             onChange={handleChange}
             placeholder="Brief summary of your specialization, methodology, and career goals…"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white"
+            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500"
           />
         </div>
 
@@ -235,6 +235,7 @@ export default function PersonalTab({ profile, onRefresh }) {
           <Button
             type="submit"
             disabled={saving}
+            data-profile-action="true"
             className="!bg-[#F5B51B] !text-[#172334] hover:!bg-[#E5A514] focus-visible:!ring-[#F5B51B]/25"
           >
             {saving ? "Saving Changes…" : "Save Personal Info"}
@@ -272,10 +273,10 @@ export default function PersonalTab({ profile, onRefresh }) {
             </div>
 
             <div className="mt-5 flex justify-end gap-2">
-              <Button size="sm" variant="outline" onClick={() => setOtpModal({ ...otpModal, open: false })}>
+              <Button size="sm" variant="outline" data-profile-action="true" onClick={() => setOtpModal({ ...otpModal, open: false })}>
                 Cancel
               </Button>
-              <Button size="sm" onClick={confirmOtp} disabled={otpModal.verifying || otpModal.code.length < 6}>
+              <Button size="sm" data-profile-action="true" onClick={confirmOtp} disabled={otpModal.verifying || otpModal.code.length < 6}>
                 {otpModal.verifying ? "Verifying…" : "Confirm Code"}
               </Button>
             </div>

@@ -10,26 +10,26 @@ const DISABLED =
 
 const variants = {
   primary:
-    `bg-[#F97316] text-white shadow-sm hover:bg-[#EA6C0A] active:bg-[#EA6C0A] focus-visible:ring-4 focus-visible:ring-[#F97316]/25 ${DISABLED}`,
+    `bg-[#F97316] text-white shadow-sm hover:bg-[#E5A514] active:bg-[#E5A514] focus-visible:ring-4 focus-visible:ring-[#7C3F10]/25 ${DISABLED}`,
   secondary:
-    `border border-[#F97316] bg-white text-[#F97316] hover:bg-[#FEF3E8] active:bg-[#FEF3E8] focus-visible:ring-4 focus-visible:ring-[#F97316]/20 disabled:opacity-50 disabled:cursor-not-allowed`,
+    `border border-[#7C3F10] bg-white text-[#7C3F10] hover:bg-[#FEF3E8] active:bg-[#FEF3E8] focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20 disabled:opacity-50 disabled:cursor-not-allowed`,
   outline:
-    `border border-[#E2E8F0] bg-transparent text-[#64748B] hover:border-[#F97316] hover:bg-[#FEF3E8] hover:text-[#F97316] focus-visible:ring-4 focus-visible:ring-[#F97316]/20 disabled:opacity-40 disabled:cursor-not-allowed`,
+    `border border-[#E2E8F0] bg-transparent text-[#64748B] hover:border-[#7C3F10] hover:bg-[#FEF3E8] hover:text-[#7C3F10] focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20 disabled:opacity-40 disabled:cursor-not-allowed`,
   ghost:
-    `bg-transparent text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#F97316] focus-visible:ring-4 focus-visible:ring-[#F97316]/20 disabled:opacity-40 disabled:cursor-not-allowed`,
+    `bg-transparent text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#7C3F10] focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20 disabled:opacity-40 disabled:cursor-not-allowed`,
   danger:
     `bg-red-600 text-white shadow-sm hover:bg-red-700 active:bg-red-800 focus-visible:ring-4 focus-visible:ring-red-400/30 ${DISABLED}`,
   navy:
     `bg-[#1B2A3B] text-white shadow-sm hover:bg-[#243447] active:bg-[#131F2E] focus-visible:ring-4 focus-visible:ring-[#1B2A3B]/30 ${DISABLED}`,
   /* backward-compat aliases → all map to orange primary */
   gold:
-    `bg-[#F97316] text-white shadow-sm hover:bg-[#EA6C0A] focus-visible:ring-4 focus-visible:ring-[#F97316]/25 ${DISABLED}`,
+    `bg-[#F97316] text-white shadow-sm hover:bg-[#E5A514] focus-visible:ring-4 focus-visible:ring-[#7C3F10]/25 ${DISABLED}`,
   accent:
-    `bg-[#F97316] text-white shadow-sm hover:bg-[#EA6C0A] focus-visible:ring-4 focus-visible:ring-[#F97316]/25 ${DISABLED}`,
+    `bg-[#F97316] text-white shadow-sm hover:bg-[#E5A514] focus-visible:ring-4 focus-visible:ring-[#7C3F10]/25 ${DISABLED}`,
   orange:
-    `bg-[#F97316] text-white shadow-sm hover:bg-[#EA6C0A] focus-visible:ring-4 focus-visible:ring-[#F97316]/25 ${DISABLED}`,
+    `bg-[#F97316] text-white shadow-sm hover:bg-[#E5A514] focus-visible:ring-4 focus-visible:ring-[#7C3F10]/25 ${DISABLED}`,
   link:
-    `bg-transparent text-[#F97316] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-[#F97316]/30 disabled:opacity-40 disabled:cursor-not-allowed`,
+    `bg-transparent text-[#7C3F10] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-[#7C3F10]/30 disabled:opacity-40 disabled:cursor-not-allowed`,
 };
 
 const sizes = {

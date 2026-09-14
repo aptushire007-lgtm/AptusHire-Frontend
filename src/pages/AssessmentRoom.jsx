@@ -1039,7 +1039,7 @@ function AnswerWidget({ item, value, onChange }) {
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
                   aria-label={`Move "${textById.get(id)}" up`}
-                  className="tap-target flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="tap-target flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20 disabled:opacity-30 disabled:hover:bg-transparent"
                 >
                   <ArrowUp className="h-4 w-4" />
                 </button>
@@ -1048,7 +1048,7 @@ function AnswerWidget({ item, value, onChange }) {
                   onClick={() => move(i, 1)}
                   disabled={i === order.length - 1}
                   aria-label={`Move "${textById.get(id)}" down`}
-                  className="tap-target flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="tap-target flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20 disabled:opacity-30 disabled:hover:bg-transparent"
                 >
                   <ArrowDown className="h-4 w-4" />
                 </button>

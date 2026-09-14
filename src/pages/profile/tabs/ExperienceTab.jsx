@@ -54,7 +54,7 @@ export default function ExperienceTab({ profile, onRefresh }) {
             Detail your past employment, responsibilities, and verified skills.
           </p>
         </div>
-        <Button size="sm" variant="secondary" onClick={addEntry}>
+        <Button size="sm" variant="secondary" data-profile-action="true" onClick={addEntry}>
           <Plus className="h-4 w-4" /> Add Experience
         </Button>
       </div>
@@ -72,7 +72,7 @@ export default function ExperienceTab({ profile, onRefresh }) {
             <Briefcase className="mx-auto h-10 w-10 text-slate-400" />
             <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">No experience added</p>
             <p className="mt-0.5 text-xs text-slate-500">Adding at least one role awards 10% profile strength.</p>
-            <Button size="sm" className="mt-4" onClick={addEntry}>Add Experience</Button>
+            <Button size="sm" data-profile-action="true" className="mt-4" onClick={addEntry}>Add Experience</Button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -168,7 +168,7 @@ export default function ExperienceTab({ profile, onRefresh }) {
             ))}
 
             <div className="flex justify-end pt-2">
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" data-profile-action="true" disabled={saving}>
                 {saving ? "Saving…" : "Save Experience"}
               </Button>
             </div>

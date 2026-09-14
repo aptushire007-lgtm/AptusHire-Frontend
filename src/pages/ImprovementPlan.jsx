@@ -79,7 +79,7 @@ export default function ImprovementPlan() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-10">
-      <Link to="/applied-jobs" className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#F97316] hover:text-[#F97316]"><ArrowLeft className="h-4 w-4" /> Back to applied jobs</Link>
+      <Link to="/applied-jobs" className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#172334] hover:text-[#7C3F10]"><ArrowLeft className="h-4 w-4" /> Back to applied jobs</Link>
       <div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#4A554F]">Application update</p><h1 className="mt-2 text-2xl font-bold text-[#0F172A]">Your Improvement Plan</h1><p className="mt-2 text-sm text-[#3F4A45]">You can improve your next application.</p><p className="mt-2 text-sm text-[#3F4A45]">{application.job?.title || "Application"} · {stageLabel(application.status)}</p></div>
       {report && <>
         <Card><h2 className="text-[15px] font-semibold text-[#0F172A]">Why you were not selected</h2><p className="mt-2 text-sm text-[#3F4A45]">{report.summary}</p></Card>

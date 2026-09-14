@@ -74,8 +74,6 @@ export default function Landing() {
       <MarketingNavbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-[#E2E8F0] bg-white">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-[radial-gradient(ellipse_at_bottom,#FED7AA_0%,transparent_70%)] opacity-70" />
       <section className="relative overflow-hidden border-b border-[#E5EBE7] bg-white">
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-[radial-gradient(ellipse_at_bottom,#E4F8C6_0%,transparent_70%)] opacity-70" />
         <div className="relative mx-auto max-w-3xl px-5 py-24 text-center sm:px-8">
@@ -225,10 +223,10 @@ export default function Landing() {
             </div>
             <div className="text-sm text-slate-600">
               <div className="font-semibold text-slate-800">Get in Touch</div>
-              <a href="mailto:careers@AptusHire.ai" className="mt-2 flex items-center gap-2 hover:text-[#F97316]">
+              <a href="mailto:careers@AptusHire.ai" className="mt-2 flex items-center gap-2 hover:text-[#7C3F10]">
                 <Mail className="h-4 w-4" /> careers@AptusHire.ai
               </a>
-              <a href="tel:+911140001234" className="mt-2 flex items-center gap-2 hover:text-[#F97316]">
+              <a href="tel:+911140001234" className="mt-2 flex items-center gap-2 hover:text-[#7C3F10]">
                 <Phone className="h-4 w-4" /> +91 11 4000 1234
               </a>
             </div>

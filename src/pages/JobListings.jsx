@@ -6,7 +6,7 @@
    All API calls, auth logic, save/unsave, search, filters and
    routing are preserved exactly. Only UI changes here.
    ============================================================ */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import {
   MapPin, Search, X, Bookmark, Briefcase, DollarSign,
@@ -66,6 +66,26 @@ function jobSearchScore(job, query) {
       const best = Math.max(...fields.map((f) => fuzzyScore(f, term)));
       return best ? total + best : -1;
     }, 0);
+}
+
+function normalizedValue(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function minimumSalaryValue(job) {
+  const salary = job.salary ?? job.salaryRange ?? job.compensation;
+  if (typeof salary === "number") return salary;
+  const match = String(salary || "").replace(/,/g, "").match(/\$?([\d.]+)\s*k?/i);
+  if (!match) return null;
+  const value = Number(match[1]);
+  return /k/i.test(match[0]) ? value * 1000 : value;
+}
+
+function salaryFilterValue(value) {
+  const match = String(value || "").match(/[\d.]+/);
+  if (!match) return 0;
+  const amount = Number(match[0]);
+  return value.toLowerCase().includes("k") ? amount * 1000 : amount;
 }
 
 /** Derive match strength from recommendation rank */
@@ -162,7 +182,7 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
         onClick={(e) => { e.stopPropagation(); onToggleSave(job); }}
         disabled={saving}
         aria-label={saved ? "Unsave" : "Save"}
-        className={`absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] transition-colors hover:bg-white hover:text-[#F97316] focus-visible:outline-none ${
+        className={`absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] transition-colors hover:bg-white hover:text-[#7C3F10] focus-visible:outline-none ${
           saved ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
         }`}
       >
@@ -205,7 +225,19 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
 // ─────────────────────────────────────────────────────────────────────────────
 // RIGHT PANEL — job detail
 // ─────────────────────────────────────────────────────────────────────────────
-function JobDetailPanel({ job, navigate }) {
+function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!showMenu) return undefined;
+    function closeMenu(event) {
+      if (!menuRef.current?.contains(event.target)) setShowMenu(false);
+    }
+    document.addEventListener("pointerdown", closeMenu);
+    return () => document.removeEventListener("pointerdown", closeMenu);
+  }, [showMenu]);
+
   if (!job) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-12 text-center">
@@ -231,17 +263,33 @@ function JobDetailPanel({ job, navigate }) {
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="p-6 pb-2">
           {/* Title + 3-dot */}
-          <div className="flex items-start justify-between gap-3">
+          <div className="relative flex items-start justify-between gap-3">
             <h1 className="text-[26px] font-bold leading-snug text-[#0F172A]">
               {job.title}
             </h1>
             <button
               type="button"
               aria-label="More options"
+              onClick={() => setShowMenu((visible) => !visible)}
               className="mt-1 shrink-0 rounded-lg p-1 text-[#94A3B8] hover:bg-[#F4F6F9] hover:text-[#0F172A]"
             >
               <MoreHorizontal className="h-5 w-5" aria-hidden />
             </button>
+            {showMenu && (
+              <div ref={menuRef} className="absolute right-0 top-10 z-20 rounded-lg border border-[#E2E8F0] bg-white p-1 shadow-lg">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMenu(false);
+                    onDismiss(job);
+                  }}
+                  disabled={dismissing}
+                  className="whitespace-nowrap rounded-md px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] hover:bg-[#FEF2F2]"
+                >
+                  {dismissing ? "Removing..." : "Remove from recommended"}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Company info */}
@@ -257,7 +305,7 @@ function JobDetailPanel({ job, navigate }) {
                     href={website}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[13px] text-[#64748B] hover:text-[#F97316]"
+                    className="inline-flex items-center gap-1.5 text-[13px] text-[#64748B] hover:text-[#7C3F10]"
                   >
                     <Globe className="h-3.5 w-3.5" aria-hidden />
                     {website.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]}
@@ -669,6 +717,7 @@ export default function JobListings() {
   const [showFilters,  setShowFilters]  = useState(false);
   const [showSearch,   setShowSearch]   = useState(() => Boolean(initialQuery));
   const [selectedJobId, setSelectedJobId] = useState(null);
+  const [dismissingId, setDismissingId] = useState(null);
 
   // ── Fetch jobs + dashboard (API calls unchanged) ──
   useEffect(() => {
@@ -695,27 +744,56 @@ export default function JobListings() {
     let list = [...jobs];
 
     // Split-panel view always shows recommended jobs ("All jobs" navigates to the full browse page).
-    if (recommendedOrder.length > 0) {
+    if (recommendationsOnly) {
       list = list.filter((j) => recommendedOrder.includes(String(j._id)));
     }
 
+    // Match filters
+    if (filters.matchFilter === "Strong matches only") {
+      list = list.filter((j) => getMatchLabel(j, recommendedOrder) === "Strong match");
+    }
+    if (filters.matchFilter === "Hide jobs I applied to") {
+      list = list.filter((j) => !j.alreadyApplied);
+    }
+    if (filters.matchFilter === "No screening questions") {
+      list = list.filter((j) => {
+        const questions = j.screeningQuestions || j.screening_questions;
+        return !j.hasScreeningQuestions && (!Array.isArray(questions) || questions.length === 0);
+      });
+    }
+
+    // Salary filters use the lower bound of a listed salary range.
+    if (filters.minSalary && filters.minSalary !== "Any") {
+      const minimum = salaryFilterValue(filters.minSalary);
+      list = list.filter((j) => {
+        const salary = minimumSalaryValue(j);
+        return salary != null && salary >= minimum;
+      });
+    }
+
     // Location filter
-    if (filters.location) list = list.filter((j) => j.location === filters.location);
+    if (filters.location) {
+      const location = normalizedValue(filters.location);
+      list = list.filter((j) => normalizedValue(j.location) === location);
+    }
 
     // Work arrangement filter (on-site / remote / hybrid)
     if (filters.workArrangement) {
-      const wa = filters.workArrangement.toLowerCase();
-      list = list.filter((j) => (j.workplaceType || j.workPlace || "").toLowerCase() === wa);
+      const arrangement = normalizedValue(filters.workArrangement);
+      list = list.filter((j) => normalizedValue(j.workplaceType || j.workPlace || j.workArrangement) === arrangement);
     }
 
     // Employment type filter
     if (filters.employmentType) {
-      const et = filters.employmentType.toLowerCase();
-      list = list.filter((j) => (j.jobType || j.employmentType || "").toLowerCase() === et);
+      const employmentType = normalizedValue(filters.employmentType);
+      list = list.filter((j) => normalizedValue(j.jobType || j.employmentType || j.contractType) === employmentType);
     }
 
     // Company filter
-    if (filters.company) list = list.filter((j) => j.company?.name === filters.company);
+    if (filters.company) {
+      const company = normalizedValue(filters.company);
+      list = list.filter((j) => normalizedValue(j.company?.name) === company);
+    }
 
     // Text search
     if (query.trim()) {
@@ -795,6 +873,23 @@ export default function JobListings() {
       setError(err?.response?.data?.error || "Could not update saved jobs.");
     } finally {
       setSavingId(null);
+    }
+  }
+
+  async function dismissRecommended(job) {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: "/?recommended=1" } });
+      return;
+    }
+    const id = String(job._id);
+    setDismissingId(id);
+    try {
+      await api.post(`/candidate-dashboard/recommended-jobs/${job._id}/dismiss`, {}, { headers: accountAuthHeader() });
+      setRecommendedOrder((prev) => prev.filter((recommendedId) => recommendedId !== id));
+    } catch (err) {
+      setError(err?.response?.data?.error || "Could not remove this recommendation.");
+    } finally {
+      setDismissingId(null);
     }
   }
 
@@ -898,17 +993,17 @@ export default function JobListings() {
           <div className="shrink-0 border-b border-[#EAEEF0] px-3 py-2.5">
             <div className="flex items-center gap-2">
               {/* Tab segmented control */}
-              <div className="flex flex-1 gap-1 overflow-x-auto rounded-full bg-[#F1F5F9] p-0.5 scrollbar-none">
-                <span className="rounded-full bg-white px-3.5 py-1 text-[16px] font-semibold whitespace-nowrap text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)]">
+              <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-full bg-[#F1F5F9] p-0.5 scrollbar-none">
+                <span className="flex shrink-0 items-center justify-center rounded-full bg-white px-3 py-1 text-[14px] font-semibold whitespace-nowrap text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)] sm:px-3.5 sm:text-[15px]">
                   Top matches{topMatches.length > 0 ? ` (${topMatches.length})` : ""}
                 </span>
                 <a
                   href="/jobs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full px-3.5 py-1 text-[16px] font-semibold whitespace-nowrap text-[#64748B] transition-colors hover:text-[#0F172A]"
+                  className="flex shrink-0 items-center justify-center rounded-full px-3 py-1 text-[14px] font-semibold whitespace-nowrap text-[#64748B] transition-colors hover:text-[#0F172A] sm:px-3.5 sm:text-[15px]"
                 >
-                  All jobs{jobs.length > 0 ? ` (${jobs.length})` : ""}
+                  All jobs
                 </a>
               </div>
 
@@ -920,7 +1015,7 @@ export default function JobListings() {
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors ${
                   showSearch
                     ? "border-[#F97316] bg-[#FEF3E8] text-[#F97316]"
-                    : "border-[#E2E8F0] text-[#64748B] hover:border-[#F97316] hover:text-[#F97316]"
+                    : "border-[#E2E8F0] text-[#64748B] hover:border-[#7C3F10] hover:text-[#7C3F10]"
                 }`}
               >
                 <Search className="h-[18px] w-[18px]" aria-hidden />
@@ -933,7 +1028,7 @@ export default function JobListings() {
                 className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[14px] font-semibold whitespace-nowrap transition-colors ${
                   showFilters
                     ? "border-[#F97316] bg-[#FEF3E8] text-[#F97316]"
-                    : "border-[#E2E8F0] text-[#64748B] hover:border-[#F97316] hover:text-[#F97316]"
+                    : "border-[#E2E8F0] text-[#64748B] hover:border-[#7C3F10] hover:text-[#7C3F10]"
                 }`}
               >
                 <SlidersHorizontal className="h-[18px] w-[18px]" aria-hidden />
@@ -1052,7 +1147,12 @@ export default function JobListings() {
 
         {/* ── RIGHT: job detail (desktop) ─────────────────────── */}
         <div className="hidden min-h-0 flex-1 overflow-hidden bg-white md:flex md:flex-col">
-          <JobDetailPanel job={selectedJob} navigate={navigate} />
+          <JobDetailPanel
+            job={selectedJob}
+            navigate={navigate}
+            onDismiss={dismissRecommended}
+            dismissing={dismissingId === selectedJobId}
+          />
         </div>
       </div>
     </div>
@@ -1093,7 +1193,7 @@ function LegacyJobCard({ job, saved, onToggleSave, saving }) {
           <h2 className="text-[15px] leading-6 font-semibold text-[#0F172A]">
             <Link
               to={to}
-              className="hover:text-[#F97316] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F97316]"
+              className="hover:text-[#7C3F10] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7C3F10]"
             >
               {job.title}
             </Link>
@@ -1117,7 +1217,7 @@ function LegacyJobCard({ job, saved, onToggleSave, saving }) {
             className={`tap-target inline-flex h-9 w-9 items-center justify-center rounded-control border transition-colors ${
               saved
                 ? "border-brand-300 bg-[#FEF3E8] text-[#F97316]"
-                : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#F97316]"
+                : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#7C3F10]"
             }`}
           >
             {saved ? (
@@ -1202,7 +1302,7 @@ function LegacyFullPageLayout({
             <button
               type="button"
               onClick={() => { setSearchInput(""); setQuery(""); }}
-              className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-control text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#F97316]"
+              className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-control text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#7C3F10]"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" aria-hidden="true" />
