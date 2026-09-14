@@ -17,7 +17,7 @@ function SavedJobCard({ job, onUnsave, saving }) {
       <div className="flex items-start gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FEF3E8] text-sm font-bold text-[#F97316]">{companyInitials(job.company?.name)}</span>
         <div className="min-w-0 flex-1">
-          <Link to={to} className="block truncate text-[15px] font-semibold text-[#0F172A] hover:text-[#F97316] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5A7B71]">{job.title || "Open position"}</Link>
+          <Link to={to} className="block truncate text-[15px] font-semibold text-[#0F172A] hover:text-[#7C3F10] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5A7B71]">{job.title || "Open position"}</Link>
           <p className="mt-1 truncate text-sm text-[#F97316]">{job.company?.name || "Company unavailable"}{job.department ? ` · ${job.department}` : ""}</p>
         </div>
         <button type="button" onClick={() => onUnsave(job)} disabled={saving} aria-label={`Unsave ${job.title || "job"}`} aria-pressed="true" className="tap-target inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FED7AA] bg-[#FEF3E8] text-[#F97316] transition-colors hover:bg-[#FED7AA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]/20 disabled:cursor-wait disabled:opacity-60">

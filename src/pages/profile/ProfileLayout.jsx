@@ -8,11 +8,6 @@ import {
   Wrench,
   FileText,
   Sliders,
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
-  ExternalLink,
-  ChevronRight,
 } from "lucide-react";
 import api from "../../api/client";
 import { accountAuthHeader } from "../../auth/accountAuth";
@@ -64,25 +59,10 @@ export default function ProfileLayout() {
 
   const profile = profileData?.profile || {};
   const documents = profileData?.documents || [];
-  const strength = profileData?.strengthScore || 0;
-  const ver = profile?.verification || {};
-  const hasDefaultResume = profileData?.hasDefaultResume || false;
 
   const handleTabChange = (tabId) => {
     setSearchParams({ tab: tabId });
   };
-
-  // 100-Point Formula Items
-  const checklist = [
-    { label: "Core Profile Details", points: 15, done: Boolean(profile.personal?.firstName && profile.personal?.lastName && profile.headline) },
-    { label: "Email Verified (OTP)", points: 10, done: Boolean(ver.emailVerified) },
-    { label: "Phone Verified (SMS/WA)", points: 10, done: Boolean(ver.phoneVerified) },
-    { label: "Gov Document OCR Verified", points: 20, done: Boolean(ver.govDocVerified) },
-    { label: "LinkedIn Connected", points: 10, done: Boolean(ver.linkedinLinked) },
-    { label: "Education History Added", points: 10, done: Boolean(profile.education?.length > 0) },
-    { label: "Work Experience Added", points: 10, done: Boolean(profile.experience?.length > 0) },
-    { label: "Default Resume Active", points: 15, done: Boolean(hasDefaultResume) },
-  ];
 
   // Do not mount tab forms against an empty placeholder profile. Their local
   // form state must be created from the saved server values on first render.
@@ -98,13 +78,13 @@ export default function ProfileLayout() {
     return (
       <div role="alert" className="rounded-[14px] border border-[#E2E8F0] bg-white p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.07)]">
         <p className="text-sm font-semibold text-[#0F172A]">{loadError || "Your profile could not be loaded."}</p>
-        <Button type="button" size="sm" className="mt-4" onClick={fetchFullProfile}>Try again</Button>
+        <Button type="button" size="sm" data-profile-action="true" className="mt-4" onClick={fetchFullProfile}>Try again</Button>
       </div>
     );
   }
 
   return (
-    <div className="candidate-profile-page space-y-6">
+    <div className="candidate-profile-page space-y-6 [&_input]:!text-[#0F172A] [&_select]:!text-[#0F172A] [&_textarea]:!text-[#0F172A] [&_input::placeholder]:!text-[#64748B] [&_textarea::placeholder]:!text-[#64748B] [&_[data-profile-action='true']]:!border-transparent [&_[data-profile-action='true']]:!bg-[#F5B51B] [&_[data-profile-action='true']]:!text-[#172334]">
       {/* Tab Header Bar (Horizontal on mobile, rail on desktop) */}
       <div className="flex flex-wrap gap-2 rounded-2xl border border-[#E2E8F0] bg-white p-2 shadow-xs dark:border-[#E2E8F0] dark:bg-white">
         {TABS.map((tab) => {
@@ -127,93 +107,17 @@ export default function ProfileLayout() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Main Active Tab Content */}
-        <div className="lg:col-span-8">
-          <Card className="rounded-3xl border border-[#E2E8F0] bg-white p-6 shadow-soft dark:border-[#E2E8F0] dark:bg-white sm:p-8">
-            {activeTab === "personal" && <PersonalTab profile={profile} onRefresh={fetchFullProfile} />}
-            {activeTab === "education" && <EducationTab profile={profile} onRefresh={fetchFullProfile} />}
-            {activeTab === "skills" && <SkillsTab profile={profile} onRefresh={fetchFullProfile} />}
-            {activeTab === "experience" && <ExperienceTab profile={profile} onRefresh={fetchFullProfile} />}
-            {activeTab === "documents" && <DocumentsTab profile={profile} documents={documents} onRefresh={fetchFullProfile} />}
-            {activeTab === "resumes" && <ResumeManager />}
-            {activeTab === "preferences" && <PreferencesTab profile={profile} onRefresh={fetchFullProfile} />}
-          </Card>
-        </div>
-
-        {/* Right Rail Sticky Cards */}
-        <div className="space-y-5 lg:col-span-4">
-          {/* Profile Strength Card */}
-          <Card className="rounded-3xl border border-[#E2E8F0] bg-white p-5 shadow-soft dark:border-[#E2E8F0] dark:bg-white">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-[#172334]">Profile Strength</span>
-              <span className="font-display text-base font-extrabold text-[#E5A514]">
-                {strength}%
-              </span>
-            </div>
-
-            {/* Segmented Progress Bar */}
-            <div className="mt-3 flex h-2.5 w-full gap-1 overflow-hidden rounded-full bg-[#F1F3F5]">
-              <div
-                className="h-full rounded-full bg-[#F5B51B] transition-all duration-500"
-                style={{ width: `${strength}%` }}
-              />
-            </div>
-
-            <p className="mt-2 text-[11px] text-slate-500">
-              {strength >= 80 ? "Your profile is verified and ranks in top candidate searches." : "Complete remaining items to unlock 1-click apply and recruiter match priority."}
-            </p>
-
-            {/* Checklist */}
-            <div className="mt-4 space-y-2 divide-y divide-slate-100 text-xs dark:divide-slate-800">
-              {checklist.map((item) => (
-                <div key={item.label} className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
-                      item.done ? "bg-[#FFF1C7] text-[#E5A514]" : "bg-border text-[#94A3B8]"
-                    }`}>
-                      {item.done ? "✓" : "•"}
-                    </span>
-                    <span className={item.done ? "font-semibold text-slate-900 dark:text-white" : "text-slate-500"}>
-                      {item.label}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold text-[#E5A514]">{item.points}%</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* Recruiter View Preview (Trust Badge) */}
-          <div className="rounded-3xl border border-[#E5A514] bg-[#F5B51B] p-5 text-[#172334] shadow-soft">
-            <div className="flex items-center gap-2 text-[#172334]">
-              <ShieldCheck className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase tracking-wider">Recruiter View Preview</span>
-            </div>
-
-            <div className="mt-3 rounded-2xl border border-black/5 bg-white/40 p-4 backdrop-blur-xs">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white font-bold text-[#E5A514]">
-                  {(profile.personal?.firstName || "S")[0]}
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#172334]">
-                    {profile.personal?.firstName || "Candidate"} {profile.personal?.lastName || ""}
-                  </h4>
-                  <p className="text-xs text-[#3F3620]">{profile.headline || "Specialist"}</p>
-                </div>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-2.5 text-[11px]">
-                <span className="text-[#3F3620]">Trust Credential</span>
-                <span className="font-bold text-[#172334]">
-                  {ver.govDocVerified ? "✓ Aptus Verified (6/6)" : "Self-Reported"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Main profile content. The strength and recruiter-preview rail was removed
+          so every profile section now uses the available page width. */}
+      <Card className="rounded-3xl border border-[#E2E8F0] bg-white p-6 shadow-soft dark:border-[#E2E8F0] dark:bg-white sm:p-8">
+        {activeTab === "personal" && <PersonalTab profile={profile} onRefresh={fetchFullProfile} />}
+        {activeTab === "education" && <EducationTab profile={profile} onRefresh={fetchFullProfile} />}
+        {activeTab === "skills" && <SkillsTab profile={profile} onRefresh={fetchFullProfile} />}
+        {activeTab === "experience" && <ExperienceTab profile={profile} onRefresh={fetchFullProfile} />}
+        {activeTab === "documents" && <DocumentsTab profile={profile} documents={documents} onRefresh={fetchFullProfile} />}
+        {activeTab === "resumes" && <ResumeManager />}
+        {activeTab === "preferences" && <PreferencesTab profile={profile} onRefresh={fetchFullProfile} />}
+      </Card>
     </div>
   );
 }

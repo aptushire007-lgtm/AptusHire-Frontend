@@ -35,7 +35,7 @@ export default function MarketingNavbar() {
 
         <nav className="hidden items-center gap-9 md:flex">
           {LINKS.map((link) => (
-            <a key={link.label} href={link.href} className="text-[15px] font-semibold text-[#0F172A] transition-colors hover:text-[#F97316]">
+            <a key={link.label} href={link.href} className="text-[15px] font-semibold text-[#0F172A] transition-colors hover:text-[#7C3F10]">
               {link.label}
             </a>
           ))}

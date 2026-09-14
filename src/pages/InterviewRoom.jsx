@@ -1747,10 +1747,299 @@ export default function InterviewRoom() {
             )}
           </div>
 
-          <div className="flex justify-end sm:min-w-0 sm:flex-1">
-            <BarButton tone="danger" onClick={() => setConfirmingExit(true)}>
-              <PhoneOff className="h-4 w-4" aria-hidden="true" /> End interview
-            </BarButton>
+            {livekitMode ? (
+              /* Realtime: one continuous conversation. There is no Done button and no per-question
+                 control, because there are no turns to control — the interviewer hears and responds
+                 the way a person on a call does. Interrupt it, ask it to repeat, tell it you don't
+                 know, tell it you want to stop: all of that is just talking. */
+              !started ? (
+                <div className="flex flex-col items-center gap-3 py-2 text-center">
+                  <p className="text-sm text-slate-500">
+                    This is a live spoken interview — you and the interviewer can talk normally. Interrupt whenever you
+                    like, ask for a question again, or say you&apos;d rather skip one. You can switch to typing at any
+                    point; it won&apos;t affect your evaluation.
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Finished answering and want to move on right away? Just say{" "}
+                    <span className="font-semibold text-slate-700">&ldquo;Done, that&apos;s it&rdquo;</span> and the
+                    interviewer will submit your answer immediately instead of waiting.
+                  </p>
+                  <p className="max-w-md text-xs text-[#94A3B8]">
+                    By starting, you consent to your voice being captured and processed in real time by third-party
+                    speech services (Deepgram, carried over LiveKit&apos;s real-time infrastructure) to conduct this
+                    interview. Audio is streamed and not stored by this platform — only the text transcript is kept. If
+                    you&apos;d rather not, typing your answers is always available and is evaluated identically.
+                  </p>
+                  <Button
+                    size="lg"
+                    loading={consentBusy}
+                    onClick={async () => {
+                      await acceptVoiceConsent();
+                      try {
+                        await lk.connect();
+                      } catch {
+                        // Never a dead end: fall back to the turn-based interview every candidate
+                        // gets today.
+                        setError("Couldn't start the live interview — switching to the standard voice interview.");
+                        await lk.disconnect();
+                      }
+                    }}
+                  >
+                    <Mic className="h-4 w-4" /> Agree &amp; start interview
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={declineVoiceConsent}
+                    className="tap-target rounded py-1 text-xs font-medium text-[#64748B] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
+                  >
+                    no thanks — I&apos;ll type my answers instead
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-1">
+                  <div role="status" aria-live="polite" className="flex flex-col items-center gap-2">
+                    {(lk.phase === "connecting" || lk.phase === "waiting_agent") && (
+                      <p className="flex items-center gap-2 text-sm text-slate-500">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Connecting you to{" "}
+                        {lk.personaName || "your interviewer"}…
+                      </p>
+                    )}
+                    {/* The worker owns turn-taking, and now says which turn it is on (lk.activity).
+                        Each branch is the same sentence a person on a call would infer from the
+                        silence, said out loud — and the last one is the original copy, kept
+                        verbatim as the fallback for a worker that publishes no state at all. */}
+                    {lk.phase === "live" &&
+                      (agentState === "thinking" ? (
+                        <p className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          {interviewerName ? `${interviewerName} is thinking…` : "Thinking about what you said…"}
+                          <ThinkingDots className="text-slate-400" />
+                        </p>
+                      ) : agentState === "speaking" ? (
+                        <p className="flex items-center gap-2 text-sm font-medium text-[#F97316]">
+                          <Volume2 className="h-4 w-4 animate-pulse" aria-hidden="true" />
+                          {interviewerName ? `${interviewerName} is speaking` : "Interviewer is speaking"} — cut in
+                          whenever you like
+                        </p>
+                      ) : (
+                        <p className="flex items-center gap-2 text-sm font-medium text-emerald-700">
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                          </span>
+                          {agentState === "listening"
+                            ? "Listening — go ahead, take your time"
+                            : "In conversation — just talk, you can cut in any time"}
+                        </p>
+                      ))}
+                    {lk.phase === "live" && (
+                      <p className="text-xs text-slate-400">
+                        Say &ldquo;Done, that&apos;s it&rdquo; any time to submit your answer right away.
+                      </p>
+                    )}
+                    {lk.phase === "dropped" && (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-sm font-medium text-amber-700">
+                          Your connection dropped. Your interview is still open — nothing has been lost.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => void lk.rejoin()}
+                          className="rounded-lg bg-[#F97316] px-4 py-2 text-sm font-medium text-white hover:bg-[#F97316]-dark"
+                        >
+                          Rejoin the interview
+                        </button>
+                        <p className="text-xs text-slate-400">
+                          You&apos;ll pick up from the question you were on.
+                        </p>
+                      </div>
+                    )}
+                    {lk.error && <p className="text-sm font-medium text-red-600">{lk.error}</p>}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await lk.disconnect();
+                      switchToTyping();
+                    }}
+                    className="tap-target rounded py-1 text-xs font-medium text-[#64748B] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
+                  >
+                    <Keyboard className="mr-1 inline h-3 w-3" /> Switch to typing
+                  </button>
+                </div>
+              )
+            ) : voiceMode ? (
+              !started ? (
+                <div className="flex flex-col items-center gap-3 py-2 text-center">
+                  <p className="text-sm text-[#64748B]">
+                    This is a spoken interview — each question will be read aloud. You can switch to typing at any point;
+                    it won't affect your evaluation.
+                  </p>
+                  {/* Voice consent notice (Phase 9.5) — shown BEFORE the mic ever opens.
+                      Starting is the explicit consent action; the server refuses a
+                      streaming token until consent is recorded. */}
+                  <p className="max-w-md text-xs text-[#94A3B8]">
+                    By starting, you consent to your voice being captured and transcribed in real time by a third-party
+                    speech service (Deepgram) to record your answers. Your recorded answers are also saved, so the hiring
+                    team can review how the interview actually sounded and check the AI interviewer&apos;s own
+                    performance — visible only inside your interview report, never shared beyond it, and deleted along
+                    with the rest of your data. If you&apos;d rather not, typing your answers is always available and is
+                    evaluated identically.
+                  </p>
+                  <Button size="lg" loading={consentBusy} onClick={acceptVoiceConsent}>
+                    <Mic className="h-4 w-4" /> Agree &amp; start voice interview
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={declineVoiceConsent}
+                    className="tap-target rounded py-1 text-xs font-medium text-[#64748B] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
+                  >
+                    no thanks — I&apos;ll type my answers instead
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-1">
+                  <div role="status" aria-live="polite" className="flex flex-col items-center gap-3">
+                    {phase === "speaking" && (
+                      <>
+                        <p className="flex items-center gap-2 text-sm font-medium text-[#F97316]">
+                          <Volume2 className="h-4 w-4 animate-pulse" />{" "}
+                          {personaName ? `${personaName} is speaking…` : "Interviewer is speaking…"}
+                        </p>
+                        {(canInterrupt || bargeIn) && (
+                          <p className="text-xs text-slate-500">You can start answering whenever you&apos;re ready — just talk.</p>
+                        )}
+                      </>
+                    )}
+                    {/* What the interviewer just said out loud, shown as well as spoken — a candidate
+                        who is deaf or hard of hearing, or on a device with no audio, must still get
+                        "take your time" rather than silence. Rendered in the live status region and
+                        deliberately NOT as a chat bubble: a backchannel is not a question and must
+                        never be mistakable for one in the transcript. */}
+                    {backchannel && (
+                      <p className="flex items-center gap-2 text-sm font-medium text-[#F97316]">
+                        <Volume2 className="h-4 w-4 animate-pulse" /> &ldquo;{backchannel}&rdquo;
+                      </p>
+                    )}
+                    {phase === "listening" && !backchannel && (
+                      <p
+                        className={`flex items-center gap-2 text-sm font-medium ${
+                          endingSoon ? "text-[#F97316]" : "text-emerald-700"
+                        }`}
+                      >
+                        <span className="relative flex h-2.5 w-2.5">
+                          <span
+                            className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
+                              endingSoon ? "bg-brand-400" : "bg-emerald-400"
+                            }`}
+                          />
+                          <span
+                            className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
+                              endingSoon ? "bg-brand-500" : "bg-emerald-500"
+                            }`}
+                          />
+                        </span>
+                        {endingSoon ? "Still there? Keep talking to continue." : "Listening — speak your answer"}
+                      </p>
+                    )}
+                    {phase === "listening" && !backchannel && (
+                      <p className="text-xs text-slate-500">
+                        {endingSoon
+                          ? "Your answer will be submitted in a few seconds unless you keep talking."
+                          : "Pause when you're finished — there's no hurry. Say “could you repeat that?” to hear the question again, or tap Done."}
+                      </p>
+                    )}
+                    {phase === "processing" && !backchannel && (
+                      <p className="flex items-center gap-2 text-sm text-slate-500">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Transcribing your answer…
+                      </p>
+                    )}
+                    {phase === "idle" && !backchannel && !sending && !pending && (
+                      <p className="flex items-center gap-2 text-sm text-slate-500">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Preparing the next question…
+                        <ThinkingDots className="text-slate-400" />
+                      </p>
+                    )}
+                    {phase === "idle" && pending?.status === "failed" && (
+                      <p className="text-sm text-slate-600">
+                        Your answer didn't send — tap <span className="font-semibold">Retry</span> above, or switch to typing.
+                      </p>
+                    )}
+                    {phase === "idle" && pending?.status === "expired" && (
+                      <p className="text-sm font-medium text-red-600">This interview link has expired.</p>
+                    )}
+                  </div>
+                  {phase === "listening" && (
+                    <Button size="lg" onClick={handleDone}>
+                      <Square className="h-4 w-4" /> Done answering
+                    </Button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={switchToTyping}
+                    className="tap-target rounded py-1 text-xs font-medium text-[#64748B] hover:text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100"
+                  >
+                    <Keyboard className="mr-1 inline h-3 w-3" /> Switch to typing
+                  </button>
+                </div>
+              )
+            ) : (
+              <form onSubmit={handleTextSubmit}>
+                <Textarea
+                  rows={3}
+                  value={answer}
+                  onChange={(e) => updateAnswer(e.target.value)}
+                  placeholder="Type your answer…"
+                  disabled={sending}
+                  maxLength={MAX_ANSWER_CHARS}
+                  aria-label="Your answer"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleTextSubmit(e);
+                  }}
+                />
+                {/* `flex-wrap` on both levels: unwrapped, this row's four-plus items (the
+                    keyboard hint, the char counter, "Use voice instead", the decline link, and the
+                    Send button) run well past 360px combined and were pushing "Send answer" — the
+                    one control this screen cannot afford to hide — off the right edge of a phone
+                    screen. Wrapping lets each piece drop to its own line instead of clipping. */}
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <span className="text-xs text-slate-500">Press Ctrl/⌘ + Enter to send</span>
+                    {answer.length > MAX_ANSWER_CHARS - 500 && (
+                      <span className={`text-xs ${answer.length >= MAX_ANSWER_CHARS ? "font-semibold text-red-600" : "text-slate-500"}`}>
+                        {answer.length} / {MAX_ANSWER_CHARS}
+                      </span>
+                    )}
+                    {supported && (
+                      <button
+                        type="button"
+                        onClick={switchToVoice}
+                        className="tap-target rounded py-1 text-xs font-medium text-[#7C3F10] hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20"
+                      >
+                        <Mic className="mr-1 inline h-3 w-3" /> Use voice instead
+                      </button>
+                    )}
+                    {/* Parity with the spoken "I don't know". Without it, a typing candidate's only
+                        way to decline is to write "I don't know" into the answer box and have it
+                        scored as an answer — which is exactly the behaviour this whole change
+                        exists to remove. Recorded as a decline, not as a zero. */}
+                    {!state.currentIsWarmup && (
+                      <button
+                        type="button"
+                        disabled={sending}
+                        onClick={() => submitAct({ act: "decline", text: "I don't know.", inputMode: "text" })}
+                        className="tap-target rounded py-1 text-xs font-medium text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]-100 disabled:opacity-50"
+                      >
+                        I don&apos;t know this one — skip it
+                      </button>
+                    )}
+                  </div>
+                  <Button type="submit" loading={sending} disabled={!answer.trim()}>
+                    <Send className="h-4 w-4" /> Send answer
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
 
@@ -1853,6 +2142,51 @@ export default function InterviewRoom() {
             </div>
           )}
 
+          {/* The indicator must never claim to be listening when it isn't. It used to keep
+              pulsing green over a socket that had already died, which is how a truncated answer
+              reached the recruiter looking like a complete one. */}
+          {voiceMode && connection === "reconnecting" && (
+            <div
+              className="flex items-center gap-2 pl-11 text-sm font-medium text-amber-600"
+              role="status"
+              aria-live="polite"
+            >
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Reconnecting — hold on a moment before you carry on.
+            </div>
+          )}
+
+          {voiceMode && phase === "listening" && connection !== "reconnecting" && (
+            <div className="flex flex-wrap items-center gap-2 pl-11 text-sm font-medium text-slate-600">
+              <span className="relative flex h-2 w-2" aria-hidden="true">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
+              </span>
+              {/* The countdown used to be the words "Wrapping up your answer…" over a timer nobody
+                  could see, which is the whole substance of "it cut me off" — the turn ended on a
+                  deadline that was never shown while the candidate was drawing breath for the rest
+                  of it. Showing the seconds costs nothing and turns an ambush into something they
+                  can act on, which is what the button next to it is for. */}
+              {endingSoon ? (
+                <>
+                  <span>Ending in {secondsLeft ?? 0}s</span>
+                  <button
+                    type="button"
+                    onClick={keepListening}
+                    className="tap-target rounded-full border border-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-700 hover:border-[#7C3F10] hover:text-[#7C3F10]"
+                  >
+                    I'm still thinking
+                  </button>
+                </>
+              ) : (
+                "Listening…"
+              )}
+              {/* Sighted candidates get the indicator; screen-reader users would otherwise have
+                  no feedback at all that they are being heard, so they keep the words. */}
+              <span className="sr-only">{interim}</span>
+            </div>
+          )}
+
           {pending?.status === "sending" && (
             <>
               {!voiceMode && (
@@ -1909,7 +2243,7 @@ export default function InterviewRoom() {
                 <button
                   type="button"
                   onClick={() => submitAnswer(pending.payload)}
-                  className="tap-target flex items-center gap-1 rounded py-1 font-semibold text-emerald-700 hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8]"
+                  className="tap-target flex items-center gap-1 rounded py-1 font-semibold text-[#7C3F10] hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20"
                 >
                   <RotateCcw className="h-3 w-3" aria-hidden="true" /> Retry
                 </button>

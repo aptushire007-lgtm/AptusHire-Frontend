@@ -18,7 +18,7 @@ function CompanyLogo({ company }) {
       {logo && !logoFailed ? (
         <img src={logo} alt={`${company?.name || "Company"} logo`} className="h-full w-full object-contain p-2" onError={() => setLogoFailed(true)} />
       ) : (
-        <span className="flex h-full w-full items-center justify-center bg-[#FEF3E8] text-xl font-bold text-[#F97316]">
+        <span className="flex h-full w-full items-center justify-center bg-[#FEF3E8] text-xl font-bold text-[#92400E]">
           {companyInitials(company?.name)}
         </span>
       )}
@@ -29,7 +29,7 @@ function CompanyLogo({ company }) {
 function MetaFact({ icon: Icon, children }) {
   if (children == null || children === "") return null;
   return (
-    <span className="inline-flex items-center gap-2 text-[14px] font-medium text-[#F97316]">
+    <span className="inline-flex items-center gap-2 text-[14px] font-medium text-[#7C3F10]">
       <Icon className="h-[18px] w-[18px] shrink-0 text-[#64748B]" aria-hidden="true" />
       {children}
     </span>
@@ -78,7 +78,7 @@ export default function JobDetail() {
   if (error) {
     return (
       <div className="space-y-6">
-        <Link to="/" className="inline-flex items-center gap-2 text-[14px] font-semibold text-[#F97316] hover:text-[#F97316]">
+        <Link to="/" className="inline-flex items-center gap-2 text-[14px] font-semibold text-amber-800 hover:text-amber-900">
           <ArrowLeft className="h-4 w-4" /> Back to listings
         </Link>
         <Card className="border-[#E2E8F0] bg-white py-12 text-center dark:border-[#E2E8F0] dark:bg-white">
@@ -109,7 +109,12 @@ export default function JobDetail() {
         <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Already applied — track it
       </Button>
     ) : (
-      <Button as={Link} to={applyTo} size={size} className={className}>
+      <Button
+        as={Link}
+        to={applyTo}
+        size={size}
+        className={`!bg-[#F5B51B] !text-[#172334] hover:!bg-[#E5A514] focus-visible:!ring-[#F5B51B]/25 ${className}`}
+      >
         Apply Now <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Button>
     );
@@ -120,7 +125,7 @@ export default function JobDetail() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-5 pb-10">
-      <Link to="/" className="inline-flex items-center gap-2 rounded-lg text-[13px] font-semibold text-[#F97316] transition-colors hover:text-[#F97316] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A7B71]">
+      <Link to="/" className="inline-flex items-center gap-2 rounded-lg text-[13px] font-semibold text-[#172334] transition-colors hover:text-[#7C3F10] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A7B71]">
         <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
       </Link>
 
@@ -130,7 +135,7 @@ export default function JobDetail() {
             <div className="min-w-0">
               <h1 className="font-display text-[24px] leading-tight font-bold tracking-tight text-[#0F172A] sm:text-[28px]">{job.title}</h1>
               <p className="mt-2 text-[14px] text-[#64748B]">
-                {job.company?.name && <span className="font-semibold text-[#F97316]">{job.company.name}</span>}
+                {job.company?.name && <span className="font-semibold text-[#92400E]">{job.company.name}</span>}
                 {job.company?.name && job.location ? <span className="mx-2 text-[#A7B2AB]">•</span> : null}
                 {job.location || "Location not specified"}
                 <span className="mx-2 text-[#A7B2AB]">•</span>
@@ -152,9 +157,9 @@ export default function JobDetail() {
 
       {match && (
         <Card className="border-[#FED7AA] bg-[#FEF3E8] dark:border-[#FED7AA] dark:bg-[#FEF3E8]">
-          <h2 className="text-[16px] font-semibold text-[#F97316]">Why this job matches you</h2>
+          <h2 className="text-[16px] font-semibold text-[#172334]">Why this job matches you</h2>
           <TextBlock>{match.explanation || match.reason || match.summary}</TextBlock>
-          {match.score != null && <p className="mt-3 text-[13px] font-semibold text-[#F97316]">Match score: {match.score}%</p>}
+          {match.score != null && <p className="mt-3 text-[13px] font-semibold text-[#92400E]">Match score: {match.score}%</p>}
         </Card>
       )}
 
@@ -173,7 +178,7 @@ export default function JobDetail() {
           <h2 className="text-[16px] font-semibold text-[#0F172A]">Skills</h2>
           {job.requiredSkills?.length > 0 ? (
             <ul className="mt-4 flex flex-wrap gap-2.5">
-              {job.requiredSkills.map((skill) => <li key={skill} className="rounded-full border border-[#E2E8F0] bg-white px-3.5 py-2 text-[13px] font-medium text-[#F97316]">{skill}</li>)}
+              {job.requiredSkills.map((skill) => <li key={skill} className="rounded-full border border-[#FED7AA] bg-[#FEF3E8] px-3.5 py-2 text-[13px] font-medium text-[#92400E]">{skill}</li>)}
             </ul>
           ) : <p className="mt-3 text-[13px] text-[#64748B]">No specific skills listed.</p>}
         </section>

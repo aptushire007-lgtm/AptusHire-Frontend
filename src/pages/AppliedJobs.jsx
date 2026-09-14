@@ -157,7 +157,7 @@ function ApplicationDetails({ application, loading, error, onClose }) {
             <h2 id="application-details-title" className="mt-1 text-xl font-bold text-[#0F172A]">{job?.title || "Application"}</h2>
             <p className="mt-1 text-sm text-[#64748B]">{job?.company?.name || "Company unavailable"}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close application details" className="tap-target inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#F97316]"><X className="h-5 w-5" /></button>
+          <button type="button" onClick={onClose} aria-label="Close application details" className="tap-target inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#7C3F10]"><X className="h-5 w-5" /></button>
         </div>
         {loading && <p className="mt-6 rounded-xl bg-white p-4 text-sm text-[#64748B]">Loading your application details...</p>}
         {error && <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p>}
@@ -192,10 +192,10 @@ function ApplicationRow({ application, onView }) {
       <td className={`border-l-2 px-3 py-3.5 sm:px-4 ${actionable ? "border-[#F97316]" : "border-transparent group-hover:border-[#F59E0B]"}`}>
         <button type="button" onClick={() => onView(application)} className="flex min-w-0 items-center gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7D68E]">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-[#F0F2F4] text-[#263A36] font-bold">{companyName.charAt(0).toUpperCase()}</span>
-          <span className="min-w-0 font-semibold text-[#14233A] group-hover:text-[#F97316]">{companyName}</span>
+          <span className="min-w-0 font-semibold text-[#14233A] group-hover:text-[#7C3F10]">{companyName}</span>
         </button>
       </td>
-      <td className="max-w-[240px] px-3 py-3.5 sm:px-4"><button type="button" onClick={() => onView(application)} className="block max-w-full truncate text-left font-medium text-[#14233A] hover:text-[#F97316] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7D68E]">{job?.title || "Application"}</button><span className="mt-1 block truncate text-[11px] text-[#77807D]">{location}</span></td>
+      <td className="max-w-[240px] px-3 py-3.5 sm:px-4"><button type="button" onClick={() => onView(application)} className="block max-w-full truncate text-left font-medium text-[#14233A] hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7D68E]">{job?.title || "Application"}</button><span className="mt-1 block truncate text-[11px] text-[#77807D]">{location}</span></td>
       <td className="px-3 py-3.5 sm:px-4"><span className="rounded-md bg-[#F1F5F9] px-2 py-1 text-[11px] font-semibold text-[#64748B]">Manual</span></td>
       <td className="whitespace-nowrap px-3 py-3.5 sm:px-4">{dateLabel(createdAt)}</td>
       <td className="px-3 py-3.5 sm:px-4">
@@ -221,7 +221,7 @@ function ApplicationRow({ application, onView }) {
           </div>
         )}
       </td>
-      <td className="px-2 py-3.5 text-right"><button type="button" onClick={() => onView(application)} aria-label={`View details for ${job?.title || "application"}`} className="tap-target inline-flex items-center justify-center rounded-lg text-[#77807D] hover:bg-[#FEF3E8] hover:text-[#F97316] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7D68E]"><MoreVertical className="h-4 w-4" /></button></td>
+      <td className="px-2 py-3.5 text-right"><button type="button" onClick={() => onView(application)} aria-label={`View details for ${job?.title || "application"}`} className="tap-target inline-flex items-center justify-center rounded-lg text-[#77807D] hover:bg-[#FEF3E8] hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7D68E]"><MoreVertical className="h-4 w-4" /></button></td>
     </tr>
   );
 }
