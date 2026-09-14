@@ -132,9 +132,16 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
   const salary = job.salary || job.salaryRange || job.compensation;
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
       className={`group relative w-full cursor-pointer border-b-[1px] border-l-[3px] border-b-[#F0F2F4] px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F97316] ${
         active ? "border-l-[#F97316] bg-[#FFF7ED]" : "border-l-transparent hover:bg-[#F8F9FB]"
       }`}
@@ -191,7 +198,7 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
