@@ -7,12 +7,10 @@ import {
   AlertTriangle,
   X,
   Loader2,
-  ShieldCheck,
   ArrowRight,
-  ExternalLink,
 } from "lucide-react";
 import api from "../../api/client";
-import { accountAuthHeader } from "../../auth/accountAuth";
+import { accountAuthHeader, getAccountAuth } from "../../auth/accountAuth";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 
@@ -27,15 +25,22 @@ export default function ApplyVersionModal({
   const [error, setError] = useState("");
   const [versionsData, setVersionsData] = useState([]);
   const [selectedVersionId, setSelectedVersionId] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
 
   const [consentAi, setConsentAi] = useState(true);
   const [consentData, setConsentData] = useState(true);
+  const account = getAccountAuth()?.user || {};
+  const nameParts = String(account.name || "").trim().split(/\s+/);
+  const [firstName, setFirstName] = useState(nameParts[0] || "");
+  const [lastName, setLastName] = useState(nameParts.slice(1).join(" "));
+  const [email] = useState(account.email || "");
 
   useEffect(() => {
     if (!isOpen || !job?._id) {
       // Reset state when modal closes so stale data doesn't flash on reopen
       setVersionsData([]);
       setSelectedVersionId(null);
+      setSubmitted(false);
       setError("");
       setLoading(true);
       return;
@@ -47,7 +52,7 @@ export default function ApplyVersionModal({
       try {
         setLoading(true);
         setError("");
-        const res = await api.get(`/candidate-dashboard/jobs/${job.slug || job._id}/match-versions`, {
+        const res = await api.get(`/candidate-dashboard/jobs/${job._id}/match-versions`, {
           headers: accountAuthHeader(),
           signal: controller.signal,
         });
@@ -98,20 +103,21 @@ export default function ApplyVersionModal({
       formData.append("consentAiProcessing", true);
       formData.append("consentDataProcessing", true);
       // Prepopulate name from candidate profile
-      formData.append("name", "Applicant");
+      formData.append("name", [firstName, lastName].filter(Boolean).join(" ") || "Applicant");
+      formData.append("email", email);
 
       const params = new URLSearchParams(window.location.search);
       if (params.get("src")) formData.append("src", params.get("src"));
       if (params.get("campaign")) formData.append("campaign", params.get("campaign"));
 
-      const res = await api.post(`/jobs/${job.slug || job._id}/apply`, formData, {
+      const res = await api.post(`/jobs/${job._id}/apply`, formData, {
         headers: accountAuthHeader(),
       });
 
       if (onSuccess) {
         onSuccess(res.data);
       }
-      onClose();
+      setSubmitted(true);
     } catch (err) {
       setError(err?.response?.data?.error || "Failed to submit application");
     } finally {
@@ -120,15 +126,14 @@ export default function ApplyVersionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F4F6F9]-deep/80 p-4 backdrop-blur-xs">
-      <div className="relative w-full max-w-xl rounded-3xl border border-[#E2E8F0] bg-white p-6 shadow-lift sm:p-7">
+    <>
     <Modal
       open={isOpen}
       onClose={onClose}
       showClose={false}
       size="xl"
       label={`Apply for ${job.title}`}
-      panelClassName="rounded-3xl border border-[#E5EBE7] bg-white p-6 shadow-lift sm:p-7"
+      panelClassName="max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl border border-[#E5EBE7] bg-white p-6 shadow-lift sm:p-7"
     >
       <div className="relative w-full">
         <button
@@ -152,85 +157,46 @@ export default function ApplyVersionModal({
           </p>
         </div>
 
-        {error && (
+        {submitted ? (
+          <div className="py-8 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF3E8] text-[#F97316]"><CheckCircle2 className="h-8 w-8" aria-hidden="true" /></div>
+            <h3 className="mt-4 text-xl font-bold text-[#0F172A]">Successfully applied</h3>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-[#64748B]">Your application has been submitted successfully. You can track it from Applied Jobs.</p>
+            <Button type="button" className="mt-6" onClick={onClose}>Done</Button>
+          </div>
+        ) : error && (
           <div role="alert" className="mt-4 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700 dark:border-red-900/50">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        {loading ? (
+        {!submitted && loading ? (
           <div className="my-8 flex flex-col items-center justify-center gap-2 text-center text-xs text-slate-500">
             <Loader2 className="h-6 w-6 animate-spin text-[#F97316]" />
             <span>Calculating live match scores across your resume versions…</span>
           </div>
-        ) : versionsData.length === 0 ? (
+        ) : !submitted && versionsData.length === 0 ? (
           <div className="my-6 rounded-2xl border border-dashed border-slate-200 p-6 text-center ">
             <FileText className="mx-auto h-8 w-8 text-slate-400" />
             <p className="mt-2 text-sm font-bold text-slate-900 ">No resume versions found</p>
             <p className="mt-1 text-xs text-slate-500">Please upload a resume in your Resume Manager first.</p>
           </div>
-        ) : (
+        ) : !submitted && (
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-sm font-semibold text-[#172334]">First Name<input value={firstName} onChange={(event) => setFirstName(event.target.value)} className="mt-1 h-11 w-full rounded-xl border border-[#E2E8F0] px-3 font-normal text-[#0F172A]" required /></label>
+              <label className="text-sm font-semibold text-[#172334]">Last Name<input value={lastName} onChange={(event) => setLastName(event.target.value)} className="mt-1 h-11 w-full rounded-xl border border-[#E2E8F0] px-3 font-normal text-[#0F172A]" required /></label>
+            </div>
+            <label className="block text-sm font-semibold text-[#172334]">Email<input value={email} readOnly className="mt-1 h-11 w-full rounded-xl border border-[#E2E8F0] bg-[#F4F6F9] px-3 font-normal text-[#0F172A]" /></label>
             <div className="space-y-2.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 ">
                 Select Resume Version
               </label>
 
-              {versionsData.map((v) => {
-                const isSelected = selectedVersionId === v._id;
-                return (
-                  <div
-                    key={v._id}
-                    onClick={() => setSelectedVersionId(v._id)}
-                    className={`cursor-pointer rounded-2xl border p-3.5 transition-all ${
-                      isSelected
-                        ? "border-[#F97316] bg-white ring-2 ring-[#F97316]/15"
-                        : "border-slate-200/90 bg-white hover:border-slate-300   dark:hover:border-slate-700"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          name="resume_version"
-                          checked={isSelected}
-                          onChange={() => setSelectedVersionId(v._id)}
-                          className="h-4 w-4 text-[#F97316] accent-[#F97316]"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-slate-900 ">
-                              {v.label}
-                            </span>
-                            {v.isDefault && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700  ">
-                                <Star className="h-2.5 w-2.5 fill-current" /> Default
-                              </span>
-                            )}
-                          </div>
-                          {v.tags?.length > 0 && (
-                            <p className="mt-0.5 text-[11px] text-slate-500 ">
-                              Tags: {v.tags.join(", ")}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {v.isBestFit && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#F97316] px-2.5 py-0.5 text-[11px] font-extrabold text-[#F97316] shadow-2xs">
-                            <Sparkles className="h-3 w-3" /> Best Fit
-                          </span>
-                        )}
-                        <span className="rounded-full bg-[#FEF3E8] px-2.5 py-0.5 text-xs font-extrabold text-[#F97316]">
-                          {v.matchScore}% match
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              <select value={selectedVersionId || ""} onChange={(event) => setSelectedVersionId(event.target.value)} className="h-12 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm font-semibold text-[#0F172A]">
+                {versionsData.map((v) => <option key={v._id} value={v._id}>{v.label}{v.isDefault ? " (Default)" : ""}{v.isBestFit ? " - Best fit" : ""}</option>)}
+              </select>
             </div>
 
             {/* Compliance & Consent Disclosures */}
@@ -285,5 +251,6 @@ export default function ApplyVersionModal({
         )}
       </div>
     </Modal>
+    </>
   );
 }
