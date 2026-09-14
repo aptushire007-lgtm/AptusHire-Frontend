@@ -1001,8 +1001,10 @@ export default function InterviewRoom() {
           const form = new FormData();
           form.append("audio", result.audioBlob, `answer.${ext}`);
           api
+            // No explicit Content-Type — the browser must set it so the multipart boundary is
+            // included. Naming the bare type drops the boundary and the upload 400s.
             .post(`/interview-portal/interview/answer/${turnIndex}/audio`, form, {
-              headers: { ...authHeader(), "Content-Type": "multipart/form-data" },
+              headers: authHeader(),
             })
             .catch(() => {});
         }
