@@ -89,11 +89,7 @@ export function Chip({
       className={`tap-target inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-4 ${
         active
           ? "border-[#F97316] bg-[#F97316] text-white shadow-[0_1px_2px_rgba(23,107,69,0.20)] focus-visible:ring-[#F97316]/25"
-          : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#FED7AA] hover:bg-[#FEF3E8] hover:text-[#F97316] focus-visible:ring-[#F97316]/20",
-        className,
-      ].join(" ")}
-          ? "border-brand-800 bg-brand-800 text-white focus-visible:ring-brand-300"
-          : "border-hairline bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900 focus-visible:ring-brand-200"
+          : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#FED7AA] hover:bg-[#FEF3E8] hover:text-[#F97316] focus-visible:ring-[#F97316]/20"
       } ${className}`}
       {...props}
     >

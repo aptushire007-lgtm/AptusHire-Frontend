@@ -151,8 +151,7 @@ export default function Landing() {
                 </div>
                 <p className="text-[13px] font-semibold text-[#0F172A] lg:mt-1">{step}</p>
                 {i < FLOW.length - 1 && (
-                  <div className="hidden h-px flex-1 bg-gradient-to-r from-[#FEF3E8] to-[#FEF3E8] lg:block" />
-                  <div className="hidden h-px flex-1 bg-gradient-to-r from-[#D4F056] to-[#F4FDE8] lg:block" />
+                  <div className="hidden h-px flex-1 bg-gradient-to-r from-[#FED7AA] to-[#FEF3E8] lg:block" />
                 )}
               </motion.div>
             ))}

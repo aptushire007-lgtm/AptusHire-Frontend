@@ -121,7 +121,6 @@ export default function JobDetail() {
   return (
     <div className="mx-auto max-w-5xl space-y-5 pb-10">
       <Link to="/" className="inline-flex items-center gap-2 rounded-lg text-[13px] font-semibold text-[#F97316] transition-colors hover:text-[#F97316] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A7B71]">
-      <Link to="/" className="inline-flex items-center gap-2 rounded-lg text-[13px] font-semibold text-[#176B45] transition-colors hover:text-[#176B45] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5B6B63]">
         <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
       </Link>
 
