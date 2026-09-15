@@ -396,6 +396,88 @@ const CSS = `
 
 /* ── scrollbar none ── */
 .fmc ::-webkit-scrollbar{display:none;}
+
+/* ── mobile menu (hidden by default, shown under the nav breakpoint) ── */
+.fmc-burger{
+  display:none;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:10px;border:none;flex-shrink:0;
+  background:transparent;color:${BK};cursor:pointer;
+}
+.fmc-burger:hover{background:rgba(0,0,0,.06);}
+.fmc-mobile-menu{
+  display:flex;flex-direction:column;gap:2px;
+  border-top:1px solid rgba(0,0,0,.08);background:#fff;padding:8px 20px 20px;
+}
+.fmc-mobile-link{
+  display:flex;align-items:center;gap:6px;width:100%;
+  padding:13px 2px;font-size:15px;font-weight:500;color:${BK};
+  text-decoration:none;background:transparent;border:none;
+  text-align:left;cursor:pointer;
+}
+.fmc-mobile-cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:10px;height:48px;border-radius:999px;padding:0 8px 0 22px;
+  background:${BK};color:#fff;text-decoration:none;font-weight:600;font-size:14px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — this page shipped desktop-only; everything below
+   brings it to phone/tablet widths without touching desktop.
+═══════════════════════════════════════════════════════════════ */
+
+/* nav collapses to a hamburger — logo + chip + 3 links + CTA text
+   need ~750px+ to sit on one line without overlapping */
+@media (max-width:900px){
+  .fmc-cands,.fmc-nav,.fmc-cta-pill{display:none;}
+  .fmc-burger{display:inline-flex;}
+}
+
+/* hero: stack to one column, drop the decorative laptop mockup */
+@media (max-width:860px){
+  .fmc-hero{padding:56px 20px 64px;}
+  .fmc-hero-grid{grid-template-columns:1fr;gap:32px;}
+  .fmc-laptop{display:none;}
+}
+
+/* tablet: 3-col grids become 2-col */
+@media (max-width:900px){
+  .fmc-feat-grid{grid-template-columns:repeat(2,1fr);}
+  .fmc-jobs-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* phone: everything collapses to a single column, type scales down */
+@media (max-width:640px){
+  .fmc .s60{font-size:32px!important;}
+  .fmc .s54{font-size:28px!important;}
+  .fmc .s42{font-size:26px!important;}
+  .fmc .s40{font-size:24px!important;}
+  .fmc .s36{font-size:22px!important;}
+  .fmc .s30{font-size:20px!important;}
+
+  .fmc-hdr-inner{padding:0 16px;}
+
+  .fmc-feat-grid{grid-template-columns:1fr;}
+  .fmc-jobs-grid{grid-template-columns:1fr;}
+
+  .fmc-feat{padding:64px 20px;}
+  .fmc-feat-card,.fmc-feat-card-body{min-height:260px;}
+
+  .fmc-jobs{padding:56px 20px;}
+  .fmc-how{padding:48px 20px 72px;}
+  .fmc-faq{padding:48px 20px 64px;}
+  .fmc-walk-content{padding:56px 20px;}
+  .fmc-closing-inner{padding:48px 20px 88px;}
+
+  .fmc-step{gap:20px;}
+  .fmc-step-num{width:46px;font-size:34px;}
+
+  .fmc-footer-grid{grid-template-columns:1fr 1fr;gap:32px 20px;}
+  .fmc-footer-bottom{flex-direction:column;align-items:flex-start;gap:12px;}
+}
+
+@media (max-width:420px){
+  .fmc-footer-grid{grid-template-columns:1fr;}
+}
 `;
 
 /* ── tiny SVG helpers ── */
@@ -424,6 +506,21 @@ const Plus = ({ size = 22 }) => (
     <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
+const Burger = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </svg>
+);
+const CloseX = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+    <line x1="5" y1="5" x2="19" y2="19" />
+    <line x1="19" y1="5" x2="5" y2="19" />
+  </svg>
+);
 /* ── initials helper ── */
 function ini(name) {
   return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
@@ -433,6 +530,15 @@ function ini(name) {
    NAVBAR
 ═══════════════════════════════════════════════════════════════ */
 function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function onKeyDown(e) { if (e.key === "Escape") setMobileOpen(false); }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
   return (
     <header className="fmc-hdr">
       <div className="fmc-hdr-inner">
@@ -466,8 +572,32 @@ function Navbar() {
               <ArrowDiag size={14} color="#fff" />
             </span>
           </Link>
+
+          {/* Mobile menu toggle */}
+          <button
+            type="button"
+            className="fmc-burger"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <CloseX /> : <Burger />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {mobileOpen && (
+        <div className="fmc-mobile-menu">
+          <button type="button" className="fmc-mobile-link">What you get <Chevron size={12} color={WM} /></button>
+          <Link to="/jobs" className="fmc-mobile-link" onClick={() => setMobileOpen(false)}>Jobs</Link>
+          <a href="#how" className="fmc-mobile-link" onClick={() => setMobileOpen(false)}>How it works</a>
+          <Link to="/register" className="fmc-mobile-cta" onClick={() => setMobileOpen(false)}>
+            Let the job find me
+            <span className="chip"><ArrowDiag size={13} color="#fff" /></span>
+          </Link>
+        </div>
+      )}
     </header>
   );
 }
@@ -793,7 +923,7 @@ function WalkSection() {
 
           {/* content */}
           <div key={active} className="fmc-reveal" style={{ marginTop: 32 }}>
-            <h3 style={{ fontSize: 38, fontWeight: 400, color: "#fff", maxWidth: 640, margin: "0 auto", letterSpacing: "-0.04em", lineHeight: 1.08 }}>
+            <h3 style={{ fontSize: "clamp(26px,6vw,38px)", fontWeight: 400, color: "#fff", maxWidth: 640, margin: "0 auto", letterSpacing: "-0.04em", lineHeight: 1.08 }}>
               {item.title}
             </h3>
             <p className="s14" style={{ marginTop: 12, maxWidth: 560, margin: "12px auto 0", color: "rgba(255,255,255,.70)", lineHeight: 1.65 }}>
