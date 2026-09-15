@@ -622,7 +622,7 @@ function BottomTabBar({ onOpenMore, moreActive }) {
 
   const tabClass = ({ isActive }) =>
     [
-      "tap-target flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-semibold transition-colors",
+      "tap-target flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-[11px] font-semibold transition-colors",
       isActive ? "text-[#F97316]" : "text-[#64748B]",
     ].join(" ");
 
@@ -643,7 +643,7 @@ function BottomTabBar({ onOpenMore, moreActive }) {
                   </span>
                 )}
               </span>
-              <span>{item.label}</span>
+              <span className="block w-full truncate text-center">{item.label}</span>
             </>
           )}
         </NavLink>
@@ -653,12 +653,12 @@ function BottomTabBar({ onOpenMore, moreActive }) {
         onClick={onOpenMore}
         aria-haspopup="dialog"
         aria-expanded={moreActive ? undefined : false}
-        className={`tap-target flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-semibold transition-colors ${
+        className={`tap-target flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-[11px] font-semibold transition-colors ${
           moreActive ? "text-[#F97316]" : "text-[#64748B]"
         }`}
       >
         <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
-        <span>More</span>
+        <span className="block w-full truncate text-center">More</span>
       </button>
     </nav>
   );

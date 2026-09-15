@@ -85,8 +85,11 @@ export default function ProfileLayout() {
 
   return (
     <div className="candidate-profile-page space-y-6 [&_input]:!text-[#0F172A] [&_select]:!text-[#0F172A] [&_textarea]:!text-[#0F172A] [&_input::placeholder]:!text-[#64748B] [&_textarea::placeholder]:!text-[#64748B] [&_[data-profile-action='true']]:!border-transparent [&_[data-profile-action='true']]:!bg-[#F5B51B] [&_[data-profile-action='true']]:!text-[#172334]">
-      {/* Tab Header Bar (Horizontal on mobile, rail on desktop) */}
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-[#E2E8F0] bg-white p-2 shadow-xs dark:border-[#E2E8F0] dark:bg-white">
+      {/* Tab Header Bar — a horizontally scrollable strip on mobile (labels are
+          too long to share equal flex widths without spilling into each
+          other; see the bottom tab bar fix in AppShell for the same bug),
+          full-width wrap once there's room on tablet/desktop. */}
+      <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#E2E8F0] bg-white p-2 shadow-xs dark:border-[#E2E8F0] dark:bg-white sm:flex-wrap sm:overflow-visible">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -94,13 +97,13 @@ export default function ProfileLayout() {
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`tap-target flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-center text-xs font-semibold transition-all sm:flex-none sm:px-4 ${
+              className={`tap-target flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-center text-xs font-semibold transition-all sm:flex-none sm:px-4 ${
                 isActive
                   ? "bg-[#F5B51B] text-[#172334] shadow-xs dark:bg-[#F5B51B] dark:text-[#172334]"
                   : "bg-white text-[#64748B] hover:bg-[#FFF4CC] hover:text-[#E5A514] dark:bg-white dark:text-[#64748B] dark:hover:bg-[#FFF4CC] dark:hover:text-[#E5A514]"
               }`}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-4 w-4 shrink-0" />
               <span>{tab.label}</span>
             </button>
           );
