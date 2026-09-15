@@ -17,6 +17,8 @@ import {
   ChevronRight,
   ChevronDown,
   Search,
+  User,
+  MoreHorizontal,
 } from "lucide-react";
 import { useAccountAuth } from "../../auth/useAccountAuth.js";
 import { logoutAccount } from "../../auth/logout.js";
@@ -48,8 +50,24 @@ const ACCOUNT_NAV_GROUPS = [
   },
 ];
 
-const SIDEBAR_ID  = "app-sidebar";
-const DRAWER_ID   = "app-sidebar-drawer";
+// The bottom tab bar (mobile, authenticated) surfaces the three most-used
+// destinations directly; everything else lives behind "More".
+const BOTTOM_TAB_ITEMS = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/?recommended=1", label: "Recommended", icon: Sparkles, end: true },
+  { to: "/assessments", label: "Assessments", icon: ClipboardList, badgeKey: "assessments" },
+];
+
+const MORE_SHEET_ITEMS = [
+  { to: "/account", label: "Settings", icon: Settings },
+  { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
+  { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
+];
+const MORE_SHEET_PATHS = MORE_SHEET_ITEMS.map((item) => item.to);
+
+const SIDEBAR_ID   = "app-sidebar";
+const DRAWER_ID    = "app-sidebar-drawer";
+const MORE_SHEET_ID = "app-more-sheet";
 const COLLAPSE_KEY = "candidateNavCollapsed";
 
 function readCollapsed() {
@@ -64,11 +82,13 @@ function writeCollapsed(v) {
 const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SidebarNav
+// Shared hooks
 // ─────────────────────────────────────────────────────────────────────────────
-function SidebarNav({ collapsed, onNavigate, label }) {
+
+// Used by both the sidebar/drawer nav and the mobile bottom tab bar, so the
+// assessment badge count stays in sync without fetching it twice per render.
+function useAssessmentBadgeCount() {
   const { isAuthenticated } = useAccountAuth();
-  const { search }          = useLocation();
   const [counts, setCounts] = useState({ assessments: 0 });
 
   useEffect(() => {
@@ -83,6 +103,54 @@ function SidebarNav({ collapsed, onNavigate, label }) {
       .catch(() => {});
     return () => { active = false; };
   }, [isAuthenticated]);
+
+  return counts;
+}
+
+// Shared a11y wiring for a dismissable overlay panel (the mobile sidebar
+// drawer and the "More" bottom sheet both need it): Escape to close, Tab
+// trapped inside the panel, body scroll locked while open, and focus
+// restored to whatever opened it on close.
+function useOverlayA11y(open, panelRef, closeRef) {
+  useEffect(() => {
+    if (!open) return undefined;
+    const panel  = panelRef.current;
+    const opener = document.activeElement;
+    closeRef.current?.focus();
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") { closeRef.current?.click(); return; }
+      if (e.key !== "Tab" || !panel) return;
+      const items = panel.querySelectorAll(FOCUSABLE);
+      if (!items.length) return;
+      const first = items[0];
+      const last  = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prev;
+      if (opener instanceof HTMLElement && document.contains(opener))
+        opener.focus({ preventScroll: true });
+    };
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SidebarNav
+// ─────────────────────────────────────────────────────────────────────────────
+function SidebarNav({ collapsed, onNavigate, label }) {
+  const { isAuthenticated } = useAccountAuth();
+  const { search }          = useLocation();
+  const counts               = useAssessmentBadgeCount();
 
   const groups = isAuthenticated
     ? ACCOUNT_NAV_GROUPS
@@ -267,10 +335,19 @@ function HeaderActions({ onNavigate }) {
                 {user?.email && <p className="truncate text-[12px] text-[#64748B]">{user.email}</p>}
               </div>
             )}
+            {/* Mobile: the editable profile (Settings/account moved into the "More" sheet). Desktop keeps Settings — it has no other entry point there. */}
+            <Link
+              to="/profile"
+              onClick={() => { setMenuOpen(false); onNavigate?.(); }}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9] lg:hidden"
+            >
+              <User className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
+              Update Profile
+            </Link>
             <Link
               to="/account"
               onClick={() => { setMenuOpen(false); onNavigate?.(); }}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9]"
+              className="hidden items-center gap-2.5 px-4 py-2.5 text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9] lg:flex"
             >
               <Settings className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
               Settings
@@ -296,6 +373,7 @@ function HeaderActions({ onNavigate }) {
 function ShellInner({ children }) {
   const [collapsed, setCollapsed]   = useState(readCollapsed);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [moreOpen, setMoreOpen]     = useState(false);
   const [headerSearch, setHeaderSearch] = useState("");
   const { pathname }                = useLocation();
   const { theme, setTheme }         = useTheme();
@@ -303,6 +381,8 @@ function ShellInner({ children }) {
   const navigate                    = useNavigate();
   const panelRef                    = useRef(null);
   const closeRef                    = useRef(null);
+  const moreRef                     = useRef(null);
+  const moreCloseRef                = useRef(null);
 
   const handleHeaderSearch = useCallback((e) => {
     e.preventDefault();
@@ -322,7 +402,7 @@ function ShellInner({ children }) {
     setCollapsed((v) => { writeCollapsed(!v); return !v; });
   }, []);
 
-  useEffect(() => { setDrawerOpen(false); }, [pathname]);
+  useEffect(() => { setDrawerOpen(false); setMoreOpen(false); }, [pathname]);
 
   useEffect(() => {
     if (!drawerOpen) return undefined;
@@ -333,36 +413,8 @@ function ShellInner({ children }) {
     return () => mq.removeEventListener("change", close);
   }, [drawerOpen]);
 
-  useEffect(() => {
-    if (!drawerOpen) return undefined;
-    const panel  = panelRef.current;
-    const opener = document.activeElement;
-    closeRef.current?.focus();
-
-    function onKeyDown(e) {
-      if (e.key === "Escape") { setDrawerOpen(false); return; }
-      if (e.key !== "Tab" || !panel) return;
-      const items = panel.querySelectorAll(FOCUSABLE);
-      if (!items.length) return;
-      const first = items[0];
-      const last  = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault(); last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault(); first.focus();
-      }
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = prev;
-      if (opener instanceof HTMLElement && document.contains(opener))
-        opener.focus({ preventScroll: true });
-    };
-  }, [drawerOpen]);
+  useOverlayA11y(drawerOpen, panelRef, closeRef);
+  useOverlayA11y(moreOpen, moreRef, moreCloseRef);
 
   return (
     <div className="candidate-side flex min-h-screen bg-[#F4F6F9] text-[#0F172A]">
@@ -433,35 +485,59 @@ function ShellInner({ children }) {
       {/* ── Main content column ──────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Sticky header */}
-        <header className="sticky top-0 z-40 flex h-[68px] items-center justify-between gap-3 border-b border-[#E2E8F0] bg-white/95 px-5 shadow-[0_1px_3px_rgba(0,0,0,0.07)] backdrop-blur-md sm:px-8">
-          <div className="flex min-w-0 items-center gap-2">
-            {/* Mobile: open drawer */}
-            <button
-              type="button"
-              onClick={() => setDrawerOpen(true)}
-              aria-label="Open menu"
-              aria-expanded={drawerOpen}
-              aria-controls={drawerOpen ? DRAWER_ID : undefined}
-              className="tap-target -ml-1.5 inline-flex items-center justify-center rounded-control p-1.5 text-[#64736A] transition-colors hover:bg-[#DDECE3] hover:text-[#176B45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 lg:hidden"
-            >
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            </button>
-            {/* Brand on mobile (sidebar hidden) */}
-            <BrandLogo
-              to="/welcome"
-              variant="image"
-              size={52}
-              className="lg:hidden"
-            />
+        <header className="sticky top-0 z-40 border-b border-[#E2E8F0] bg-white/95 shadow-[0_1px_3px_rgba(0,0,0,0.07)] backdrop-blur-md">
+          <div className="flex h-[68px] items-center justify-between gap-3 px-5 sm:px-8">
+            <div className="flex min-w-0 items-center gap-2">
+              {/* Mobile: open drawer (guests only — authenticated mobile nav lives in the bottom tab bar) */}
+              {!isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  aria-label="Open menu"
+                  aria-expanded={drawerOpen}
+                  aria-controls={drawerOpen ? DRAWER_ID : undefined}
+                  className="tap-target -ml-1.5 inline-flex items-center justify-center rounded-control p-1.5 text-[#64736A] transition-colors hover:bg-[#DDECE3] hover:text-[#176B45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 lg:hidden"
+                >
+                  <Menu className="h-6 w-6" aria-hidden="true" />
+                </button>
+              )}
+              {/* Brand on mobile (sidebar hidden) */}
+              <BrandLogo
+                to="/welcome"
+                variant="image"
+                size={isAuthenticated ? 40 : 52}
+                className="lg:hidden"
+              />
+            </div>
+
+            {isAuthenticated && (
+              <form onSubmit={handleHeaderSearch} className="hidden min-w-0 flex-1 max-w-md md:block">
+                <label className="sr-only" htmlFor="app-header-search">Search for jobs, roles or companies</label>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" aria-hidden="true" />
+                  <input
+                    id="app-header-search"
+                    type="search"
+                    value={headerSearch}
+                    onChange={(e) => setHeaderSearch(e.target.value)}
+                    placeholder="Search for jobs, roles or companies..."
+                    className="h-10 w-full rounded-full border border-[#E5E7EB] bg-[#F8FAFC] pl-10 pr-4 text-[14px] text-[#111827] placeholder:text-[#94A3B8] transition-colors focus:border-[#F97316] focus:bg-white focus:outline-none focus:ring-3 focus:ring-[#F97316]/15"
+                  />
+                </div>
+              </form>
+            )}
+
+            <HeaderActions />
           </div>
 
+          {/* Mobile-only second row: full-width search (authenticated only — the row above already shows an inline search at md+) */}
           {isAuthenticated && (
-            <form onSubmit={handleHeaderSearch} className="hidden min-w-0 flex-1 max-w-md md:block">
-              <label className="sr-only" htmlFor="app-header-search">Search for jobs, roles or companies</label>
+            <form onSubmit={handleHeaderSearch} className="px-5 pb-3 md:hidden">
+              <label className="sr-only" htmlFor="app-header-search-mobile">Search for jobs, roles or companies</label>
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" aria-hidden="true" />
                 <input
-                  id="app-header-search"
+                  id="app-header-search-mobile"
                   type="search"
                   value={headerSearch}
                   onChange={(e) => setHeaderSearch(e.target.value)}
@@ -471,17 +547,120 @@ function ShellInner({ children }) {
               </div>
             </form>
           )}
-
-          <HeaderActions />
         </header>
 
         <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
-          <div className="mx-auto max-w-[1440px] px-5 py-6 sm:px-8 sm:py-8">
+          <div className={`mx-auto max-w-[1440px] px-5 py-6 sm:px-8 sm:py-8 ${isAuthenticated ? "pb-24 lg:pb-8" : ""}`}>
             {children}
           </div>
         </main>
       </div>
+
+      {isAuthenticated && (
+        <BottomTabBar
+          onOpenMore={() => setMoreOpen(true)}
+          moreActive={MORE_SHEET_PATHS.includes(pathname)}
+        />
+      )}
+
+      {/* ── "More" bottom sheet ─────────────────────────────────── */}
+      {moreOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]"
+            aria-hidden="true"
+            onClick={() => setMoreOpen(false)}
+          />
+          <div
+            ref={moreRef}
+            id={MORE_SHEET_ID}
+            role="dialog"
+            aria-modal="true"
+            aria-label="More"
+            className="absolute inset-x-0 bottom-0 flex max-h-[70vh] flex-col overflow-y-auto rounded-t-2xl border-t border-[#E2E8F0] bg-white pb-[calc(env(safe-area-inset-bottom)+8px)] shadow-deep"
+          >
+            <div className="flex items-center justify-center pt-3">
+              <span className="h-1.5 w-10 rounded-full bg-[#E2E8F0]" aria-hidden="true" />
+            </div>
+            <div className="flex items-center justify-between px-5 pb-2 pt-3">
+              <p className="text-[15px] font-bold text-[#0F172A]">More</p>
+              <button
+                ref={moreCloseRef}
+                type="button"
+                onClick={() => setMoreOpen(false)}
+                aria-label="Close"
+                className="tap-target inline-flex h-9 w-9 items-center justify-center rounded-control text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+            <nav aria-label="More" className="flex flex-col gap-1 px-3 pb-3">
+              {MORE_SHEET_ITEMS.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMoreOpen(false)}
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold text-[#1E293B] transition-colors hover:bg-[#FEF3E8]"
+                >
+                  <item.icon className="h-[18px] w-[18px] shrink-0 text-[#64748B]" aria-hidden="true" />
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BottomTabBar (mobile, authenticated)
+// ─────────────────────────────────────────────────────────────────────────────
+function BottomTabBar({ onOpenMore, moreActive }) {
+  const counts = useAssessmentBadgeCount();
+
+  const tabClass = ({ isActive }) =>
+    [
+      "tap-target flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-semibold transition-colors",
+      isActive ? "text-[#F97316]" : "text-[#64748B]",
+    ].join(" ");
+
+  return (
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-[#E2E8F0] bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+    >
+      {BOTTOM_TAB_ITEMS.map((item) => (
+        <NavLink key={item.to} to={item.to} end={item.end} className={tabClass}>
+          {({ isActive }) => (
+            <>
+              <span className="relative">
+                <item.icon className="h-5 w-5" aria-hidden="true" />
+                {item.badgeKey && counts[item.badgeKey] > 0 && (
+                  <span className="absolute -right-2 -top-1.5 inline-flex min-w-[1rem] items-center justify-center rounded-full bg-[#F97316] px-1 text-[9px] font-bold leading-[1rem] text-white">
+                    {counts[item.badgeKey]}
+                  </span>
+                )}
+              </span>
+              <span>{item.label}</span>
+            </>
+          )}
+        </NavLink>
+      ))}
+      <button
+        type="button"
+        onClick={onOpenMore}
+        aria-haspopup="dialog"
+        aria-expanded={moreActive ? undefined : false}
+        className={`tap-target flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-semibold transition-colors ${
+          moreActive ? "text-[#F97316]" : "text-[#64748B]"
+        }`}
+      >
+        <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+        <span>More</span>
+      </button>
+    </nav>
   );
 }
 

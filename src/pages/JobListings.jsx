@@ -283,12 +283,12 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
         onClick={(e) => { e.stopPropagation(); onToggleSave(job); }}
         disabled={saving}
         aria-label={saved ? "Unsave" : "Save"}
-        className={`absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] transition-colors hover:bg-white hover:text-[#7C3F10] focus-visible:outline-none ${
+        className={`absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] transition-colors hover:bg-white hover:text-[#F97316] focus-visible:outline-none ${
           saved ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
         }`}
       >
         <Bookmark
-          className={`h-5 w-5 ${saved ? "fill-[#F97316] text-[#F97316]" : ""}`}
+          className={`h-5 w-5 ${saved ? "fill-[#EAB308] text-[#EAB308]" : ""}`}
           aria-hidden
         />
       </button>
@@ -1337,7 +1337,7 @@ function LegacyJobCard({ job, saved, onToggleSave, saving }) {
             className={`tap-target inline-flex h-9 w-9 items-center justify-center rounded-control border transition-colors ${
               saved
                 ? "border-brand-300 bg-[#FEF3E8] text-[#F97316]"
-                : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#7C3F10]"
+                : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#F97316]"
             }`}
           >
             {saved ? (

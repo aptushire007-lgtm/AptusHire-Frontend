@@ -21,6 +21,10 @@ const variants = {
     `bg-red-600 text-white shadow-sm hover:bg-red-700 active:bg-red-800 focus-visible:ring-4 focus-visible:ring-red-400/30 ${DISABLED}`,
   navy:
     `bg-[#1B2A3B] text-white shadow-sm hover:bg-[#243447] active:bg-[#131F2E] focus-visible:ring-4 focus-visible:ring-[#1B2A3B]/30 ${DISABLED}`,
+  yellow:
+    `bg-[#EAB308] text-[#1B2A3B] shadow-sm hover:bg-[#CA8A04] hover:text-white active:bg-[#CA8A04] active:text-white focus-visible:ring-4 focus-visible:ring-[#EAB308]/30 ${DISABLED}`,
+  "yellow-outline":
+    `border border-[#FDE68A] bg-white text-[#CA8A04] hover:bg-[#FEF9C3] active:bg-[#FEF9C3] focus-visible:ring-4 focus-visible:ring-[#EAB308]/20 disabled:opacity-50 disabled:cursor-not-allowed`,
   /* backward-compat aliases → all map to orange primary */
   gold:
     `bg-[#F97316] text-white shadow-sm hover:bg-[#E5A514] focus-visible:ring-4 focus-visible:ring-[#7C3F10]/25 ${DISABLED}`,

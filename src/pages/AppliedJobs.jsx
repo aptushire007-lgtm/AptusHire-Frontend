@@ -226,6 +226,60 @@ function ApplicationRow({ application, onView }) {
   );
 }
 
+function ApplicationCard({ application, onView }) {
+  const { job, status, createdAt } = application;
+  const companyName = job?.company?.name || "Company unavailable";
+  const location = job?.location || job?.department || "Location unavailable";
+  const group = stageGroup(status);
+  const actionable = ACTIONABLE_STAGES.includes(normalizedStatus(status));
+
+  return (
+    <Card padding="compact" className="space-y-3">
+      <button type="button" onClick={() => onView(application)} className="flex w-full min-w-0 items-start gap-3 text-left">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-[#F0F2F4] text-[#263A36] font-bold">{companyName.charAt(0).toUpperCase()}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-xs font-semibold text-[#64748B]">{companyName}</span>
+          <span className="block truncate font-medium text-[#14233A]">{job?.title || "Application"}</span>
+          <span className="mt-0.5 block truncate text-[11px] text-[#77807D]">{location}</span>
+        </span>
+      </button>
+
+      <div className="flex items-center justify-between gap-2">
+        {actionable ? (
+          <Link
+            to="/assessments"
+            className="inline-flex whitespace-nowrap items-center gap-1.5 rounded-full bg-[#FEF3C7] px-3 py-1.5 text-[11px] font-semibold text-[#92400E] transition-colors hover:bg-[#FDE68A]"
+          >
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#D97706]" />
+            {stageLabel(status)}
+            <ArrowRight className="h-3 w-3 shrink-0" />
+          </Link>
+        ) : group === "rejected" || group === "decision" ? (
+          <span className={`inline-flex whitespace-nowrap items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${group === "rejected" ? "bg-red-50 text-red-700" : "bg-[#FEF3E8] text-[#17804B]"}`}>
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />{stageLabel(status)}
+          </span>
+        ) : (
+          <div>
+            <span className="inline-block rounded-full bg-[#F1F5F9] px-2.5 py-1 text-[11px] font-semibold text-[#64748B]">Application sent</span>
+            <p className="mt-1 flex items-center gap-1 text-[11px] text-[#94A3B8]">
+              <Clock className="h-3 w-3" />{relativeTime(createdAt)}
+            </p>
+          </div>
+        )}
+        <span className="shrink-0 text-[11px] text-[#64748B]">{dateLabel(createdAt)}</span>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onView(application)}
+        className="tap-target flex w-full items-center justify-center rounded-control border border-[#E2E8F0] py-2 text-xs font-semibold text-[#64748B] hover:bg-[#F1F5F9]"
+      >
+        View details
+      </button>
+    </Card>
+  );
+}
+
 export default function AppliedJobs() {
   const [applications, setApplications] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -286,7 +340,12 @@ export default function AppliedJobs() {
       {state === "loading" && <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map((item) => <Card key={item}><Skeleton className="h-5 w-2/3" /><Skeleton className="mt-3 h-4 w-1/3" /><Skeleton className="mt-6 h-12 w-full" /><Skeleton className="mt-5 h-10 w-32" /></Card>)}</div>}
       {state === "error" && <Card role="alert" className="border-red-200 bg-red-50"><div className="flex items-start gap-3"><CircleAlert className="h-5 w-5 shrink-0 text-red-600" /><div><p className="text-sm font-semibold text-red-700">{error}</p><Button size="sm" variant="outline" className="mt-4" onClick={() => window.location.reload()}>Try again</Button></div></div></Card>}
       {state === "ready" && applications.length === 0 && <EmptyState icon={Briefcase} title="No applications yet" description="When you apply for a role, its progress will appear here." action={<Button as={Link} to="/" size="sm">Find jobs</Button>} />}
-      {state === "ready" && sortedApplications.length > 0 && (filteredApplications.length > 0 ? <div className="overflow-x-auto rounded-[16px] border border-[#E2E8F0] bg-white shadow-[0_5px_18px_rgba(33,71,64,.05)]"><table className="w-full min-w-[760px] border-collapse text-left"><thead className="bg-[#FBFCFB]"><tr className="text-[11px] font-bold text-[#14233A]"><th className="px-3 py-3 sm:px-4">Company</th><th className="px-3 py-3 sm:px-4">Job title</th><th className="px-3 py-3 sm:px-4">Type</th><th className="px-3 py-3 sm:px-4">Date Applied</th><th className="px-3 py-3 sm:px-4">Status</th><th className="px-2 py-3"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filteredApplications.map((application) => <ApplicationRow key={application._id} application={application} onView={viewApplication} />)}</tbody></table></div> : <Card><p className="text-sm text-[#64748B]">No applications match &quot;{query}&quot;.</p></Card>)}
+      {state === "ready" && sortedApplications.length > 0 && (filteredApplications.length > 0 ? (
+        <>
+          <div className="hidden overflow-x-auto rounded-[16px] border border-[#E2E8F0] bg-white shadow-[0_5px_18px_rgba(33,71,64,.05)] md:block"><table className="w-full min-w-[760px] border-collapse text-left"><thead className="bg-[#FBFCFB]"><tr className="text-[11px] font-bold text-[#14233A]"><th className="px-3 py-3 sm:px-4">Company</th><th className="px-3 py-3 sm:px-4">Job title</th><th className="px-3 py-3 sm:px-4">Type</th><th className="px-3 py-3 sm:px-4">Date Applied</th><th className="px-3 py-3 sm:px-4">Status</th><th className="px-2 py-3"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filteredApplications.map((application) => <ApplicationRow key={application._id} application={application} onView={viewApplication} />)}</tbody></table></div>
+          <div className="space-y-3 md:hidden">{filteredApplications.map((application) => <ApplicationCard key={application._id} application={application} onView={viewApplication} />)}</div>
+        </>
+      ) : <Card><p className="text-sm text-[#64748B]">No applications match &quot;{query}&quot;.</p></Card>)}
       {selected && <ApplicationDetails application={selected} loading={detailLoading} error={detailError} onClose={() => setSelected(null)} />}
     </div>
   );

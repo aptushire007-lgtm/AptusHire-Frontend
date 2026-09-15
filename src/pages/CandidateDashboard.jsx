@@ -216,11 +216,11 @@ export default function CandidateDashboard() {
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }} aria-busy="true">
         <p className="sr-only" role="status">Loading your dashboard…</p>
         <div style={{ background: WH, border: `1px solid ${BORD}`, borderRadius: 16, padding: 32, height: 180 }} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
           {[1, 2, 3].map((i) => <div key={i} style={{ borderRadius: 16, height: 170, background: WH, border: `1px solid ${BORD}` }} />)}
         </div>
         <div style={{ background: WH, border: `1px solid ${BORD}`, borderRadius: 16, height: 195 }} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
           {[1, 2, 3].map((i) => <div key={i} style={{ borderRadius: 14, height: 100, background: WH, border: `1px solid ${BORD}` }} />)}
         </div>
       </div>
