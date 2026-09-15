@@ -773,6 +773,25 @@ export default function AllJobs() {
   const [selectedId, setSelectedId] = useState(null);
   const [showAll,    setShowAll]    = useState(false);
 
+  // Below 769px (matches the CSS "@media (max-width: 768px)" split/detail
+  // toggle) selecting a job HIDES the list entirely — there's no persistent
+  // pane to auto-populate there, only a full-screen detail a candidate must
+  // deliberately navigate to. Auto-selecting on that layout was trapping
+  // mobile visitors: "Back to list" cleared selectedId, but the auto-select
+  // effect below (no dependency array — it runs after every render) then
+  // immediately re-selected the first job again, so the job list itself
+  // was never actually visible/reachable on a phone.
+  const [isDesktopSplit, setIsDesktopSplit] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 769px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 769px)");
+    const update = () => setIsDesktopSplit(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   /* ── Fetch ── */
   useEffect(() => {
     Promise.all([
@@ -792,10 +811,10 @@ export default function AllJobs() {
       .finally(() => setLoading(false));
   }, [isAuthenticated]); // eslint-disable-line
 
-  /* ── Auto-select first ── */
+  /* ── Auto-select first (desktop split-pane only — see isDesktopSplit) ── */
   const listRef = useRef(null);
   useEffect(() => {
-    if (!loading && filteredJobs.length > 0 && !selectedId) {
+    if (isDesktopSplit && !loading && filteredJobs.length > 0 && !selectedId) {
       setSelectedId(String(filteredJobs[0]._id));
     }
   }); // runs every render until set
