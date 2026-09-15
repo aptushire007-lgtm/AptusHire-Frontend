@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Bookmark, Briefcase, Building2, Calendar, FileText, MapPin, Search, Sparkles, Trash2 } from "lucide-react";
+import { ArrowRight, Bookmark, Briefcase, Building2, Calendar, FileText, MapPin, Search, SlidersHorizontal, Sparkles, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
@@ -37,6 +37,7 @@ export default function SavedJobs() {
   const [company, setCompany] = useState("");
   const [sort, setSort] = useState("recent");
   const [error, setError] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     api
@@ -54,6 +55,7 @@ export default function SavedJobs() {
 
   const locations = useMemo(() => [...new Set(jobs.map((job) => job.location).filter(Boolean))].sort(), [jobs]);
   const companies = useMemo(() => [...new Set(jobs.map((job) => job.company?.name).filter(Boolean))].sort(), [jobs]);
+  const activeFilterCount = [location, experience, company].filter(Boolean).length;
 
   const visibleJobs = useMemo(() => {
     const value = query.trim().toLowerCase();
@@ -87,24 +89,12 @@ export default function SavedJobs() {
 
   return (
     <div className="min-h-[calc(100vh-7rem)] w-full space-y-6 pb-10">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">Your activity</p>
-          <h1 className="mt-2 text-2xl font-bold text-[#0F172A]">
-            Saved <span className="text-[#CA8A04]">Jobs</span>
-          </h1>
-          <p className="mt-2 text-sm text-[#64748B]">Roles you're considering for your next application.</p>
-        </div>
-        <label className="flex min-h-11 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-4 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#EAB308] focus-within:ring-2 focus-within:ring-[#FEF9C3]">
-          <Search className="h-4 w-4" />
-          <span className="sr-only">Search saved jobs</span>
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search saved jobs..."
-            className="w-36 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-48"
-          />
-        </label>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">Your activity</p>
+        <h1 className="mt-2 text-2xl font-bold text-[#0F172A]">
+          Saved <span className="text-[#CA8A04]">Jobs</span>
+        </h1>
+        <p className="mt-2 text-sm text-[#64748B]">Roles you're considering for your next application.</p>
       </div>
 
       {error && (
@@ -133,34 +123,63 @@ export default function SavedJobs() {
 
       {!loading && jobs.length > 0 && (
         <>
-          <Card padding="compact" className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <IconTile icon={Bookmark} tone="yellow" />
-              <div>
-                <p className="text-lg font-bold leading-none text-[#0F172A]">{jobs.length}</p>
-                <p className="mt-1 text-xs font-medium text-[#64748B]">{jobs.length === 1 ? "Saved Job" : "Saved Jobs"}</p>
+          <Card padding="compact" className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <IconTile icon={Bookmark} tone="yellow" />
+                <div>
+                  <p className="text-lg font-bold leading-none text-[#0F172A]">{jobs.length}</p>
+                  <p className="mt-1 text-xs font-medium text-[#64748B]">{jobs.length === 1 ? "Saved Job" : "Saved Jobs"}</p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setFiltersOpen((open) => !open)}
+                aria-expanded={filtersOpen}
+                aria-controls="saved-jobs-filters"
+                className="tap-target inline-flex items-center gap-1.5 rounded-control border border-[#E2E8F0] px-3 py-2 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-[#F1F5F9] sm:hidden"
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F97316] px-1 text-[10px] font-bold text-white">{activeFilterCount}</span>
+                )}
+              </button>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Select compact value={location} onChange={(event) => setLocation(event.target.value)} className="w-auto">
+
+            <div
+              id="saved-jobs-filters"
+              className={`${filtersOpen ? "flex" : "hidden"} w-full flex-col gap-2 sm:flex sm:w-auto sm:flex-row sm:flex-wrap sm:items-center`}
+            >
+              <label className="flex min-h-11 w-full items-center gap-2 rounded-control border border-[#E0E5E2] bg-white px-3 text-sm text-[#77807D] focus-within:border-[#EAB308] focus-within:ring-2 focus-within:ring-[#FEF9C3] sm:w-48">
+                <Search className="h-4 w-4 shrink-0" />
+                <span className="sr-only">Search saved jobs</span>
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search saved jobs..."
+                  className="w-full border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0"
+                />
+              </label>
+              <Select compact value={location} onChange={(event) => setLocation(event.target.value)} className="w-full sm:w-auto">
                 <option value="">All Locations</option>
                 {locations.map((loc) => (
                   <option key={loc} value={loc}>{loc}</option>
                 ))}
               </Select>
-              <Select compact value={experience} onChange={(event) => setExperience(event.target.value)} className="w-auto">
+              <Select compact value={experience} onChange={(event) => setExperience(event.target.value)} className="w-full sm:w-auto">
                 <option value="">All Experience</option>
                 {EXPERIENCE_BANDS.map((band) => (
                   <option key={band.value} value={band.value}>{band.label}</option>
                 ))}
               </Select>
-              <Select compact value={company} onChange={(event) => setCompany(event.target.value)} className="w-auto">
+              <Select compact value={company} onChange={(event) => setCompany(event.target.value)} className="w-full sm:w-auto">
                 <option value="">All Companies</option>
                 {companies.map((name) => (
                   <option key={name} value={name}>{name}</option>
                 ))}
               </Select>
-              <Select compact value={sort} onChange={(event) => setSort(event.target.value)} className="w-auto">
+              <Select compact value={sort} onChange={(event) => setSort(event.target.value)} className="w-full sm:w-auto">
                 {SORTS.map((option) => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
