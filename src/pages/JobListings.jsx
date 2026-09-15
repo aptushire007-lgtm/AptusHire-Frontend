@@ -120,7 +120,7 @@ function getMatchLabel(job, recommendedOrder) {
   return "Match";
 }
 
-function AutoApplyModal({ isOpen, jobs, recommendedOrder, onClose, onEnabled }) {
+function AutoApplyModal({ isOpen, jobs, recommendedOrder, enabled, initialResumeId, initialIncludeGood, onClose, onEnabled, onDisabled }) {
   const [view, setView] = useState("confirm");
   const [includeGood, setIncludeGood] = useState(false);
   const [rolesOpen, setRolesOpen] = useState(false);
@@ -128,6 +128,7 @@ function AutoApplyModal({ isOpen, jobs, recommendedOrder, onClose, onEnabled }) 
   const [selectedResume, setSelectedResume] = useState(null);
   const [loadingResumes, setLoadingResumes] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const uploadRef = useRef(null);
 
   const matches = useMemo(() => jobs
@@ -143,16 +144,23 @@ function AutoApplyModal({ isOpen, jobs, recommendedOrder, onClose, onEnabled }) 
     if (!isOpen) return;
     setView("confirm");
     setRolesOpen(false);
+    // Reflects the saved setting each time the modal reopens, not whatever was
+    // left over from a previous open — those are two different candidates'
+    // worth of state if the page has been sitting idle.
+    setIncludeGood(!!initialIncludeGood);
     setLoadingResumes(true);
     api.get("/candidate-dashboard/resumes", { headers: accountAuthHeader() })
       .then((response) => {
-        const nextResumes = Array.isArray(response.data) ? response.data : response.data?.resumes || [];
+        const nextResumes = Array.isArray(response.data) ? response.data : response.data?.versions || [];
         setResumes(nextResumes);
-        setSelectedResume(nextResumes.find((resume) => resume.isDefault) || nextResumes[0] || null);
+        const savedChoice = initialResumeId
+          ? nextResumes.find((resume) => String(resume._id) === String(initialResumeId))
+          : null;
+        setSelectedResume(savedChoice || nextResumes.find((resume) => resume.isDefault) || nextResumes[0] || null);
       })
       .catch(() => setResumes([]))
       .finally(() => setLoadingResumes(false));
-  }, [isOpen]);
+  }, [isOpen, initialResumeId, initialIncludeGood]);
 
   if (!isOpen) return null;
 
@@ -211,7 +219,41 @@ function AutoApplyModal({ isOpen, jobs, recommendedOrder, onClose, onEnabled }) 
             </div>
             {rolesOpen && <div className="mt-3 max-h-[170px] overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white p-2 text-left shadow-inner">{visibleMatches.map((job) => <div key={job._id} className="flex items-center gap-2 px-2 py-2 text-[14px]"><span className="min-w-0 flex-1 truncate font-semibold text-[#172334]">{job.title} <span className="font-normal text-[#64748B]">{job.company?.name}</span></span><span className="text-[#16A36A]">{job.matchScore || job.ats?.overallScore || Math.max(70, 100 - recommendedOrder.indexOf(String(job._id)) * 3)}%</span></div>)}</div>}
             <div className="mt-5 rounded-2xl border border-[#DDE1E7] bg-[#F5F6F8] p-4 text-left"><div className="flex gap-3"><Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#2583FF]" /><div><p className="text-[15px] font-semibold text-[#172334]">Checks for new matches hourly</p><p className="mt-1 text-[14px] leading-5 text-[#64748B]">We look for new matching jobs every hour and apply for you automatically.</p></div></div><div className="mt-4 flex gap-3"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#2583FF]" /><div><p className="text-[15px] font-semibold text-[#172334]">Some roles ask you a few questions</p><p className="mt-1 text-[14px] leading-5 text-[#64748B]">We still apply for you — those go out shortly, and your tracker shows which ones need your answers to be complete.</p></div></div></div>
-            <div className="mt-5 grid grid-cols-2 gap-2.5"><button type="button" onClick={onClose} className="h-12 rounded-full border border-[#DDE1E7] bg-[#F5F6F8] text-[16px] font-medium text-[#172334]">Cancel</button><button type="button" onClick={() => onEnabled({ resume: activeResume, includeGood })} disabled={!activeResume} className="h-12 rounded-full bg-[#202020] text-[16px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Turn on &amp; apply</button></div>
+            <div className="mt-5 grid grid-cols-2 gap-2.5">
+              <button type="button" onClick={onClose} className="h-12 rounded-full border border-[#DDE1E7] bg-[#F5F6F8] text-[16px] font-medium text-[#172334]">Cancel</button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    await onEnabled({ resume: activeResume, includeGood });
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={!activeResume || saving}
+                className="h-12 rounded-full bg-[#202020] text-[16px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? "Saving..." : enabled ? "Update auto-apply" : "Turn on & apply"}
+              </button>
+            </div>
+            {enabled && (
+              <button
+                type="button"
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    await onDisabled();
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+                className="mt-3 h-11 w-full rounded-full border border-[#FCA5A5] text-[15px] font-semibold text-[#B91C1C] hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Turn off auto-apply
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -858,7 +900,25 @@ export default function JobListings() {
   const [dismissingId, setDismissingId] = useState(null);
   const [applyJob, setApplyJob] = useState(null);
   const [autoApplyOpen, setAutoApplyOpen] = useState(false);
-  const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
+  // Server-backed (candidate-dashboard/auto-apply), not local UI state — without
+  // this it read back as OFF on every navigation/refresh no matter what was
+  // chosen last, since there was nowhere else it could have been remembered.
+  const [autoApply, setAutoApply] = useState({ enabled: false, resumeVersionId: null, includeGoodMatches: false });
+
+  useEffect(() => {
+    let cancelled = false;
+    api.get("/candidate-dashboard/auto-apply", { headers: accountAuthHeader() })
+      .then((response) => {
+        if (cancelled || !response.data) return;
+        setAutoApply({
+          enabled: !!response.data.enabled,
+          resumeVersionId: response.data.resumeVersionId || null,
+          includeGoodMatches: !!response.data.includeGoodMatches,
+        });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   // The split-panel's right-hand detail pane is desktop-only (hidden below
   // md); below that breakpoint, selecting a job needs to navigate to the
@@ -1187,7 +1247,7 @@ export default function JobListings() {
             onClick={() => setAutoApplyOpen(true)}
             className="shrink-0 rounded-full bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:opacity-90"
           >
-            {autoApplyEnabled ? "Auto-apply on" : "Turn it on"}
+            {autoApply.enabled ? "Auto-apply on" : "Turn it on"}
           </button>
         </div>
       </div>
@@ -1400,9 +1460,34 @@ export default function JobListings() {
         isOpen={autoApplyOpen}
         jobs={jobs}
         recommendedOrder={recommendedOrder}
+        enabled={autoApply.enabled}
+        initialResumeId={autoApply.resumeVersionId}
+        initialIncludeGood={autoApply.includeGoodMatches}
         onClose={() => setAutoApplyOpen(false)}
-        onEnabled={() => {
-          setAutoApplyEnabled(true);
+        onEnabled={async ({ resume, includeGood }) => {
+          const response = await api.put(
+            "/candidate-dashboard/auto-apply",
+            { enabled: true, resumeVersionId: resume?._id, includeGoodMatches: includeGood },
+            { headers: accountAuthHeader() }
+          );
+          setAutoApply({
+            enabled: !!response.data.enabled,
+            resumeVersionId: response.data.resumeVersionId || null,
+            includeGoodMatches: !!response.data.includeGoodMatches,
+          });
+          setAutoApplyOpen(false);
+        }}
+        onDisabled={async () => {
+          const response = await api.put(
+            "/candidate-dashboard/auto-apply",
+            { enabled: false },
+            { headers: accountAuthHeader() }
+          );
+          setAutoApply({
+            enabled: !!response.data.enabled,
+            resumeVersionId: response.data.resumeVersionId || null,
+            includeGoodMatches: !!response.data.includeGoodMatches,
+          });
           setAutoApplyOpen(false);
         }}
       />
