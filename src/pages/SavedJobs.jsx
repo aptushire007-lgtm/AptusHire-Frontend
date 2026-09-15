@@ -7,32 +7,24 @@ import { Badge, Card, EmptyState, IconTile, Skeleton } from "../components/ui/Ca
 import { Select } from "../components/ui/Field.jsx";
 import Button from "../components/ui/Button.jsx";
 
-function companyInitials(name) {
-  return String(name || "Company").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
-}
+const EXPERIENCE_BANDS = [
+  { value: "1", label: "1+ years" },
+  { value: "2", label: "2+ years" },
+  { value: "3", label: "3+ years" },
+  { value: "5", label: "5+ years" },
+  { value: "8", label: "8+ years" },
+];
 
-function SavedJobCard({ job, onUnsave, saving }) {
-  const to = `/jobs/${job.slug || job._id}`;
-  return (
-    <Card className="relative border-[#E2E8F0] bg-white dark:border-[#E2E8F0] dark:bg-white">
-      <div className="flex items-start gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FEF3E8] text-sm font-bold text-[#F97316]">{companyInitials(job.company?.name)}</span>
-        <div className="min-w-0 flex-1">
-          <Link to={to} className="block truncate text-[15px] font-semibold text-[#0F172A] hover:text-[#F97316] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5A7B71]">{job.title || "Open position"}</Link>
-          <p className="mt-1 truncate text-sm text-[#F97316]">{job.company?.name || "Company unavailable"}{job.department ? ` · ${job.department}` : ""}</p>
-        </div>
-        <button type="button" onClick={() => onUnsave(job)} disabled={saving} aria-label={`Unsave ${job.title || "job"}`} aria-pressed="true" className="tap-target inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FED7AA] bg-[#FEF3E8] text-[#F97316] transition-colors hover:bg-[#FED7AA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]/20 disabled:cursor-wait disabled:opacity-60">
-          <Bookmark className="h-4 w-4 fill-current" aria-hidden="true" />
-        </button>
-      </div>
-      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#F97316]">
-        {job.location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{job.location}</span>}
-        {job.minExperienceYears != null && <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{job.minExperienceYears ? `${job.minExperienceYears}+ yrs experience` : "No minimum experience"}</span>}
-      </div>
-      {job.description && <p className="mt-3 line-clamp-2 text-sm leading-5 text-[#64748B]">{job.description}</p>}
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#E2E8F0] pt-3"><span className="text-xs font-medium text-[#64748B]">Saved for later</span><Button as={Link} to={to} size="sm">View job</Button></div>
-    </Card>
-  );
+const SORTS = [
+  { value: "recent", label: "Recently saved" },
+  { value: "oldest", label: "Oldest saved" },
+  { value: "title", label: "Job title (A-Z)" },
+  { value: "company", label: "Company (A-Z)" },
+];
+
+function formatSavedOn(value) {
+  if (!value) return "Date unavailable";
+  return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
 export default function SavedJobs() {
