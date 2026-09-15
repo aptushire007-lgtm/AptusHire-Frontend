@@ -874,6 +874,27 @@ export default function JobListings() {
     return () => mq.removeEventListener("change", update);
   }, []);
 
+  // This page goes edge-to-edge (see the -my-6 wrapper below) so its
+  // h-[calc(100vh-…)] has to know AppShell's actual on-screen chrome
+  // itself: the sticky top header (68px on desktop, but taller on mobile —
+  // it grows a second full-width search row below md) and, below lg, a
+  // fixed bottom tab bar (its own height varies with the safe-area inset
+  // on notched phones). A hardcoded pixel guess for either drifts out of
+  // sync the moment either header changes, so measure the real elements
+  // instead — offsetHeight is naturally 0 for the tab bar once its own
+  // lg:hidden kicks in, so this needs no separate visibility check.
+  const [chromeHeight, setChromeHeight] = useState(68);
+  useEffect(() => {
+    function measure() {
+      const header = document.querySelector("header.sticky")?.offsetHeight ?? 68;
+      const bottomBar = document.querySelector('nav[aria-label="Primary"]')?.offsetHeight ?? 0;
+      setChromeHeight(header + bottomBar);
+    }
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
   useEffect(() => {
     saveBrowseState({ query, filters, viewMode });
   }, [query, filters, viewMode]);
@@ -1109,9 +1130,16 @@ export default function JobListings() {
   return (
     /*
       Escape the AppShell's px-5 py-6 padding so we can go edge-to-edge.
-      h-[calc(100vh-68px)] matches the sticky header height (68px).
+      Height is 100vh minus the real, measured AppShell chrome (chromeHeight
+      — see above): the sticky top header plus, below lg, the fixed bottom
+      tab bar. A padding-bottom on the scrollable list wouldn't fix this —
+      the list's own box was extending past the visible viewport, not just
+      its content overflowing past a correctly-sized box.
     */
-    <div className="-mx-5 -my-6 flex h-[calc(100vh-68px)] flex-col overflow-hidden sm:-mx-8 sm:-my-8">
+    <div
+      className="-mx-5 -my-6 flex flex-col overflow-hidden sm:-mx-8 sm:-my-8"
+      style={{ height: `calc(100vh - ${chromeHeight}px)` }}
+    >
 
       {/* ── Page header ───────────────────────────────────────── */}
       <div className="shrink-0 border-b border-[#EAEEF0] bg-white px-5 pb-4 pt-5 sm:px-6">
