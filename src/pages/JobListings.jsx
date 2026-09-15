@@ -90,6 +90,26 @@ function salaryFilterValue(value) {
   return value.toLowerCase().includes("k") ? amount * 1000 : amount;
 }
 
+// Survives a mobile round trip to /jobs/:id and back (a full route change,
+// so this component unmounts) so the search/filter/tab state a candidate
+// had on the list isn't silently lost when they open a job and go back.
+const BROWSE_STATE_KEY = "jobListings:browseState:v1";
+function loadBrowseState() {
+  try {
+    const raw = sessionStorage.getItem(BROWSE_STATE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+function saveBrowseState(state) {
+  try {
+    sessionStorage.setItem(BROWSE_STATE_KEY, JSON.stringify(state));
+  } catch {
+    // best-effort only
+  }
+}
+
 /** Derive match strength from recommendation rank */
 function getMatchLabel(job, recommendedOrder) {
   const pos = recommendedOrder.indexOf(String(job._id));
@@ -283,8 +303,11 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
         onClick={(e) => { e.stopPropagation(); onToggleSave(job); }}
         disabled={saving}
         aria-label={saved ? "Unsave" : "Save"}
-        className={`absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] transition-colors hover:bg-white hover:text-[#F97316] focus-visible:outline-none ${
-          saved ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+        aria-pressed={saved}
+        className={`tap-target absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] opacity-100 transition-colors hover:bg-white hover:text-[#F97316] focus-visible:outline-none ${
+          // Always visible on mobile (there's no hover to reveal it there);
+          // desktop keeps the original hover/focus reveal when not saved.
+          saved ? "" : "md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
         }`}
       >
         <Bookmark
@@ -797,6 +820,10 @@ export default function JobListings() {
   const recommendationsOnly = searchParams.get("recommended") === "1";
   const { isAuthenticated } = useAccountAuth();
 
+  // Restored once per mount — lets search/filters/tab survive a mobile
+  // navigation to /jobs/:id and back (see BROWSE_STATE_KEY above).
+  const restoredBrowseState = useMemo(() => loadBrowseState(), []);
+
   // ── Data state (all API calls preserved) ──
   const [jobs,             setJobs]             = useState([]);
   const [savedIds,         setSavedIds]         = useState(new Set());
@@ -806,13 +833,24 @@ export default function JobListings() {
   const [recommendedOrder, setRecommendedOrder] = useState([]);
 
   // ── UI state ──
-  const initialQuery = searchParams.get("q") || "";
+  const initialQuery = searchParams.get("q") || restoredBrowseState?.query || "";
   const [searchInput, setSearchInput] = useState(initialQuery);
   const [query,       setQuery]       = useState(initialQuery);
-  const [filters,     setFilters]     = useState({
+  const [filters,     setFilters]     = useState(() => ({
     location: "", matchFilter: "", minSalary: "Any",
     experience: "", skills: "", company: "", department: "",
     workArrangement: "", employmentType: "",
+    ...(restoredBrowseState?.filters || {}),
+  }));
+  // "top" = recommended matches only, "all" = every published job — same
+  // page, same list/search/filter/detail plumbing, just a different subset.
+  // An explicit ?view= (the Recommended / All Jobs nav links both set one)
+  // always wins; a bare /?recommended=1 (a redirect, a login bounce-back)
+  // falls back to whatever tab the candidate last had open.
+  const [viewMode, setViewMode] = useState(() => {
+    const explicitView = searchParams.get("view");
+    if (explicitView === "all" || explicitView === "top") return explicitView;
+    return restoredBrowseState?.viewMode || "top";
   });
   const [showFilters,  setShowFilters]  = useState(false);
   const [showSearch,   setShowSearch]   = useState(() => Boolean(initialQuery));
@@ -821,6 +859,24 @@ export default function JobListings() {
   const [applyJob, setApplyJob] = useState(null);
   const [autoApplyOpen, setAutoApplyOpen] = useState(false);
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
+
+  // The split-panel's right-hand detail pane is desktop-only (hidden below
+  // md); below that breakpoint, selecting a job needs to navigate to the
+  // full job detail route instead of just setting state nothing shows.
+  const [isDesktopSplit, setIsDesktopSplit] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktopSplit(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    saveBrowseState({ query, filters, viewMode });
+  }, [query, filters, viewMode]);
 
   // ── Fetch jobs + dashboard (API calls unchanged) ──
   useEffect(() => {
@@ -846,8 +902,9 @@ export default function JobListings() {
   const filteredJobs = useMemo(() => {
     let list = [...jobs];
 
-    // Split-panel view always shows recommended jobs ("All jobs" navigates to the full browse page).
-    if (recommendationsOnly) {
+    // Split-panel view shows recommended-only jobs on the "Top matches" tab;
+    // the in-page "All jobs" tab (viewMode) shows every published job instead.
+    if (recommendationsOnly && viewMode !== "all") {
       list = list.filter((j) => recommendedOrder.includes(String(j._id)));
     }
 
@@ -914,7 +971,7 @@ export default function JobListings() {
     }
 
     return list;
-  }, [jobs, recommendedOrder, filters, query]);
+  }, [jobs, recommendedOrder, filters, query, recommendationsOnly, viewMode]);
 
   // Keep the selection valid as the list changes (filters, search).
   useEffect(() => {
@@ -953,6 +1010,13 @@ export default function JobListings() {
     return jobs.filter((j) => new Date(j.createdAt || 0).getTime() > cutoff).length;
   }, [jobs]);
 
+  // So the Filters button still shows something is active once the panel is closed.
+  const activeFilterCount = useMemo(() => {
+    const { location, matchFilter, minSalary, experience, skills, company, department, workArrangement, employmentType } = filters;
+    return [location, matchFilter, experience, skills, company, department, workArrangement, employmentType]
+      .filter(Boolean).length + (minSalary && minSalary !== "Any" ? 1 : 0);
+  }, [filters]);
+
   // ── Save / unsave (API call unchanged) ──
   async function toggleSave(job) {
     if (!isAuthenticated) {
@@ -977,6 +1041,19 @@ export default function JobListings() {
     } finally {
       setSavingId(null);
     }
+  }
+
+  // Selecting a job from the list: on desktop the right-hand detail pane is
+  // visible, so just update state; on mobile that pane is hidden entirely,
+  // so open the real job detail route instead (same page other links use).
+  function handleSelectJob(job) {
+    const id = String(job._id);
+    if (isDesktopSplit) {
+      setSelectedJobId(id);
+      return;
+    }
+    setSelectedJobId(id);
+    navigate(`/jobs/${job.slug || job._id}`);
   }
 
   async function dismissRecommended(job) {
@@ -1040,7 +1117,9 @@ export default function JobListings() {
       <div className="shrink-0 border-b border-[#EAEEF0] bg-white px-5 pb-4 pt-5 sm:px-6">
         {/* Title + count badges */}
         <div className="flex flex-wrap items-baseline gap-2.5">
-          <h1 className="text-[30px] font-semibold text-[#0F172A]">Recommended Jobs</h1>
+          <h1 className="text-[30px] font-semibold text-[#0F172A]">
+            {viewMode === "all" ? "All Jobs" : "Recommended Jobs"}
+          </h1>
           {!loading && (
             <>
               <span className="rounded-full bg-[#EFF6FF] px-2.5 py-0.5 text-[13px] font-semibold text-[#2563EB]">
@@ -1055,8 +1134,9 @@ export default function JobListings() {
           )}
         </div>
         <p className="mt-1 text-[16px] leading-6 text-[#64748B]">
-          Job opportunities matched to your profile. The door is open — apply with your CV.
-          New matches arrive every hour.
+          {viewMode === "all"
+            ? "Every open role, searchable and filterable right here — apply with your CV."
+            : "Job opportunities matched to your profile. The door is open — apply with your CV. New matches arrive every hour."}
         </p>
 
         {/* Auto-apply banner */}
@@ -1096,19 +1176,35 @@ export default function JobListings() {
           {/* Filter / tab bar */}
           <div className="shrink-0 border-b border-[#EAEEF0] px-3 py-2.5">
             <div className="flex items-center gap-2">
-              {/* Tab segmented control */}
+              {/* Tab segmented control — switches the same list/search/filter/detail
+                  view between recommended matches and every published job.
+                  (The standalone /jobs board still exists and still works;
+                  this just gives the in-app portal its own All Jobs view too.) */}
               <div className="grid min-w-0 flex-1 grid-cols-2 gap-1 rounded-full bg-[#F1F5F9] p-0.5">
-                <span className="flex min-w-0 items-center justify-center rounded-full bg-white px-2 py-1 text-center text-[14px] font-semibold text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)] sm:px-3.5 sm:text-[15px]">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("top")}
+                  aria-pressed={viewMode === "top"}
+                  className={`flex min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-[14px] font-semibold transition-colors sm:px-3.5 sm:text-[15px] ${
+                    viewMode === "top"
+                      ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
+                      : "text-[#64748B] hover:text-[#0F172A]"
+                  }`}
+                >
                   Top matches
-                </span>
-                <a
-                  href="/jobs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-[14px] font-semibold text-[#64748B] transition-colors hover:text-[#0F172A] sm:px-3.5 sm:text-[15px]"
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("all")}
+                  aria-pressed={viewMode === "all"}
+                  className={`flex min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-[14px] font-semibold transition-colors sm:px-3.5 sm:text-[15px] ${
+                    viewMode === "all"
+                      ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
+                      : "text-[#64748B] hover:text-[#0F172A]"
+                  }`}
                 >
                   All jobs
-                </a>
+                </button>
               </div>
 
               {/* Search icon button */}
@@ -1125,18 +1221,25 @@ export default function JobListings() {
                 <Search className="h-[18px] w-[18px]" aria-hidden />
               </button>
 
-              {/* Filters button */}
+              {/* Filters button — badge shows an active filter is applied even
+                  when the panel itself is closed. */}
               <button
                 type="button"
                 onClick={() => setShowFilters((v) => !v)}
+                aria-expanded={showFilters}
                 className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[14px] font-semibold whitespace-nowrap transition-colors ${
-                  showFilters
+                  showFilters || activeFilterCount > 0
                     ? "border-[#F97316] bg-[#FEF3E8] text-[#F97316]"
                     : "border-[#E2E8F0] text-[#64748B] hover:border-[#7C3F10] hover:text-[#7C3F10]"
                 }`}
               >
                 <SlidersHorizontal className="h-[18px] w-[18px]" aria-hidden />
                 Filters
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F97316] px-1 text-[10px] font-bold text-white">
+                    {activeFilterCount}
+                  </span>
+                )}
               </button>
             </div>
 
@@ -1204,7 +1307,7 @@ export default function JobListings() {
                     key={job._id}
                     job={job}
                     active={String(job._id) === selectedJobId}
-                    onClick={() => setSelectedJobId(String(job._id))}
+                    onClick={() => handleSelectJob(job)}
                     saved={savedIds.has(String(job._id))}
                     onToggleSave={toggleSave}
                     saving={savingId === String(job._id)}
@@ -1217,7 +1320,7 @@ export default function JobListings() {
                 <>
                   {topMatches.length > 0 && (
                     <p className="bg-[#F4F6F9] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
-                      More jobs you might like
+                      {viewMode === "all" ? "All other jobs" : "More jobs you might like"}
                     </p>
                   )}
                   {moreJobs.map((job) => (
@@ -1225,7 +1328,7 @@ export default function JobListings() {
                       key={job._id}
                       job={job}
                       active={String(job._id) === selectedJobId}
-                      onClick={() => setSelectedJobId(String(job._id))}
+                      onClick={() => handleSelectJob(job)}
                       saved={savedIds.has(String(job._id))}
                       onToggleSave={toggleSave}
                       saving={savingId === String(job._id)}

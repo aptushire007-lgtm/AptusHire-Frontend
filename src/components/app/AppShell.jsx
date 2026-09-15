@@ -42,7 +42,7 @@ const ACCOUNT_NAV_GROUPS = [
     divider: false,
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
-      { to: "/?recommended=1", label: "Recommended", icon: Sparkles, end: true },
+      { to: "/?recommended=1&view=top", label: "Recommended", icon: Sparkles, end: true },
       { to: "/saved-jobs", label: "Saved Jobs", icon: Bookmark },
       { to: "/applied-jobs", label: "Applied Jobs", icon: FileText },
       { to: "/assessments", label: "Assessment", icon: ClipboardList, badgeKey: "assessments" },
@@ -54,7 +54,7 @@ const ACCOUNT_NAV_GROUPS = [
 // destinations directly; everything else lives behind "More".
 const BOTTOM_TAB_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/?recommended=1", label: "Recommended", icon: Sparkles, end: true },
+  { to: "/?recommended=1&view=top", label: "Recommended", icon: Sparkles, end: true },
   { to: "/assessments", label: "Assessments", icon: ClipboardList, badgeKey: "assessments" },
 ];
 
@@ -335,11 +335,12 @@ function HeaderActions({ onNavigate }) {
                 {user?.email && <p className="truncate text-[12px] text-[#64748B]">{user.email}</p>}
               </div>
             )}
-            {/* Mobile: the editable profile (Settings/account moved into the "More" sheet). Desktop keeps Settings — it has no other entry point there. */}
+            {/* Update Profile: available at every breakpoint (desktop previously
+                had no entry point to it from this menu — only Settings). */}
             <Link
               to="/profile"
               onClick={() => { setMenuOpen(false); onNavigate?.(); }}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9] lg:hidden"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] font-medium text-[#0F172A] hover:bg-[#F4F6F9]"
             >
               <User className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
               Update Profile
