@@ -150,6 +150,7 @@ function useOverlayA11y(open, panelRef, closeRef) {
 function SidebarNav({ collapsed, onNavigate, label }) {
   const { isAuthenticated } = useAccountAuth();
   const { search }          = useLocation();
+  const navigate             = useNavigate();
   const counts               = useAssessmentBadgeCount();
 
   const groups = isAuthenticated
@@ -171,7 +172,13 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                 key={item.to}
                 to={item.to}
                 end={item.end}
-                onClick={onNavigate}
+                onClick={(event) => {
+                  onNavigate?.();
+                  if (item.label === "Recommended") {
+                    event.preventDefault();
+                    navigate("/?recommended=1&view=top");
+                  }
+                }}
                 title={collapsed ? item.label : undefined}
                 className={({ isActive }) => {
                   const active = isActive && !isHidden;
@@ -431,7 +438,7 @@ function ShellInner({ children }) {
       <aside
         id={SIDEBAR_ID}
         className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#E2E8F0] bg-white transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
-          collapsed ? "w-[4.5rem]" : "w-[calc(18rem+1cm)]"
+          collapsed ? "w-[4.5rem]" : "w-72"
         }`}
       >
         <SidebarBrand collapsed={collapsed} />
@@ -465,7 +472,7 @@ function ShellInner({ children }) {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute inset-y-0 left-0 flex w-[calc(18rem+1cm)] max-w-[85vw] flex-col border-r border-[#E2E8F0] bg-white shadow-lift"
+            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#E2E8F0] bg-white shadow-lift"
           >
             <button
               ref={closeRef}

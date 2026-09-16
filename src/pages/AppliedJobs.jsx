@@ -333,7 +333,6 @@ export default function AppliedJobs() {
               </span>
             )}
           </div>
-          <p className="mt-2 text-sm text-[#64748B]">A list of the jobs you've applied to</p>
         </div>
         <label className="flex min-h-11 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-4 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E] focus-within:ring-2 focus-within:ring-[#FEF3E8]"><Search className="h-4 w-4" /><span className="sr-only">Search applications</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-32 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-40" /></label>
       </div>

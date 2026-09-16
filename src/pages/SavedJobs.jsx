@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Bookmark, Briefcase, Building2, Calendar, FileText, MapPin, Search, SlidersHorizontal, Sparkles, Trash2 } from "lucide-react";
+import { Bookmark, Briefcase, Building2, Calendar, MapPin, Search, SlidersHorizontal, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
@@ -88,13 +88,9 @@ export default function SavedJobs() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] w-full space-y-6 pb-10">
+    <div className="min-h-[calc(100vh-7rem)] w-full space-y-7 pb-10">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">Your activity</p>
-        <h1 className="mt-2 text-2xl font-bold text-[#0F172A]">
-          Saved <span className="text-[#CA8A04]">Jobs</span>
-        </h1>
-        <p className="mt-2 text-sm text-[#64748B]">Roles you're considering for your next application.</p>
+        <h1 className="text-[30px] font-semibold text-[#0F172A]">Saved Jobs</h1>
       </div>
 
       {error && (
@@ -218,26 +214,6 @@ export default function SavedJobs() {
             </>
           )}
 
-          <Card tone="yellow" className="flex flex-wrap items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <IconTile icon={Briefcase} tone="yellow" size="lg" />
-              <div>
-                <h3 className="text-base font-bold text-[#0F172A]">Find more opportunities</h3>
-                <p className="mt-1 text-sm text-[#64748B]">Explore thousands of jobs and find the right fit for your career.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button as={Link} to="/" variant="yellow">
-                Browse Jobs
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <span aria-hidden="true" className="relative hidden h-16 w-16 shrink-0 items-center justify-center sm:flex">
-                <FileText className="h-14 w-14 text-[#E2E8F0]" strokeWidth={1.5} />
-                <Bookmark className="absolute -bottom-1 -right-1 h-6 w-6 fill-[#EAB308] text-[#EAB308]" />
-                <Sparkles className="absolute -top-1 -left-1 h-4 w-4 text-[#CA8A04]" />
-              </span>
-            </div>
-          </Card>
         </>
       )}
     </div>

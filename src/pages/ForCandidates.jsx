@@ -653,11 +653,11 @@ function Hero({ jobCount }) {
                 <div style={{ background: "#f5f6f8", padding: "0 0 8px" }}>
                   {/* portal header */}
                   <div style={{ background: "#fff", borderBottom: "1px solid #e8e8ed", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#E85A1A" }}>AptusHire</span>
+                    <img src="/logo.png" alt="AptusHire" style={{ height: 20, width: "auto" }} />
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 10, color: "#64748B" }}>🔔</span>
-                      <span style={{ fontSize: 10, color: "#64748B", border: "1px solid #e0e0e0", borderRadius: 4, padding: "1px 6px" }}>🇺🇸 English</span>
-                      <span style={{ width: 24, height: 24, borderRadius: "50%", background: "#FEF3E8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#F97316" }}>U</span>
+                      <span style={{ fontSize: 10, color: "#64748B", border: "1px solid #e0e0e0", borderRadius: 4, padding: "1px 6px" }}>Search</span>
+                      <span style={{ width: 24, height: 24, borderRadius: "50%", background: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#172334" }}>DU</span>
                     </div>
                   </div>
                   {/* sidebar + content */}
@@ -665,15 +665,15 @@ function Hero({ jobCount }) {
                     {/* sidebar */}
                     <div style={{ width: 130, background: "#fff", borderRight: "1px solid #e8e8ed", padding: "12px 0", flexShrink: 0 }}>
                       <div style={{ padding: "6px 12px", fontSize: 10, color: "#64748B" }}>Welcome!</div>
-                      {["Private Introduction", "Proactive Outreach", "Recommended_ 33", "CV Evaluation", "Job Preferences", "Applied Jobs", "Past Assessments"].map((item, i) => (
+                      {["Dashboard", "Recommended", "Saved Jobs", "Applied Jobs", "Assessment"].map((item, i) => (
                         <div key={i} style={{
-                          padding: "6px 12px", fontSize: 10, color: i === 2 ? "#E85A1A" : "#64748B",
-                          background: i === 2 ? "rgba(232,90,26,.06)" : "transparent",
+                          padding: "6px 12px", fontSize: 10, color: i === 1 ? "#172334" : "#64748B",
+                          background: i === 1 ? "#F1F5F9" : "transparent",
                           display: "flex", alignItems: "center", gap: 6
                         }}>
-                          <span style={{ width: 12, height: 12, borderRadius: 3, background: i === 2 ? "#FEF3E8" : "#f0f0f0", flexShrink: 0 }} />
+                          <span style={{ width: 12, height: 12, borderRadius: 3, background: i === 1 ? "#DBEAFE" : "#f0f0f0", flexShrink: 0 }} />
                           {item}
-                          {i === 2 && <span style={{ marginLeft: "auto", fontSize: 9, background: "#FEF3E8", color: "#F97316", padding: "1px 4px", borderRadius: 999 }}>+2 New</span>}
+                          {i === 1 && <span style={{ marginLeft: "auto", fontSize: 9, background: "#DBEAFE", color: "#2563EB", padding: "1px 4px", borderRadius: 999 }}>3</span>}
                         </div>
                       ))}
                     </div>
@@ -682,8 +682,8 @@ function Hero({ jobCount }) {
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                         <div>
                           <span style={{ fontSize: 13, fontWeight: 700 }}>Recommended Jobs</span>
-                          <span style={{ fontSize: 10, color: "#F97316", marginLeft: 6, background: "#FEF3E8", padding: "1px 6px", borderRadius: 999 }}>33 Jobs</span>
-                          <span style={{ fontSize: 10, color: "#64748B", marginLeft: 4 }}>+4 New</span>
+                          <span style={{ fontSize: 10, color: "#2563EB", marginLeft: 6, background: "#EFF6FF", padding: "1px 6px", borderRadius: 999 }}>3 Jobs</span>
+                          <span style={{ fontSize: 10, color: "#16A34A", marginLeft: 4 }}>+1 New</span>
                         </div>
                         <span style={{ fontSize: 10, color: "#64748B", border: "1px solid #e0e0e0", borderRadius: 4, padding: "2px 8px" }}>Search</span>
                       </div>
@@ -693,23 +693,23 @@ function Hero({ jobCount }) {
                         {/* left job item */}
                         <div style={{ flex: 1, border: "1px solid #e0e0e0", borderRadius: 8, padding: "8px", fontSize: 10 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <div style={{ width: 20, height: 20, borderRadius: 4, background: "#FEF3E8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#F97316", flexShrink: 0 }}>M</div>
+                            <div style={{ width: 20, height: 20, borderRadius: 4, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#2563EB", flexShrink: 0 }}>DC</div>
                             <div>
-                              <div style={{ fontWeight: 600 }}>Senior Backend Engineer</div>
+                              <div style={{ fontWeight: 600 }}>marketing</div>
                               <div style={{ color: "#64748B" }}>New</div>
-                              <div style={{ color: "#64748B" }}>Meridian Logistics</div>
+                              <div style={{ color: "#64748B" }}>Demo Company</div>
                             </div>
                           </div>
-                          <div style={{ marginTop: 4, color: "#64748B" }}>Ho Chi Minh · $1,500–$2,500</div>
-                          <span style={{ fontSize: 9, background: "#FEF3E8", color: "#F97316", padding: "2px 6px", borderRadius: 999, marginTop: 4, display: "inline-block" }}>Strong match</span>
+                          <div style={{ marginTop: 4, color: "#64748B" }}>Remote / Hybrid</div>
+                          <span style={{ fontSize: 9, background: "#DCFCE7", color: "#166534", padding: "2px 6px", borderRadius: 999, marginTop: 4, display: "inline-block" }}>Strong match</span>
                         </div>
                         {/* right detail */}
                         <div style={{ flex: 1.2, border: "1px solid #e0e0e0", borderRadius: 8, padding: "8px", fontSize: 10 }}>
-                          <div style={{ fontWeight: 700, marginBottom: 4 }}>Senior Backend Engineer</div>
+                          <div style={{ fontWeight: 700, marginBottom: 4 }}>marketing</div>
                           <div style={{ display: "flex", gap: 12 }}>
-                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Salary</div><div style={{ fontWeight: 600 }}>$1,500–2,500</div></div>
-                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Workplace Type</div><div style={{ fontWeight: 600 }}>Hybrid</div></div>
-                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Employment type</div><div style={{ fontWeight: 600 }}>Full-time</div></div>
+                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Location</div><div style={{ fontWeight: 600 }}>Remote</div></div>
+                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Workplace</div><div style={{ fontWeight: 600 }}>Hybrid</div></div>
+                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Type</div><div style={{ fontWeight: 600 }}>Full-time</div></div>
                           </div>
                         </div>
                       </div>

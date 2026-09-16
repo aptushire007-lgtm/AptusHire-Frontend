@@ -108,12 +108,12 @@ function StatCard({ icon, title, value, valueColor = TXP, iconBg, description, a
 function QuickActionCard({ icon, title, description, to, dot }) {
   return (
     <Link to={to} style={{
-      display: "flex", alignItems: "center", gap: 12, minHeight: 68,
-      background: WH, border: `1px solid ${BORD}`, borderRadius: 12, padding: "12px 16px",
+      display: "flex", alignItems: "center", gap: 10, minHeight: 58,
+      background: WH, border: `1px solid ${BORD}`, borderRadius: 12, padding: "10px 13px",
       textDecoration: "none", boxShadow: SHADOW_CARD, transition: "box-shadow 180ms ease",
     }}>
       <div style={{ position: "relative", flexShrink: 0 }}>
-        <IconBox icon={icon} size={40} radius={999} iconSize={18} />
+        <IconBox icon={icon} size={36} radius={999} iconSize={17} />
         {dot && (
           <span style={{
             position: "absolute", top: -2, right: -2, width: 10, height: 10,
@@ -122,8 +122,8 @@ function QuickActionCard({ icon, title, description, to, dot }) {
         )}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 16, fontWeight: 500, color: TXP, margin: 0 }}>{title}</p>
-        <p style={{ fontSize: 14, color: TXS, marginTop: 2 }}>{description}</p>
+        <p style={{ fontSize: 15, fontWeight: 600, color: TXP, margin: 0 }}>{title}</p>
+        {description && <p style={{ fontSize: 13, color: TXS, marginTop: 2 }}>{description}</p>}
       </div>
       <ChevronRight style={{ width: 18, height: 18, color: TXM, flexShrink: 0 }} />
     </Link>
@@ -248,7 +248,7 @@ export default function CandidateDashboard() {
   const maxStageCount = Math.max(1, ...pipelineCounts.map((s) => s.count));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
       {/* ══════ HERO — compact horizontal banner (not a tall card) ══════ */}
       <style>{`
@@ -259,42 +259,31 @@ export default function CandidateDashboard() {
         }
       `}</style>
       <div className="dash-hero" style={{
-        backgroundImage: `linear-gradient(to right, ${WH} 0%, ${WH} 45%, rgba(255,255,255,0.55) 68%, rgba(255,255,255,0) 88%), url('/hero-banner.png')`,
-        backgroundSize: "cover, cover",
-        backgroundPosition: "center, right center",
+        backgroundImage: `linear-gradient(to right, ${WH} 0%, ${WH} 52%, rgba(255,255,255,0.9) 66%, rgba(255,255,255,0) 84%), url('/hero-banner.png')`,
+        backgroundSize: "cover, 96% auto",
+        backgroundPosition: "center, right 35%",
         backgroundRepeat: "no-repeat, no-repeat",
-        border: `1px solid ${BORD}`, borderRadius: 14, padding: "12px 24px",
+        border: `1px solid ${BORD}`, borderRadius: 14, minHeight: 156, padding: "18px 24px", overflow: "hidden",
         boxShadow: SHADOW_CARD,
-        display: "flex", gap: 20, alignItems: "center", justifyContent: "space-between",
+        display: "flex", gap: 24, alignItems: "center", justifyContent: "space-between",
       }}>
         {/* left: eyebrow + greeting + description + actions */}
         <div style={{ flex: "1 1 300px", minWidth: 240 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: YEL, flexShrink: 0 }} />
-            <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.09em", textTransform: "uppercase", color: TXS }}>
-              Candidate Dashboard
-            </span>
-          </div>
-
           <h1 style={{ fontSize: 30, fontWeight: 500, lineHeight: 1.15, color: TXP, margin: 0 }}>
             {greeting},{" "}
             <span style={{ color: YELD, fontWeight: 600 }}>{displayName}</span> <span role="img" aria-label="wave">👋</span>
           </h1>
-          <p style={{ fontSize: 14, fontWeight: 400, color: TXS, marginTop: 4 }}>
-            Here's your hiring progress and recent updates.
-          </p>
-
-          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+          <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
             <Link to="/?recommended=1" style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
-              height: 36, padding: "0 16px", borderRadius: 8,
+              height: 38, padding: "0 17px", borderRadius: 9,
               background: DARK, color: WH, fontSize: 14, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap",
             }}>
               Find Jobs <ArrowRight style={{ width: 15, height: 15 }} />
             </Link>
             <Link to="/profile" style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center",
-              height: 36, padding: "0 16px", borderRadius: 8,
+              height: 38, padding: "0 17px", borderRadius: 9,
               background: WH, border: `1px solid ${BORD}`, color: TXP, fontSize: 14, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap",
             }}>
               Update Profile
@@ -302,17 +291,8 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* middle: profile completion + download */}
+        {/* middle: download */}
         <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", gap: 6, minWidth: 170 }}>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 500, color: TXS, marginBottom: 4 }}>Profile completion</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 28, fontWeight: 600, color: TXP }}>{pct}%</span>
-              <div style={{ width: 110, height: 7, background: BORD, borderRadius: 999, overflow: "hidden" }}>
-                <div style={{ width: `${pct}%`, height: "100%", background: YEL, borderRadius: 999 }} />
-              </div>
-            </div>
-          </div>
           <button
             type="button"
             onClick={handleDownload}
@@ -341,7 +321,7 @@ export default function CandidateDashboard() {
       </div>
 
       {/* ══════ STAT CARDS ══════ */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
         <StatCard
           icon={Briefcase}
           title="Applications"
@@ -372,13 +352,12 @@ export default function CandidateDashboard() {
       </div>
 
       {/* ══════ APPLICATION PIPELINE ══════ */}
-      <Card style={{ padding: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+      <Card style={{ padding: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14, marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <IconBox icon={ClipboardList} bg={DARK} color={WH} />
             <div>
               <p style={{ fontSize: 20, fontWeight: 600, color: TXP, margin: 0 }}>Application Pipeline</p>
-              <p style={{ fontSize: 14, color: TXS, marginTop: 2 }}>A current count of your applications tracked by hiring stage.</p>
             </div>
           </div>
           <span style={{
@@ -414,11 +393,11 @@ export default function CandidateDashboard() {
 
       {/* ══════ QUICK ACTIONS ══════ */}
       <div>
-        <p style={{ fontSize: 22, fontWeight: 600, color: TXP, margin: "0 0 10px" }}>Quick Actions</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
-          <QuickActionCard icon={Search} title="Find Roles" description="Explore new opportunities" to="/?recommended=1" />
-          <QuickActionCard icon={UserRound} title="My Profile & Trust" description="Keep your profile updated" to="/profile" />
-          <QuickActionCard icon={Bell} title="Notifications" description="Stay up to date" to="/notifications" dot={hasUnreadNotif} />
+        <p style={{ fontSize: 22, fontWeight: 600, color: TXP, margin: "0 0 12px" }}>Quick Actions</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+          <QuickActionCard icon={Search} title="Find Roles" to="/?recommended=1" />
+          <QuickActionCard icon={UserRound} title="My Profile & Trust" to="/profile" />
+          <QuickActionCard icon={Bell} title="Notifications" to="/notifications" dot={hasUnreadNotif} />
         </div>
       </div>
 

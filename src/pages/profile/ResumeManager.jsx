@@ -136,10 +136,12 @@ export default function ResumeManager() {
     }
   };
 
-  const handleSetDefault = async (id) => {
+  const handleSetDefault = async (id, restoring = false) => {
     try {
       await api.patch(`/candidate-dashboard/resumes/${id}/default`, {}, { headers: accountAuthHeader() });
-      setSuccessMsg("Default resume updated. Quick Apply will now use this version.");
+      setSuccessMsg(restoring
+        ? "Resume version restored and set as default. Quick Apply will now use this version."
+        : "Default resume updated. Quick Apply will now use this version.");
       setTimeout(() => setSuccessMsg(""), 3000);
       await fetchVersions();
     } catch (err) {
@@ -195,6 +197,7 @@ export default function ResumeManager() {
   return (
     <div className="space-y-6">
       <PageHero
+        className="[&_span]:border-[#E8B84D]! [&_span]:bg-[#FFF7DF]! [&_span]:text-[#B9821E]!"
         eyebrow="Resume Library"
         eyebrowIcon={FileText}
         title="Resume Version Manager"
@@ -244,12 +247,11 @@ export default function ResumeManager() {
             />
             <label
               htmlFor="resume-version-upload"
-              data-profile-action="true"
               onClick={() => setReplaceTarget(null)}
-              className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold !text-white transition-all shadow-xs ${
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold text-white! transition-all shadow-xs ${
                 activeVersions.length >= 5
                   ? "cursor-not-allowed bg-slate-100 text-slate-400 dark:text-slate-500"
-                  : "cursor-pointer bg-[#F97316] text-white hover:bg-[#F97316]-dark dark:bg-[#F97316] dark:text-white"
+                  : "cursor-pointer bg-[#172334] text-white hover:bg-navy-light dark:bg-[#172334] dark:text-white"
               }`}
             >
               {uploading ? (
@@ -275,7 +277,7 @@ export default function ResumeManager() {
             ))}
           </div>
         ) : activeVersions.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-[#FED7AA] bg-white p-8 text-center dark:border-[#FED7AA] dark:bg-white">
+          <div className="mt-8 rounded-2xl border border-dashed border-[#E8B84D]/60 bg-white p-8 text-center dark:border-[#E8B84D]/60 dark:bg-white">
             <FileText className="mx-auto h-12 w-12 text-slate-400" />
             <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">No active resume versions yet</h3>
             <p className="mt-1 text-xs text-slate-500">
@@ -321,7 +323,7 @@ export default function ResumeManager() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="ghost" data-profile-action="true" onClick={() => handleSetDefault(av._id)}>
+                    <Button size="sm" variant="ghost" onClick={() => handleSetDefault(av._id, true)}>
                       Restore &amp; Set Default
                     </Button>
                   </div>
@@ -336,7 +338,7 @@ export default function ResumeManager() {
       {reviewModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F4F6F9]-deep/80 p-4 backdrop-blur-xs">
           <div className="w-full max-w-lg rounded-3xl border border-[#E2E8F0] bg-white p-6 shadow-lift">
-            <div className="flex items-center gap-2 text-[#F97316]">
+            <div className="flex items-center gap-2 text-[#B9821E]">
               <Sparkles className="h-5 w-5" />
               <h3 className="font-display text-lg font-bold text-[#0F172A]">Review Extracted Version</h3>
             </div>
@@ -375,7 +377,7 @@ export default function ResumeManager() {
                     placeholder="Add tag (e.g. Frontend, Clinical)"
                     className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-900 dark:text-white"
                   />
-                  <Button size="sm" variant="secondary" data-profile-action="true" onClick={addTag}>Add</Button>
+                  <Button size="sm" variant="secondary" onClick={addTag}>Add</Button>
                 </div>
               </div>
 
@@ -383,7 +385,7 @@ export default function ResumeManager() {
                 <label className="block text-xs font-bold text-slate-700">Extracted Skills ({extractedSkills.length})</label>
                 <div className="mt-1 max-h-28 overflow-y-auto flex flex-wrap gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5/50">
                   {extractedSkills.map((s) => (
-                    <span key={s} className="inline-flex items-center gap-1 rounded-full bg-[#FEF3E8] px-2.5 py-0.5 text-xs font-semibold text-[#F97316]">
+                    <span key={s} className="inline-flex items-center gap-1 rounded-full bg-[#FFF7DF] px-2.5 py-0.5 text-xs font-semibold text-[#B9821E]">
                       {s}
                       <button onClick={() => removeSkill(s)} className="text-slate-400 hover:text-slate-600">&times;</button>
                     </span>
@@ -393,8 +395,8 @@ export default function ResumeManager() {
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              <Button variant="outline" data-profile-action="true" onClick={() => setReviewModalOpen(false)}>Cancel</Button>
-              <Button data-profile-action="true" onClick={handleSaveReview}>Save Version</Button>
+              <Button variant="outline" onClick={() => setReviewModalOpen(false)}>Cancel</Button>
+              <Button className="bg-[#172334]! text-white! hover:bg-navy-light!" onClick={handleSaveReview}>Save Version</Button>
             </div>
           </div>
         </div>
@@ -411,7 +413,7 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
   return (
     <div className={`relative flex flex-col justify-between rounded-2xl border p-5 transition-all shadow-xs ${
       version.isDefault
-        ? "border-[#FED7AA] bg-white dark:border-[#FED7AA] dark:bg-white"
+        ? "border-[#E8B84D] bg-white dark:border-[#E8B84D] dark:bg-white"
         : "border-[#E2E8F0] bg-white dark:border-[#E2E8F0] dark:bg-white"
     }`}>
       <div>
@@ -422,11 +424,11 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <h3 className="min-w-0 flex-1 font-display text-sm font-bold [overflow-wrap:anywhere] text-slate-900 dark:text-white">
+                <h3 className="min-w-0 flex-1 font-display text-sm font-bold wrap-anywhere text-slate-900 dark:text-white">
                   {version.label}
                 </h3>
                 {version.isDefault && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#FEF3E8] px-2 py-0.5 text-[11px] font-extrabold text-[#F97316] shadow-2xs">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF7DF] px-2 py-0.5 text-[11px] font-extrabold text-[#B9821E] shadow-2xs">
                     <Star className="h-3 w-3 fill-current" /> Default
                   </span>
                 )}
@@ -452,7 +454,7 @@ function ResumeVersionCard({ version, onSetDefault, onArchive, onDelete, onRepla
         {/* Extracted Skills Summary */}
         <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
           {skills.slice(0, 5).map((skill) => (
-            <span key={skill} className="rounded-full bg-[#FEF3E8] px-2 py-0.5 text-[11px] font-semibold text-[#F97316]">
+            <span key={skill} className="rounded-full bg-[#FFF7DF] px-2 py-0.5 text-[11px] font-semibold text-[#B9821E]">
               {skill}
             </span>
           ))}

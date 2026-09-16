@@ -102,13 +102,32 @@ export default function Assessments() {
   }, [assessments, query]);
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] w-full space-y-6 pb-10">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">My progress</p><h1 className="mt-2 text-2xl font-bold text-[#0F172A]">Assessments</h1><p className="mt-2 text-sm text-[#64748B]">Review assigned assessments and track what you have completed.</p></div><div className="flex flex-wrap items-center gap-2"><label className="flex min-h-10 items-center gap-2 rounded-full border border-[#E0E5E2] bg-white px-3.5 text-sm text-[#77807D] shadow-[0_2px_6px_rgba(33,71,64,.06)] focus-within:border-[#A7D68E]"><Search className="h-4 w-4" /><span className="sr-only">Search assessments</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-28 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-[#77807D] focus:ring-0 sm:w-36" /></label><Button type="button" variant="outline" size="sm" onClick={load} className="!border-[#7C3F10] !text-[#7C3F10] hover:!bg-[#FEF3E8] hover:!text-[#7C3F10] focus-visible:!ring-[#7C3F10]/20"><RotateCcw className="h-3.5 w-3.5" /> Refresh</Button></div></div>
+    <div className="min-h-[calc(100vh-7rem)] w-full space-y-7 pb-10">
+      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <h1 className="text-[30px] font-semibold tracking-tight text-[#0F172A]">Assessments</h1>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <label className="flex min-h-11 items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-4 text-sm text-[#64748B] shadow-[0_2px_8px_rgba(15,23,42,0.05)] transition-colors focus-within:border-[#F97316] focus-within:ring-2 focus-within:ring-[#FEF3E8]">
+            <Search className="h-4 w-4 text-[#94A3B8]" />
+            <span className="sr-only">Search assessments</span>
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search assessments" className="w-32 border-0 bg-transparent p-0 text-sm text-[#0F172A] outline-none placeholder:text-[#94A3B8] focus:ring-0 sm:w-40" />
+          </label>
+          <Button type="button" variant="outline" size="sm" onClick={load} className="!min-h-11 !rounded-full !border-[#CBD5E1] !px-4 !text-[#334155] hover:!border-[#F97316] hover:!bg-[#FEF3E8] hover:!text-[#7C3F10] focus-visible:!ring-[#F97316]/20">
+            <RotateCcw className="h-3.5 w-3.5" /> Refresh
+          </Button>
+        </div>
+      </div>
       {state === "loading" && <div className="grid gap-4 md:grid-cols-2">{[1, 2].map((item) => <Card key={item}><Skeleton className="h-5 w-2/3" /><Skeleton className="mt-3 h-4 w-1/3" /><Skeleton className="mt-6 h-10 w-full" /></Card>)}</div>}
       {state === "error" && <Card role="alert" className="border-red-200 bg-red-50"><p className="text-sm font-semibold text-red-700">{error}</p><Button size="sm" variant="outline" className="mt-4" onClick={load}>Try again</Button></Card>}
       {state === "ready" && assessments.length === 0 && <EmptyState icon={ClipboardList} title="No assessments yet" description="Assigned assessments will appear here when a hiring team sends one to you." action={<Button as={Link} to="/" size="sm">Find jobs</Button>} />}
       {state === "ready" && assessments.length > 0 && filteredAssessments.length === 0 && <Card><p className="text-sm text-[#64748B]">No assessments match &quot;{query}&quot;.</p></Card>}
-      {state === "ready" && filteredAssessments.length > 0 && <div className="min-h-[calc(100vh-16rem)] w-full rounded-[16px] border border-[#E2E8F0] bg-white shadow-[0_5px_18px_rgba(33,71,64,.05)]"><table className="w-full table-fixed border-collapse text-left"><thead className="bg-[#FBFCFB]"><tr className="text-[11px] font-bold text-[#14233A]"><th className="w-[18%] px-3 py-3 sm:px-4">Company</th><th className="w-[24%] px-3 py-3 sm:px-4">Assessment</th><th className="w-[15%] px-3 py-3 sm:px-4">Type</th><th className="w-[19%] px-3 py-3 sm:px-4">Invitation date</th><th className="w-[13%] px-3 py-3 sm:px-4">Score / Status</th><th className="w-[11%] px-3 py-3 text-right sm:px-4">Action</th></tr></thead><tbody>{filteredAssessments.map((assessment) => <AssessmentRow key={assessment._id} assessment={assessment} onOpen={openAssessment} opening={openingId === assessment._id} />)}</tbody></table></div>}
+      {state === "ready" && filteredAssessments.length > 0 && (
+        <div className="w-full overflow-x-auto rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+          <table className="w-full min-w-[820px] table-fixed border-collapse text-left">
+            <thead className="bg-[#F8FAFC]"><tr className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#475569]"><th className="w-[18%] px-3 py-3.5 sm:px-4">Company</th><th className="w-[24%] px-3 py-3.5 sm:px-4">Assessment</th><th className="w-[15%] px-3 py-3.5 sm:px-4">Type</th><th className="w-[19%] px-3 py-3.5 sm:px-4">Invitation date</th><th className="w-[13%] px-3 py-3.5 sm:px-4">Score / Status</th><th className="w-[11%] px-3 py-3.5 text-right sm:px-4">Action</th></tr></thead>
+            <tbody>{filteredAssessments.map((assessment) => <AssessmentRow key={assessment._id} assessment={assessment} onOpen={openAssessment} opening={openingId === assessment._id} />)}</tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
