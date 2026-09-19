@@ -57,11 +57,12 @@ const ACCOUNT_NAV_GROUPS = [
   },
 ];
 
-// The bottom tab bar (mobile, authenticated) surfaces the three most-used
+// The bottom tab bar (mobile, authenticated) surfaces the four most-used
 // destinations directly; everything else lives behind "More".
 const BOTTOM_TAB_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/?recommended=1&view=top", label: "Recommended", icon: Sparkles, end: true },
+  { to: "/interviews", label: "Interviews", icon: Video, badgeKey: "interviews" },
   { to: "/assessments", label: "Assessments", icon: ClipboardList, badgeKey: "assessments" },
 ];
 
