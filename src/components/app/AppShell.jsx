@@ -150,6 +150,7 @@ function useOverlayA11y(open, panelRef, closeRef) {
 function SidebarNav({ collapsed, onNavigate, label }) {
   const { isAuthenticated } = useAccountAuth();
   const { search }          = useLocation();
+  const navigate             = useNavigate();
   const counts               = useAssessmentBadgeCount();
 
   const groups = isAuthenticated
@@ -171,7 +172,13 @@ function SidebarNav({ collapsed, onNavigate, label }) {
                 key={item.to}
                 to={item.to}
                 end={item.end}
-                onClick={onNavigate}
+                onClick={(event) => {
+                  onNavigate?.();
+                  if (item.label === "Recommended") {
+                    event.preventDefault();
+                    navigate("/?recommended=1&view=top");
+                  }
+                }}
                 title={collapsed ? item.label : undefined}
                 className={({ isActive }) => {
                   const active = isActive && !isHidden;

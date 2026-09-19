@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   FileText,
+  Eye,
   Star,
   Sparkles,
   CheckCircle2,
@@ -25,6 +26,9 @@ export default function ApplyVersionModal({
   const [error, setError] = useState("");
   const [versionsData, setVersionsData] = useState([]);
   const [selectedVersionId, setSelectedVersionId] = useState(null);
+  const [previewVersion, setPreviewVersion] = useState(null);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState("");
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const [consentAi, setConsentAi] = useState(true);
@@ -40,6 +44,8 @@ export default function ApplyVersionModal({
       // Reset state when modal closes so stale data doesn't flash on reopen
       setVersionsData([]);
       setSelectedVersionId(null);
+      setPreviewVersion(null);
+      setPreviewPdfUrl("");
       setSubmitted(false);
       setError("");
       setLoading(true);
@@ -80,6 +86,28 @@ export default function ApplyVersionModal({
     loadVersionScores();
     return () => controller.abort();
   }, [isOpen, job]);
+
+  useEffect(() => {
+    if (!previewVersion) return undefined;
+    let objectUrl = "";
+    const controller = new AbortController();
+    setPreviewLoading(true);
+    api.get(`/candidate-dashboard/resumes/${previewVersion._id}/download`, {
+      headers: accountAuthHeader(), responseType: "blob", signal: controller.signal,
+    })
+      .then((response) => {
+        objectUrl = URL.createObjectURL(response.data);
+        setPreviewPdfUrl(objectUrl);
+      })
+      .catch((err) => {
+        if (err.name !== "CanceledError" && err.name !== "AbortError") setPreviewPdfUrl("");
+      })
+      .finally(() => setPreviewLoading(false));
+    return () => {
+      controller.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [previewVersion]);
 
   if (!isOpen) return null;
 
@@ -146,7 +174,7 @@ export default function ApplyVersionModal({
         </button>
 
         <div className="pr-8">
-          <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#F97316]">
+          <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#B9821E]">
             <Sparkles className="h-3.5 w-3.5" /> Target Resume Selector
           </span>
           <h2 className="mt-1 font-display text-xl font-bold tracking-tight text-slate-900 ">
@@ -158,11 +186,12 @@ export default function ApplyVersionModal({
         </div>
 
         {submitted ? (
-          <div className="py-8 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF3E8] text-[#F97316]"><CheckCircle2 className="h-8 w-8" aria-hidden="true" /></div>
-            <h3 className="mt-4 text-xl font-bold text-[#0F172A]">Successfully applied</h3>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-[#64748B]">Your application has been submitted successfully. You can track it from Applied Jobs.</p>
-            <Button type="button" className="mt-6" onClick={onClose}>Done</Button>
+          <div className="my-5 rounded-2xl border border-[#DDEBE3] bg-[#F7FBF8] px-5 py-8 text-center sm:px-8">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#DCFCE7] text-[#15803D] shadow-[0_0_0_8px_rgba(220,252,231,0.45)]"><CheckCircle2 className="h-9 w-9" strokeWidth={2.2} aria-hidden="true" /></div>
+            <span className="mt-6 inline-flex items-center rounded-full bg-[#DCFCE7] px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] text-[#166534]">Application submitted</span>
+            <h3 className="mt-3 text-2xl font-bold tracking-tight text-[#0F172A]">You’re all set</h3>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#64748B]">Your application for <span className="font-semibold text-slate-700">{job.title}</span> has been sent successfully. Track updates from Applied Jobs.</p>
+            <Button type="button" className="mt-6 min-w-28 bg-[#172334] text-white hover:bg-navy-light" onClick={onClose}>Done</Button>
           </div>
         ) : error && (
           <div role="alert" className="mt-4 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700 dark:border-red-900/50">
@@ -194,9 +223,12 @@ export default function ApplyVersionModal({
                 Select Resume Version
               </label>
 
-              <select value={selectedVersionId || ""} onChange={(event) => setSelectedVersionId(event.target.value)} className="h-12 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm font-semibold text-[#0F172A]">
-                {versionsData.map((v) => <option key={v._id} value={v._id}>{v.label}{v.isDefault ? " (Default)" : ""}{v.isBestFit ? " - Best fit" : ""}</option>)}
-              </select>
+              <div className="flex items-center gap-2">
+                <select value={selectedVersionId || ""} onChange={(event) => setSelectedVersionId(event.target.value)} className="h-12 min-w-0 flex-1 rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm font-semibold text-[#0F172A]">
+                  {versionsData.map((v) => <option key={v._id} value={v._id}>{v.label}{v.isDefault ? " (Default)" : ""}{v.isBestFit ? " - Best fit" : ""}</option>)}
+                </select>
+                <button type="button" onClick={() => setPreviewVersion(versionsData.find((version) => String(version._id) === String(selectedVersionId)) || null)} disabled={!selectedVersionId} aria-label="Preview selected resume" title="Preview selected resume" className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#CBD5E1] text-[#64748B] transition-colors hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#2563EB] disabled:cursor-not-allowed disabled:opacity-40"><Eye className="h-5 w-5" /></button>
+              </div>
             </div>
 
             {/* Compliance & Consent Disclosures */}
@@ -251,6 +283,14 @@ export default function ApplyVersionModal({
         )}
       </div>
     </Modal>
+    {previewVersion && (
+      <div className="fixed inset-0 z-70 flex items-center justify-center bg-slate-950/50 p-4" role="dialog" aria-modal="true" aria-label="Resume preview" onClick={() => setPreviewVersion(null)}>
+        <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={(event) => event.stopPropagation()}>
+          <div className="flex items-center justify-between border-b border-[#E2E8F0] px-5 py-4"><div><p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Resume preview</p><h3 className="mt-0.5 truncate text-base font-bold text-[#0F172A]">{previewVersion.label}</h3></div><button type="button" onClick={() => setPreviewVersion(null)} aria-label="Close preview" className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9]"><X className="h-5 w-5" /></button></div>
+          <div className="min-h-0 flex-1 bg-[#F4F6F9] p-3 sm:p-5">{previewLoading ? <div className="flex h-[60vh] items-center justify-center text-sm text-[#64748B]">Loading resume preview…</div> : previewPdfUrl ? <iframe title={`${previewVersion.label} preview`} src={previewPdfUrl} className="h-[70vh] w-full rounded-lg border border-[#E2E8F0] bg-white" /> : <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap rounded-lg bg-white p-5 text-sm leading-6 text-slate-700">{previewVersion.parsedSnapshot?.rawText || "Preview is not available for this resume version."}</pre>}</div>
+        </div>
+      </div>
+    )}
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, ShieldCheck, Download, CheckCircle2, Globe, MessageSquare, Loader2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import api from "../../../api/client";
 import { accountAuthHeader } from "../../../auth/accountAuth";
 import Button from "../../../components/ui/Button";
@@ -15,7 +15,6 @@ export default function PreferencesTab({ profile, onRefresh }) {
   });
 
   const [saving, setSaving] = useState(false);
-  const [exporting, setExporting] = useState(false);
   const [success, setSuccess] = useState("");
 
   const handleToggle = (key) => {
@@ -36,28 +35,6 @@ export default function PreferencesTab({ profile, onRefresh }) {
       console.error(err);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleDownloadData = async () => {
-    try {
-      setExporting(true);
-      const res = await api.get("/candidate-dashboard/profile/export-data", {
-        headers: accountAuthHeader(),
-        responseType: "blob",
-      });
-
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `AptusHire-Data-Export-${Date.now()}.json`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      console.error("Export error:", err);
-    } finally {
-      setExporting(false);
     }
   };
 
@@ -148,48 +125,13 @@ export default function PreferencesTab({ profile, onRefresh }) {
             type="submit"
             disabled={saving}
             data-profile-action="true"
-            className="!bg-[#F5B51B] !text-[#172334] hover:!bg-[#E5A514] focus-visible:!ring-[#F5B51B]/25"
+            className="bg-[#F5B51B]! text-[#172334]! hover:bg-[#E5A514]! focus-visible:ring-[#F5B51B]/25!"
           >
             {saving ? "Saving…" : "Save Preferences"}
           </Button>
         </div>
       </form>
 
-      {/* GDPR / DPDP Download My Data Box */}
-      <section className="rounded-3xl border border-[#E5A514]/40 bg-[#FFF4CC] p-6 text-[#172334] shadow-soft">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-[#E5A514]" />
-              <h3 className="font-display text-base font-bold text-[#172334]">Download My Data (GDPR &amp; DPDP Portability)</h3>
-            </div>
-            <p className="mt-1 max-w-xl text-xs text-[#5B5335]">
-              Download a complete JSON export of all your candidate profile data, resume versions, uploaded documents, application history, and interview logs.
-            </p>
-          </div>
-
-          <Button
-            type="button"
-            variant="secondary"
-            data-profile-action="true"
-            onClick={handleDownloadData}
-            disabled={exporting}
-            className="shrink-0 !bg-white !text-[#E5A514] !border-[#F5B51B] hover:!bg-[#FFF1C7] font-bold"
-          >
-            {exporting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Exporting…</span>
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4" />
-                <span>Export My Data</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </section>
     </div>
   );
 }

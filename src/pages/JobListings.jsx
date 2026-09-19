@@ -889,11 +889,11 @@ export default function JobListings() {
   // page, same list/search/filter/detail plumbing, just a different subset.
   // An explicit ?view= (the Recommended / All Jobs nav links both set one)
   // always wins; a bare /?recommended=1 (a redirect, a login bounce-back)
-  // falls back to whatever tab the candidate last had open.
+  // always opens on the recommended Top matches view.
   const [viewMode, setViewMode] = useState(() => {
     const explicitView = searchParams.get("view");
     if (explicitView === "all" || explicitView === "top") return explicitView;
-    return restoredBrowseState?.viewMode || "top";
+    return "top";
   });
   const [showFilters,  setShowFilters]  = useState(false);
   const [showSearch,   setShowSearch]   = useState(() => Boolean(initialQuery));
@@ -1282,18 +1282,16 @@ export default function JobListings() {
                 >
                   Top matches
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("all")}
-                  aria-pressed={viewMode === "all"}
+                <a
+                  href="/jobs"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={`flex min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-[14px] font-semibold transition-colors sm:px-3.5 sm:text-[15px] ${
-                    viewMode === "all"
-                      ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
-                      : "text-[#64748B] hover:text-[#0F172A]"
+                    "text-[#64748B] hover:text-[#0F172A]"
                   }`}
                 >
                   All jobs
-                </button>
+                </a>
               </div>
 
               {/* Search icon button */}
