@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Bot,
-  User,
+  Zap,
+  Clock,
+  MessageSquare,
+  ArrowRight,
   Send,
   CheckCircle2,
   Loader2,
   Mic,
-  Square,
   Keyboard,
   Volume2,
   Eye,
@@ -25,32 +26,80 @@ import { useLiveKitInterview } from "../portal/useLiveKitInterview.js";
 import { useProctoring } from "../portal/useProctoring.js";
 import { useSessionRecorder } from "../portal/useSessionRecorder.js";
 import { Card, Skeleton } from "../components/ui/Card.jsx";
-import { Textarea } from "../components/ui/Field.jsx";
 import Button from "../components/ui/Button.jsx";
 import InterviewShell from "../components/portal/InterviewShell.jsx";
 import Watermark from "../components/portal/Watermark.jsx";
 
-function Bubble({ role, text, muted }) {
+// Two or fewer letters, from whatever name we actually have. The transcript needs a mark per
+// speaker that survives a one-word persona name ("Ava") and a three-part candidate name alike.
+function initials(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "··";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+// Wall-clock time against a turn, in the transcript's own column. `at` is an ISO string from the
+// server; anything unparseable renders nothing rather than "Invalid Date".
+function clockTime(at) {
+  if (!at) return "";
+  const d = new Date(at);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
+// mm:ss since the interview opened. Deliberately elapsed rather than remaining: a countdown on a
+// screen a candidate cannot pause turns thinking time into a penalty, and this interview has no
+// deadline to count down to.
+function formatElapsed(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return "00:00";
+  const total = Math.floor(ms / 1000);
+  const mm = String(Math.floor(total / 60)).padStart(2, "0");
+  const ss = String(total % 60).padStart(2, "0");
+  return `${mm}:${ss}`;
+}
+
+// One line of the running log. The speaker's mark, name and time sit ABOVE the bubble rather than
+// beside it, which is what lets a 22rem-wide panel give the text nearly the full column instead of
+// losing a third of it to an avatar gutter.
+//
+// `active` is the question currently on the floor. It gets a green rule and a "Question n:" label
+// so that a candidate scrolling back through twenty turns can always find the one they are
+// actually being asked — the single most common thing to lose in a long transcript.
+function Bubble({ role, text, name, time, muted, label, active }) {
   const isAi = role === "ai";
   return (
-    <div className={`flex gap-2.5 ${isAi ? "" : "flex-row-reverse"}`}>
-      <div
-        aria-hidden="true"
-        className={
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full " +
-          (isAi ? "bg-[#FEF3E8] text-[#F97316]" : "bg-slate-200 text-slate-600")
-        }
-      >
-        {isAi ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
+    <div className={isAi ? "" : "flex flex-col items-end"}>
+      <div className={`mb-1.5 flex items-center gap-2 ${isAi ? "" : "flex-row-reverse"}`}>
+        <span
+          aria-hidden="true"
+          className={
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold " +
+            (isAi ? "bg-emerald-100 text-emerald-700" : "bg-emerald-500 text-white")
+          }
+        >
+          {initials(name || (isAi ? "AI" : "You"))}
+        </span>
+        <span className="truncate text-xs font-semibold text-slate-800">{name || (isAi ? "Interviewer" : "You")}</span>
+        {active && (
+          <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">Active</span>
+        )}
+        {time && <span className="num shrink-0 text-[11px] text-slate-400">{time}</span>}
       </div>
       <div
         className={
-          "max-w-[80%] rounded-2xl px-4 py-3 text-base " +
-          (isAi ? "bg-white text-slate-700 shadow-[0_1px_4px_rgba(0,0,0,0.07)]" : "bg-[#F97316] text-white") +
+          "max-w-[calc(100%-2rem)] rounded-xl border px-3.5 py-2.5 text-[13px] leading-relaxed " +
+          (active
+            ? "border-[#F97316] bg-white text-slate-800"
+            : isAi
+              ? "border-[#E2E8F0] bg-white text-slate-700"
+              : "border-emerald-100 bg-emerald-50 text-slate-700") +
+          (isAi ? " ml-8" : " mr-8") +
           (muted ? " opacity-70" : "")
         }
       >
         <span className="sr-only">{isAi ? "Interviewer: " : "You: "}</span>
+        {label && <span className="mb-1 block text-xs font-semibold text-emerald-700">{label}</span>}
         {text}
       </div>
     </div>
@@ -76,99 +125,138 @@ function ThinkingDots({ className = "" }) {
 
 // The interviewer's coarse state, in the words the call surface uses for it. SHORT and generic on
 // purpose: the specific sentence for what is actually happening (endpointing countdown,
-// transcription, reconnection) stays where it already lived, in the answer-controls status region
-// below. This tile never invents or duplicates that copy, it gives it a second, glanceable surface.
+// transcription, reconnection) stays where it already lived, in the status line under the stage.
+// This chip never invents or duplicates that copy, it gives it a second, glanceable surface.
 //
-// `tone` picks a dot colour and nothing else, so adding a state is one line here rather than a
-// conditional at four call sites.
+// The label is a full sentence with the persona's name in it — "Ava is speaking" — because the
+// chip sits at the top of a stage with one face on it, and "Speaking" alone leaves a candidate to
+// work out who. `tone` picks a dot colour and nothing else.
 const AGENT_STATUS = {
-  idle: { label: "Ready when you are", tone: "" },
-  connecting: { label: "Connecting…", tone: "brand" },
-  live: { label: "In conversation", tone: "emerald" },
-  speaking: { label: "Speaking", tone: "brand" },
-  listening: { label: "Listening", tone: "emerald" },
-  thinking: { label: "Thinking", tone: "" },
-  dropped: { label: "Reconnecting…", tone: "amber" },
+  idle: { label: (n) => `${n} is ready when you are`, tone: "" },
+  connecting: { label: () => "Connecting…", tone: "brand" },
+  live: { label: (n) => `${n} is in conversation`, tone: "brand" },
+  speaking: { label: (n) => `${n} is speaking`, tone: "brand" },
+  listening: { label: () => "Listening to you", tone: "brand" },
+  thinking: { label: (n) => `${n} is thinking`, tone: "" },
+  dropped: { label: () => "Reconnecting…", tone: "amber" },
 };
 
 const TONE_DOT = {
-  emerald: "bg-emerald-400",
-  amber: "bg-amber-400",
-  brand: "bg-white",
-  "": "bg-white/60",
+  brand: "bg-[#F97316]",
+  amber: "bg-amber-500",
+  "": "bg-slate-400",
 };
 
-// A live status chip. Used on the tiles (over the dark call surface, `onDark`) and in the
-// transcript header (on white) — same vocabulary in both places, so the glanceable state and the
-// reading state can never disagree with each other.
-function StatusChip({ agentState, onDark = false, className = "" }) {
-  const { label, tone } = AGENT_STATUS[agentState] || AGENT_STATUS.idle;
+// A live status chip, on the light stage and in the transcript header alike — same vocabulary in
+// both places, so the glanceable state and the reading state can never disagree with each other.
+function StatusChip({ agentState, personaName, className = "" }) {
+  const entry = AGENT_STATUS[agentState] || AGENT_STATUS.idle;
+  const tone = entry.tone;
   return (
     <span
       role="status"
       className={
-        "inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium " +
-        (onDark ? "bg-black/50 text-white" : "bg-slate-100 text-slate-600") +
-        (className ? ` ${className}` : "")
+        "inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-medium text-slate-600 " +
+        className
       }
     >
-      <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${onDark ? TONE_DOT[tone] : tone === "emerald" ? "bg-emerald-500" : tone === "amber" ? "bg-amber-500" : "bg-slate-400"}`} />
-      {label}
-      {agentState === "thinking" && <ThinkingDots />}
+      <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${TONE_DOT[tone]}`} />
+      {entry.label(personaName || "Your interviewer")}
+      {agentState === "thinking" && <ThinkingDots className="text-slate-400" />}
     </span>
   );
 }
 
-// One tile on the call surface. Both participants get the SAME frame — same aspect, same radius,
-// same name chip in the same corner — because the moment they don't, the smaller one reads as a
-// preview of the bigger one rather than as the other side of a conversation. The speaking ring is
-// the one thing that distinguishes them at a glance, which is how every call app signals a turn.
-function CallTile({ name, badge, speaking, className = "", nameClassName = "", children }) {
+// The one piece of continuous motion on the stage, and the only signal that distinguishes "the
+// interviewer is talking" from "the audio has died" — which is exactly why a chip alone was not
+// enough. Bars are inert (short and still) whenever nobody is speaking, so movement always means
+// something rather than being decoration that happens to always be on.
+const WAVE_BARS = [0, 120, 240, 60, 300, 180, 30];
+
+function Waveform({ active }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-flex h-7 items-center gap-1 rounded-full border border-[#E2E8F0] bg-white px-3.5 shadow-xs"
+    >
+      {WAVE_BARS.map((delay, i) => (
+        <span
+          key={i}
+          style={active ? { animationDelay: `${delay}ms` } : undefined}
+          className={`h-3.5 w-[3px] rounded-full bg-[#F97316] ${active ? "wave-bar" : "wave-bar-idle"}`}
+        />
+      ))}
+    </span>
+  );
+}
+
+// The candidate's own camera, inset over the stage the way every call app puts it. The <video>
+// element is ALWAYS mounted and turning the preview off only makes it transparent underneath an
+// overlay. It used to be swapped out for a "show preview" button — which unmounted it, nulled the
+// ref React had handed the proctor, and killed face detection for the rest of the session.
+// Re-showing then mounted a NEW element with no srcObject (the stream is attached once, at monitor
+// start), so the preview stayed black and vision never came back. Anything that unmounts — or
+// `display: none`s, which stops decoding in some browsers — this element silently disables
+// monitoring. `opacity-0` keeps it composited and decoding.
+//
+// The toggle only ever hides this PREVIEW. Monitoring keeps running underneath, and the tile says
+// so in both states, because consenting to a proctored interview is not something a camera icon
+// should be able to quietly undo.
+function SelfView({ videoRef, hidden, name, speaking }) {
   return (
     <div
       className={
-        "relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-black/25 " +
-        "ring-1 ring-inset transition-all duration-200 " +
-        (speaking ? "ring-2 ring-white/70" : "ring-white/10") +
-        (className ? ` ${className}` : "")
+        "relative aspect-video w-32 overflow-hidden rounded-xl bg-slate-900 shadow-lift ring-1 transition-all duration-200 sm:w-44 lg:w-56 " +
+        (speaking ? "ring-2 ring-[#F97316]" : "ring-slate-900/10")
       }
     >
-      {children}
-      {badge}
-      <span
-        className={
-          "pointer-events-none absolute bottom-1.5 left-1.5 max-w-[calc(100%-0.75rem)] truncate rounded-md bg-black/50 px-1.5 py-0.5 text-[11px] font-medium text-white sm:bottom-2 sm:left-2 sm:px-2 sm:py-1 sm:text-xs" +
-          (nameClassName ? ` ${nameClassName}` : "")
-        }
-      >
-        {name}
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        aria-hidden="true"
+        className={`absolute inset-0 h-full w-full object-cover ${hidden ? "opacity-0" : ""}`}
+      />
+      {hidden && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-slate-900">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white ring-1 ring-inset ring-white/20">
+            {initials(name)}
+          </span>
+          {/* Never let "camera off" be read as "not being watched any more". */}
+          <span className="hidden text-[10px] text-white/60 sm:block">Preview off · still monitored</span>
+        </div>
+      )}
+      {/* A candidate needs the "you are being recorded" disclosure far more than they need to be
+          told which face is theirs, so on a phone-sized pip this is the badge that stays. */}
+      <span className="pointer-events-none absolute left-1.5 top-1.5 flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
+        <Eye className="h-2.5 w-2.5 shrink-0" aria-hidden="true" /> Live
+      </span>
+      <span className="pointer-events-none absolute bottom-1.5 left-1.5 right-1.5 truncate rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium text-white sm:text-[11px]">
+        You{name ? ` (${name})` : ""}
       </span>
     </div>
   );
 }
 
-// The interviewer's half of the call. No camera to show, so the tile shows presence instead:
-// an avatar that reacts to the turn, and the state chip in the same corner a video call puts a
-// connection indicator.
-function AgentTile({ agentState, personaName }) {
-  const { tone } = AGENT_STATUS[agentState] || AGENT_STATUS.idle;
-  const speaking = agentState === "speaking";
+// A control-bar pill. One component so the four controls on that bar cannot drift apart in height
+// or hit-area, which is the failure mode of writing each of them by hand.
+function BarButton({ onClick, disabled, children, tone = "default", pressed }) {
+  const tones = {
+    default:
+      "border-[#E2E8F0] bg-white text-slate-700 hover:border-slate-300 hover:text-slate-900 focus-visible:ring-[#FEF3E8]",
+    danger: "border-transparent bg-verdict-negative text-white hover:bg-red-700 focus-visible:ring-red-100",
+  };
   return (
-    <CallTile
-      name={personaName || "Your interviewer"}
-      speaking={speaking}
-      badge={<StatusChip agentState={agentState} onDark className="absolute right-1.5 top-1.5 sm:right-2 sm:top-2" />}
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={pressed}
+      className={`tap-target inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]}`}
     >
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-inset ring-white/20 sm:h-16 sm:w-16">
-        {tone && (
-          <span
-            aria-hidden="true"
-            className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-20 ${TONE_DOT[tone]}`}
-          />
-        )}
-        <Bot className="relative h-5 w-5 sm:h-7 sm:w-7" aria-hidden="true" />
-      </div>
-    </CallTile>
+      {children}
+    </button>
   );
 }
 
@@ -401,7 +489,10 @@ export default function InterviewRoom() {
   useEffect(() => {
     if (!monitoring || !state) return;
     const active = !state.completed && state.status !== "not_started";
-    if (active) startRecording();
+    // `void`: start() awaits its own microphone now (useSessionRecorder — WHY THE MIC IS OURS), so
+    // it returns a promise. Nothing here waits on it — the interview must never be held up by the
+    // recording — and it resolves rather than rejects on every failure path inside the hook.
+    if (active) void startRecording();
   }, [monitoring, state?.status, state?.completed, startRecording]);
 
   // The interview is over — stop monitoring, and CLOSE THE MICROPHONE.
@@ -593,16 +684,9 @@ export default function InterviewRoom() {
   // The explicit exit. It exists independently of the spoken one because a candidate who wants to
   // leave should never have to find the right words to be let out — and because a button press
   // needs no confirmation to be unambiguous, which the spoken path does.
+  //
+  // The callback itself lives below `lkRef`, because ending the interview has to end the ROOM too.
   const [confirmingExit, setConfirmingExit] = useState(false);
-  const endInterview = useCallback(async () => {
-    setConfirmingExit(false);
-    try {
-      cancelListening();
-    } catch {
-      /* the mic may already be closed — ending must not depend on it */
-    }
-    await submitAct({ act: "withdraw", confirmedBy: "explicit" });
-  }, [cancelListening, submitAct]);
 
   // ---- LiveKit realtime pipeline (LK-4) --------------------------------------
   //
@@ -629,6 +713,39 @@ export default function InterviewRoom() {
   });
   const lkRef = useRef(lk);
   useEffect(() => { lkRef.current = lk; }, [lk]);
+
+  // "End Interview" MUST ALSO LEAVE THE ROOM.
+  //
+  // It used to post the withdrawal and stop there. Server-side that ends the interview — status
+  // `ended_early`, nothing more can be answered — but the LiveKit room stayed live with both the
+  // candidate and the worker still in it: an open microphone, an interviewer still listening for
+  // an answer to a question that no longer exists, and a metered room billing against a session
+  // that was over. The room's own enforcement effect below could not clean it up either, because
+  // its condition is `livekitMode && started`, and both are still true after a withdrawal.
+  //
+  // Order matters. The server goes first: it is what decides the interview actually ended, and if
+  // that request fails the candidate must still be inside a working room to try again (submitAct
+  // surfaces the failure and returns null). Only once it has landed do we leave — by then
+  // `state.completed` is true, so the completed screen is what renders and the momentary
+  // `dropped` phase a teardown produces is never shown.
+  const endInterview = useCallback(async () => {
+    setConfirmingExit(false);
+    try {
+      cancelListening();
+    } catch {
+      /* the mic may already be closed — ending must not depend on it */
+    }
+    const result = await submitAct({ act: "withdraw", confirmedBy: "explicit" });
+    if (!result) return; // the withdrawal didn't land — stay connected so they can try again
+    const l = lkRef.current;
+    if (l && l.phase !== "idle") {
+      try {
+        await l.disconnect();
+      } catch {
+        /* the worker may already have torn the room down from its side */
+      }
+    }
+  }, [cancelListening, submitAct]);
 
   // Anti-cheating hard stop: the server already ended this interview (aiInterviewService.
   // terminateForIntegrityViolation) by the time this fires — `useProctoring`'s flush loop learned
@@ -884,6 +1001,8 @@ export default function InterviewRoom() {
           const form = new FormData();
           form.append("audio", result.audioBlob, `answer.${ext}`);
           api
+            // No explicit Content-Type — the browser must set it so the multipart boundary is
+            // included. Naming the bare type drops the boundary and the upload 400s.
             .post(`/interview-portal/interview/answer/${turnIndex}/audio`, form, {
               headers: authHeader(),
             })
@@ -949,7 +1068,7 @@ export default function InterviewRoom() {
   // single source of truth for it.
   const live = !!state && !state.completed && state.status !== "not_started";
 
-  // The interviewer tile's status word (AgentTile, above). Deliberately coarse — it only
+  // The interviewer's status word on the stage (StatusChip, above). Deliberately coarse — it only
   // ever shows a short, generic state, never the specific sentence that already lives in
   // the answer-controls region below.
   const agentState = useMemo(() => {
@@ -987,6 +1106,58 @@ export default function InterviewRoom() {
   // Who the candidate is talking to, in one place — the two pipelines learn the persona name from
   // different endpoints and either may be the one that has it.
   const interviewerName = personaName || lk.personaName || "";
+
+  // The elapsed clock in the header. Anchored to the first turn the server recorded rather than to
+  // page load, so a candidate who reloads mid-interview does not see the timer restart at zero —
+  // and deliberately ELAPSED rather than remaining: a countdown on a screen nobody can pause turns
+  // thinking time into a penalty, and this interview has no deadline to count down to.
+  const startedAtMs = useMemo(() => {
+    const at = state?.turns?.find((t) => t.at)?.at;
+    const ms = at ? new Date(at).getTime() : NaN;
+    return Number.isFinite(ms) ? ms : null;
+  }, [state?.turns]);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    if (!live) return undefined;
+    const id = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [live]);
+
+  // How this turn is named, in one place — the header pill, the question card and the transcript's
+  // active marker must never disagree about which question the candidate is on. The opening
+  // self-introduction is not one of the counted questions, so it is named rather than numbered:
+  // "Question 0 of 8" reads like something has gone wrong.
+  const questionLabel = !state
+    ? ""
+    : state.currentIsWarmup
+      ? "Introduction"
+      : `Question ${Math.min(state.questionCount, state.maxQuestions)} of ${state.maxQuestions}`;
+
+  // The header's centre slot. Chrome, not content: it belongs to the shell for the same reason a
+  // tab title does, and it must stay put while the panes underneath it change.
+  const headerMeta = live ? (
+    <div className="hidden shrink-0 items-center rounded-full border border-[#E2E8F0] bg-[#F4F6F9] px-1 py-1 md:flex">
+      <span className="px-3 text-[13px] font-medium text-slate-600">
+        {state.currentIsWarmup ? (
+          "Introduction"
+        ) : (
+          <>
+            Question <span className="num font-semibold text-slate-900">{Math.min(state.questionCount, state.maxQuestions)}</span> of{" "}
+            <span className="num font-semibold text-slate-900">{state.maxQuestions}</span>
+          </>
+        )}
+      </span>
+      {startedAtMs !== null && (
+        <>
+          <span aria-hidden="true" className="h-4 w-px bg-[#E2E8F0]" />
+          <span className="flex items-center gap-1.5 px-3 text-[13px] font-medium text-slate-500">
+            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="num">{formatElapsed(nowMs - startedAtMs)}</span> elapsed
+          </span>
+        </>
+      )}
+    </div>
+  ) : null;
 
   let body;
   if (!state) {
@@ -1096,201 +1267,485 @@ export default function InterviewRoom() {
       </Card>
     );
   } else {
-    body = (
-    <div className="space-y-4">
-      {/* Proctoring nudge — reported as an observation, not an accusation (DESIGN.md: no surveillance
-          framing). Brand-toned, matching the "in-progress" meaning the rest of the system reserves
-          for it; amber/red are spoken for by the Reserved Verdict Rule and would misread this as a
-          pipeline outcome. */}
-      {fullscreenLost && (
-        <div
-          role="alert"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#FED7AA] bg-[#FEF3E8] px-3 py-2 text-sm font-medium text-[#F97316]"
-        >
-          <span className="flex items-center gap-2">
-            <Info className="h-4 w-4 shrink-0" /> You've exited fullscreen — please return to continue your interview.
-          </span>
-          <Button size="sm" onClick={reenterFullscreen}>Return to fullscreen</Button>
-        </div>
-      )}
+    // Which pane the candidate is actually answering in. Named once here because six controls
+    // below branch on it, and "not voice and not realtime" is not a readable condition to repeat.
+    const textMode = !livekitMode && !voiceMode;
+    const awaitingStart = (livekitMode || voiceMode) && !started;
+    const candidateName = watermarkLabel.name;
 
-      {warning && (
-        <div
-          role="alert"
-          className="flex items-center gap-2 rounded-lg border border-[#FED7AA] bg-[#FEF3E8] px-3 py-2 text-sm font-medium text-[#F97316]"
-        >
-          <Info className="h-4 w-4 shrink-0" /> {warning}
-        </div>
-      )}
+    // Leaving the spoken interview for the keyboard is one action with two shapes: the realtime
+    // pipeline holds a room that must be torn down first, the turn-based one only holds a
+    // microphone. Every "switch to typing" affordance on this screen goes through here so the two
+    // can never diverge.
+    async function goToTyping() {
+      if (livekitMode) await lk.disconnect();
+      switchToTyping();
+    }
 
-      {/* Degraded-engine disclosure — never let a fallback pass silently as if it were the real
-          evaluation (PRODUCT.md: uncertainty must be visible everywhere it surfaces). Neutral
-          tone, deliberately not the amber/red channel reserved for verdicts and integrity. */}
-      {state.engine === "fallback" && (
-        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-          <Info className="h-4 w-4 shrink-0 text-slate-400" />
-          This interview is running on a standard question set right now. Your answers are still recorded and reviewed the
-          same way.
-        </div>
-      )}
+    // "Say that again." In the turn-based pipeline this genuinely re-asks: clearing `handledRef`
+    // is what re-arms the orchestration effect for the question already on screen. In the realtime
+    // pipeline there is nothing to re-arm — the interviewer is listening, and asking it out loud is
+    // both faster and what the room is for — so the control says so rather than pretending.
+    function askForRepeat() {
+      if (livekitMode) {
+        showWarning(`Just ask out loud — say “could you repeat that?” and ${interviewerName || "your interviewer"} will.`);
+        return;
+      }
+      retryVoice();
+    }
 
-      {/* Self-view lives inside the stage panel below now (the candidate's own camera tile,
-          Meet-style, inset over the interviewer's tile) rather than floating fixed over the
-          page — so it can no longer land on top of a banner or a button. The <video> element
-          itself is declared there. Watermark has no position of its own to protect (`fixed
-          inset-0`), so it renders here, close to the monitoring flag that gates it. */}
-      {monitoring && <Watermark name={watermarkLabel.name} idFragment={watermarkLabel.idFragment} />}
+    // The last thing the interviewer said, for the caption strip across the bottom of the stage.
+    // Shown as well as spoken, always: a candidate who is deaf or hard of hearing, or whose audio
+    // output has failed, must still receive the question. In realtime mode these are the agent's
+    // own live captions; in the turn-based one it is the question turn itself, plus any
+    // backchannel currently being spoken over it.
+    const lastAiText = [...(state.turns || [])].reverse().find((t) => t.role === "ai")?.text || "";
+    const caption = livekitMode ? (lk.captions || []).slice(-1)[0] || "" : backchannel || lastAiText;
 
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">AI Interview</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {voiceMode
-              ? "Speak your answers naturally. Take your time — pausing to think won't end your turn, and you can ask for a question to be repeated."
-              : "Answer each question in your own words. There's no time pressure — take a moment to think."}
+    // The question on the floor, so the transcript can mark it and never lose it in the scrollback.
+    const activeAiIndex = (state.turns || []).reduce((last, t, i) => (t.role === "ai" ? i : last), -1);
+
+    // The one status sentence for whatever is happening right now, under the interviewer's name on
+    // the stage. Exactly one branch may match: the specific copy each pipeline needs already
+    // existed and is kept verbatim, it has simply moved to where a person on a call looks for it.
+    let statusLine = null;
+    if (awaitingStart) {
+      statusLine = null;
+    } else if (livekitMode) {
+      if (lk.phase === "connecting" || lk.phase === "waiting_agent") {
+        statusLine = (
+          <p className="flex items-center gap-2 text-[13px] text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Connecting you to{" "}
+            {lk.personaName || "your interviewer"}…
           </p>
-        </div>
-        <span className="rounded-full bg-[#FEF3E8] px-3.5 py-1.5 text-sm font-semibold text-[#F97316]">
-          {/* The opening self-introduction is not one of the counted questions, so it is named
-              rather than numbered — "Question 0 / 8" reads like something has gone wrong. */}
-          {state.currentIsWarmup
-            ? "Introduction"
-            : `Question ${Math.min(state.questionCount, state.maxQuestions)} / ${state.maxQuestions}`}
-        </span>
-      </div>
-
-      {/* The call surface. Stage (who you're talking to, your own camera, this turn's
-          controls) on the left at `lg` and on top below it; Transcript (the running log)
-          on the right at `lg` and underneath on a phone — the two panes a Riverside- or
-          Meet-style call splits into, applied to a conversation with no other human video
-          to show. */}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-        <Card padding="none" className="overflow-hidden">
-          <div className="fill-brand p-2.5 sm:p-3">
-            {/* Two tiles, one per side of the conversation. On a phone the candidate's own camera
-                insets over the interviewer's tile (`absolute`) the way it does in Meet on mobile;
-                from `sm` up the two become equal cells of a grid (`sm:static`). One copy of the
-                self-view markup either way — the breakpoint moves it, it is never re-rendered as a
-                second element, which matters because unmounting that <video> silently kills
-                proctoring (see below). */}
-            <div className={`relative grid gap-2.5 sm:gap-3 ${monitoring ? "sm:grid-cols-2" : ""}`}>
-              <AgentTile agentState={agentState} personaName={interviewerName} />
-
-              {/* Candidate self-view — a quiet reminder the session is proctored.
-
-                  The <video> element is ALWAYS mounted, and turning the preview off only makes it
-                  transparent underneath an overlay. It used to be swapped out for a "show preview"
-                  button — which unmounted it, nulled the ref React had handed the proctor, and
-                  killed face detection for the rest of the session. Re-showing then mounted a NEW
-                  element with no srcObject (the stream is attached once, at monitor start), so the
-                  preview stayed black and vision never came back. Anything that unmounts — or
-                  `display: none`s, which stops decoding in some browsers — this element silently
-                  disables monitoring. `opacity-0` keeps it composited and decoding.
-
-                  The toggle only ever hides this PREVIEW. Monitoring keeps running underneath, and
-                  the tile says so in both states, because consenting to a proctored interview is
-                  not something a camera icon should be able to quietly undo. */}
-              <div
-                className={
-                  monitoring
-                    ? "absolute bottom-2 right-2 z-10 w-32 sm:static sm:w-auto"
-                    : "hidden"
-                }
-              >
-                <CallTile
-                  name="You"
-                  // On a phone this tile is a ~128px pip, and two chips do not fit across it. The
-                  // "Monitored" one is the one that stays: a candidate needs the disclosure far
-                  // more than they need to be told which face is theirs — and the shell's own
-                  // "Monitored" marker is itself hidden at this width.
-                  nameClassName="hidden sm:block"
-                  speaking={livekitMode && lk.youSpeaking}
-                  badge={
-                    <span
-                      className="pointer-events-none absolute left-1.5 top-1.5 flex items-center gap-1 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium text-white sm:left-2 sm:top-2 sm:text-xs"
-                    >
-                      <Eye className="h-2.5 w-2.5 shrink-0" aria-hidden="true" /> Monitored
-                    </span>
-                  }
-                >
-                  <video
-                    ref={proctorVideoRef}
-                    autoPlay
-                    muted
-                    playsInline
-                    aria-hidden="true"
-                    className={`absolute inset-0 h-full w-full bg-slate-900 object-cover ${pipHidden ? "opacity-0" : ""}`}
-                  />
-                  {pipHidden && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-slate-900 text-white">
-                      <VideoOff className="h-4 w-4 opacity-80 sm:h-5 sm:w-5" aria-hidden="true" />
-                      {/* Never let "camera off" be read as "not being watched any more". */}
-                      <span className="hidden text-[11px] text-white/70 sm:block">Preview off · still monitored</span>
-                    </div>
-                  )}
-                </CallTile>
-              </div>
-            </div>
-
-            {/* The call controls, where a video call puts them: under the tiles, centred, on the
-                dark surface rather than in the page chrome. Only real controls live here — there
-                is deliberately no mute button, because muting the microphone in a spoken interview
-                would stop the interview without saying so, and a control this room will not honour
-                is worse than no control. The mic reads out as a live indicator instead. */}
-            <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 sm:mt-3">
-              {monitoring && (
+        );
+      } else if (lk.phase === "dropped") {
+        statusLine = (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-[13px] font-medium text-amber-700">
+              Your connection dropped. Your interview is still open — nothing has been lost.
+            </p>
+            <BarButton onClick={() => void lk.rejoin()}>Rejoin the interview</BarButton>
+            <p className="text-xs text-slate-400">You&apos;ll pick up from the question you were on.</p>
+          </div>
+        );
+      } else if (lk.phase === "live") {
+        statusLine =
+          agentState === "thinking" ? (
+            <p className="flex items-center gap-2 text-[13px] font-medium text-slate-600">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              {interviewerName ? `${interviewerName} is thinking…` : "Thinking about what you said…"}
+              <ThinkingDots className="text-slate-400" />
+            </p>
+          ) : agentState === "speaking" ? (
+            <p className="flex items-center gap-2 text-[13px] font-medium text-[#EA6C0A]">
+              <Volume2 className="h-4 w-4 animate-pulse" aria-hidden="true" />
+              Cut in whenever you like
+            </p>
+          ) : (
+            <p className="flex items-center gap-2 text-[13px] font-medium text-emerald-700">
+              <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </span>
+              {agentState === "listening"
+                ? "Listening — go ahead, take your time"
+                : "In conversation — just talk, you can cut in any time"}
+            </p>
+          );
+      }
+    } else if (voiceMode) {
+      if (backchannel) {
+        statusLine = (
+          <p className="flex items-center gap-2 text-[13px] font-medium text-[#EA6C0A]">
+            <Volume2 className="h-4 w-4 animate-pulse" aria-hidden="true" /> &ldquo;{backchannel}&rdquo;
+          </p>
+        );
+      } else if (phase === "speaking") {
+        statusLine = (
+          <p className="flex items-center gap-2 text-[13px] font-medium text-[#EA6C0A]">
+            <Volume2 className="h-4 w-4 animate-pulse" aria-hidden="true" />
+            {canInterrupt || bargeIn
+              ? "You can start answering whenever you're ready — just talk."
+              : `${personaName || "The interviewer"} is speaking…`}
+          </p>
+        );
+      } else if (phase === "listening") {
+        statusLine = (
+          <div className="flex flex-col items-center gap-1">
+            <p
+              className={`flex items-center gap-2 text-[13px] font-medium ${
+                endingSoon ? "text-[#EA6C0A]" : "text-emerald-700"
+              }`}
+            >
+              <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+                <span
+                  className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
+                    endingSoon ? "bg-[#FB923C]" : "bg-emerald-400"
+                  }`}
+                />
+                <span
+                  className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
+                    endingSoon ? "bg-[#F97316]" : "bg-emerald-500"
+                  }`}
+                />
+              </span>
+              {endingSoon ? "Still there? Keep talking to continue." : "Listening — speak your answer"}
+            </p>
+            {/* The countdown used to be the words "Wrapping up your answer…" over a timer nobody
+                could see, which is the whole substance of "it cut me off" — the turn ended on a
+                deadline that was never shown while the candidate was drawing breath for the rest
+                of it. Showing the seconds costs nothing and turns an ambush into something they
+                can act on, which is what the button next to it is for. */}
+            {endingSoon ? (
+              <span className="flex items-center gap-2 text-xs text-slate-500">
+                Ending in <span className="num font-semibold text-slate-700">{secondsLeft ?? 0}s</span>
                 <button
                   type="button"
-                  onClick={() => setPipHidden((v) => !v)}
-                  aria-pressed={pipHidden}
-                  className="tap-target flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs font-medium text-white ring-1 ring-inset ring-white/20 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 sm:text-sm"
+                  onClick={keepListening}
+                  className="tap-target rounded-full border border-[#E2E8F0] px-2.5 py-0.5 text-xs font-semibold text-slate-700 hover:border-[#FB923C] hover:text-[#EA6C0A]"
                 >
-                  {pipHidden ? (
-                    <VideoOff className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  ) : (
-                    <Video className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  )}
-                  {pipHidden ? "Camera preview off" : "Camera preview on"}
+                  I&apos;m still thinking
                 </button>
-              )}
+              </span>
+            ) : (
+              <span className="text-xs text-slate-400">
+                Pause when you&apos;re finished — there&apos;s no hurry.
+              </span>
+            )}
+            {/* Sighted candidates get the indicator; screen-reader users would otherwise have no
+                feedback at all that they are being heard, so they keep the words. */}
+            <span className="sr-only">{interim}</span>
+          </div>
+        );
+      } else if (phase === "processing") {
+        statusLine = (
+          <p className="flex items-center gap-2 text-[13px] text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Transcribing your answer…
+          </p>
+        );
+      } else if (phase === "idle" && !sending && !pending) {
+        statusLine = (
+          <p className="flex items-center gap-2 text-[13px] text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Preparing the next question…
+            <ThinkingDots className="text-slate-400" />
+          </p>
+        );
+      } else if (connection === "reconnecting") {
+        statusLine = (
+          <p className="flex items-center gap-2 text-[13px] font-medium text-amber-700">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Reconnecting — hold on a moment before you
+            carry on.
+          </p>
+        );
+      }
+    } else if (sending) {
+      statusLine = (
+        <p className="flex items-center gap-2 text-[13px] text-slate-500">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Interviewer is thinking…
+          <ThinkingDots className="text-slate-400" />
+        </p>
+      );
+    }
 
-              {(livekitMode || voiceMode) && started && (
-                <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs font-medium text-white ring-1 ring-inset ring-white/20 sm:text-sm">
-                  <Mic
-                    className={`h-4 w-4 shrink-0 ${
-                      livekitMode ? (lk.youSpeaking ? "text-emerald-300" : "text-white/70") : phase === "listening" ? "text-emerald-300" : "text-white/70"
-                    }`}
-                    aria-hidden="true"
-                  />
-                  {livekitMode
-                    ? lk.youSpeaking
-                      ? "You're speaking"
-                      : "Mic on"
-                    : phase === "listening"
-                      ? "Mic open"
-                      : "Mic on standby"}
-                </span>
-              )}
+    body = (
+    <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
+      {/* ---------------------------------------------------------------- Left: the call itself */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+        {/* Proctoring nudge — reported as an observation, not an accusation (DESIGN.md: no
+            surveillance framing). Brand-toned, matching the "in-progress" meaning the rest of the
+            system reserves for it; amber/red are spoken for by the Reserved Verdict Rule and would
+            misread this as a pipeline outcome. */}
+        {fullscreenLost && (
+          <div
+            role="alert"
+            className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-medium text-emerald-700"
+          >
+            <span className="flex items-center gap-2">
+              <Info className="h-4 w-4 shrink-0" /> You&apos;ve exited fullscreen — please return to continue your
+              interview.
+            </span>
+            <BarButton onClick={reenterFullscreen}>Return to fullscreen</BarButton>
+          </div>
+        )}
 
-              {/* The way out, in the one place a person looks for it on a call. It opens the same
-                  confirmation as before — never an immediate exit. */}
-              <button
-                type="button"
-                onClick={() => setConfirmingExit(true)}
-                className="tap-target flex items-center gap-2 rounded-full bg-red-600/90 px-3 py-2 text-xs font-medium text-white hover:bg-red-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 sm:text-sm"
-              >
-                <PhoneOff className="h-4 w-4 shrink-0" aria-hidden="true" /> End interview
-              </button>
+        {warning && (
+          <div
+            role="alert"
+            className="flex shrink-0 items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-medium text-emerald-700"
+          >
+            <Info className="h-4 w-4 shrink-0" /> {warning}
+          </div>
+        )}
+
+        {/* Degraded-engine disclosure — never let a fallback pass silently as if it were the real
+            evaluation (PRODUCT.md: uncertainty must be visible everywhere it surfaces). Neutral
+            tone, deliberately not the amber/red channel reserved for verdicts and integrity. */}
+        {state.engine === "fallback" && (
+          <div className="flex shrink-0 items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-[13px] text-slate-600">
+            <Info className="h-4 w-4 shrink-0 text-slate-400" />
+            This interview is running on a standard question set right now. Your answers are still recorded and reviewed
+            the same way.
+          </div>
+        )}
+
+        {error && (
+          <p role="alert" className="shrink-0 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium text-red-600">
+            {error}
+          </p>
+        )}
+
+        {/* Watermark has no position of its own to protect (`fixed inset-0`), so it renders here,
+            close to the monitoring flag that gates it. */}
+        {monitoring && <Watermark name={watermarkLabel.name} idFragment={watermarkLabel.idFragment} />}
+
+        {/* --- The stage. Who you are talking to, what they are doing, and your own camera. --- */}
+        <div className="relative flex min-h-[16rem] flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-4 pb-28 sm:p-6 sm:pb-6">
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 sm:left-4 sm:top-4">
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#F97316]" />
+            {interviewerName || "Your interviewer"}
+          </span>
+          <StatusChip
+            agentState={agentState}
+            personaName={interviewerName}
+            className="absolute right-3 top-3 max-w-[55%] truncate sm:right-4 sm:top-4"
+          />
+
+          {/* The interviewer has no camera, so the stage shows presence instead: a mark that
+              reacts to the turn, a waveform that is only ever moving when there is actually audio,
+              and the one sentence describing what is happening right now. */}
+          <div className="flex max-w-full flex-col items-center gap-3.5 text-center sm:max-w-[calc(100%-13rem)] lg:max-w-[calc(100%-16rem)]">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-soft ring-1 ring-emerald-100 sm:h-28 sm:w-28">
+              {agentState === "speaking" && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 animate-ping rounded-full bg-emerald-200 opacity-60 motion-reduce:animate-none"
+                />
+              )}
+              <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[#F97316] text-white sm:h-16 sm:w-16">
+                <Zap className="h-6 w-6 sm:h-7 sm:w-7" fill="currentColor" strokeWidth={1.5} aria-hidden="true" />
+              </span>
             </div>
+            <Waveform active={agentState === "speaking"} />
+            <p className="text-base font-semibold text-slate-900">{interviewerName || "Your interviewer"}</p>
+            {statusLine}
           </div>
 
-          {/* --- Answer controls --- */}
-          <div className="border-t border-slate-100 p-4">
-            {error && (
-              <p role="alert" className="mb-2 text-sm font-medium text-red-600">
-                {error}
+          {/* What the interviewer just said, in words. Single line and truncated on purpose: this
+              is a caption, not the transcript — the full text is in the panel beside it, and a
+              caption that grows to four lines pushes the stage around every time it changes. */}
+          {caption && agentState === "speaking" && (
+            <div className="pointer-events-none absolute bottom-28 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-52 lg:right-64">
+              <p className="truncate rounded-xl border border-[#E2E8F0] bg-white/95 px-3.5 py-2.5 text-[13px] text-slate-600 shadow-xs backdrop-blur">
+                <span className="font-semibold text-emerald-700">{interviewerName || "Interviewer"}:</span> &ldquo;
+                {caption}&rdquo;
               </p>
+            </div>
+          )}
+
+          {monitoring && (
+            <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4">
+              <SelfView
+                videoRef={proctorVideoRef}
+                hidden={pipHidden}
+                name={candidateName}
+                speaking={livekitMode ? lk.youSpeaking : phase === "listening"}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* --- This turn. The question, and the one control that ends it. --- */}
+        {awaitingStart ? (
+          <div className="shrink-0 rounded-2xl border border-[#E2E8F0] bg-white p-4 text-center sm:p-5">
+            {livekitMode ? (
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-[13px] text-slate-500">
+                  This is a live spoken interview — you and the interviewer can talk normally. Interrupt whenever you
+                  like, ask for a question again, or say you&apos;d rather skip one. You can switch to typing at any
+                  point; it won&apos;t affect your evaluation.
+                </p>
+                <p className="text-[13px] text-slate-500">
+                  Finished answering and want to move on right away? Just say{" "}
+                  <span className="font-semibold text-slate-700">&ldquo;Done, that&apos;s it&rdquo;</span> and the
+                  interviewer will submit your answer immediately instead of waiting.
+                </p>
+                <p className="max-w-2xl text-xs text-slate-400">
+                  By starting, you consent to your voice being captured and processed in real time by third-party speech
+                  services (Deepgram, carried over LiveKit&apos;s real-time infrastructure) to conduct this interview.
+                  Audio is streamed and not stored by this platform — only the text transcript is kept. If you&apos;d
+                  rather not, typing your answers is always available and is evaluated identically.
+                </p>
+                <button
+                  type="button"
+                  disabled={consentBusy}
+                  onClick={async () => {
+                    await acceptVoiceConsent();
+                    try {
+                      await lk.connect();
+                    } catch {
+                      // Never a dead end: fall back to the turn-based interview every candidate
+                      // gets today.
+                      setError("Couldn't start the live interview — switching to the standard voice interview.");
+                      await lk.disconnect();
+                    }
+                  }}
+                  className="tap-target inline-flex items-center gap-2 rounded-lg bg-[#F97316] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                >
+                  {consentBusy ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Mic className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  Agree &amp; start interview
+                </button>
+                <button
+                  type="button"
+                  onClick={declineVoiceConsent}
+                  className="tap-target rounded py-1 text-xs font-medium text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8]"
+                >
+                  no thanks — I&apos;ll type my answers instead
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-[13px] text-slate-500">
+                  This is a spoken interview — each question will be read aloud. You can switch to typing at any point;
+                  it won&apos;t affect your evaluation.
+                </p>
+                {/* Voice consent (Phase 9.5) — shown BEFORE the mic ever opens. Starting is the
+                    explicit consent action; the server refuses a streaming token until consent is
+                    recorded. */}
+                <p className="max-w-2xl text-xs text-slate-400">
+                  By starting, you consent to your voice being captured and transcribed in real time by a third-party
+                  speech service (Deepgram) to record your answers. Your recorded answers are also saved, so the hiring
+                  team can review how the interview actually sounded and check the AI interviewer&apos;s own performance
+                  — visible only inside your interview report, never shared beyond it, and deleted along with the rest
+                  of your data. If you&apos;d rather not, typing your answers is always available and is evaluated
+                  identically.
+                </p>
+                <button
+                  type="button"
+                  disabled={consentBusy}
+                  onClick={acceptVoiceConsent}
+                  className="tap-target inline-flex items-center gap-2 rounded-lg bg-[#F97316] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                >
+                  {consentBusy ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Mic className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  Agree &amp; start voice interview
+                </button>
+                <button
+                  type="button"
+                  onClick={declineVoiceConsent}
+                  className="tap-target rounded py-1 text-xs font-medium text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8]"
+                >
+                  no thanks — I&apos;ll type my answers instead
+                </button>
+              </div>
             )}
+          </div>
+        ) : (
+          <div className="shrink-0 rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-5">
+            <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+              {questionLabel}
+            </span>
+            <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <p className="prose-wrap max-w-3xl text-[17px] font-semibold leading-snug text-slate-900">
+                {state.currentQuestion ? `“${state.currentQuestion}”` : "…"}
+              </p>
+
+              {/* Exactly one primary action, and only when there is genuinely a turn to end.
+                  Realtime has none — there are no turns to control, the interviewer hears and
+                  responds the way a person on a call does — so it gets a sentence instead of a
+                  button that would do nothing. */}
+              {voiceMode && phase === "listening" ? (
+                <button
+                  type="button"
+                  onClick={handleDone}
+                  className="tap-target inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#F97316] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8]"
+                >
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Done, that&apos;s my answer
+                </button>
+              ) : textMode ? (
+                <button
+                  type="button"
+                  onClick={handleTextSubmit}
+                  disabled={sending || !answer.trim()}
+                  className="tap-target inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#F97316] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                >
+                  {sending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Send className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  Send my answer
+                </button>
+              ) : livekitMode && lk.phase === "live" ? (
+                <p className="shrink-0 text-xs text-slate-400 sm:max-w-[13rem] sm:text-right">
+                  Say &ldquo;Done, that&apos;s it&rdquo; any time to submit your answer right away.
+                </p>
+              ) : null}
+            </div>
+          </div>
+        )}
+
+        {/* --- The call controls, where a video call puts them. ---
+            Only real controls live here — there is deliberately no mute button, because muting the
+            microphone in a spoken interview would stop the interview without saying so, and a
+            control this room will not honour is worse than no control. The mic reads out as a live
+            indicator instead. */}
+        <div className="flex shrink-0 flex-col items-stretch gap-2 rounded-2xl border border-[#E2E8F0] bg-white px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2 sm:min-w-0 sm:flex-1">
+            {!textMode && (
+              <BarButton onClick={askForRepeat}>
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Ask {interviewerName || "the interviewer"} to repeat</span>
+                <span className="sm:hidden">Repeat</span>
+              </BarButton>
+            )}
+            {textMode ? (
+              supported && (
+                <BarButton onClick={switchToVoice}>
+                  <Mic className="h-4 w-4" aria-hidden="true" /> Use voice instead
+                </BarButton>
+              )
+            ) : (
+              <BarButton onClick={goToTyping}>
+                <Keyboard className="h-4 w-4" aria-hidden="true" /> Switch to typing
+              </BarButton>
+            )}
+          </div>
+
+          <div className="flex shrink-0 flex-wrap items-center justify-center gap-1 self-center rounded-full border border-[#E2E8F0] bg-[#F4F6F9] p-1">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-slate-700 shadow-xs">
+              <span
+                aria-hidden="true"
+                className={`h-1.5 w-1.5 rounded-full ${
+                  (livekitMode ? lk.youSpeaking : phase === "listening") ? "bg-[#F97316]" : "bg-slate-300"
+                }`}
+              />
+              <Mic className="h-4 w-4 text-slate-500" aria-hidden="true" />
+              {textMode ? "Mic off" : livekitMode ? (lk.youSpeaking ? "You're speaking" : "Mic on") : phase === "listening" ? "Mic open" : "Mic on standby"}
+            </span>
+            {monitoring && (
+              <button
+                type="button"
+                onClick={() => setPipHidden((v) => !v)}
+                aria-pressed={pipHidden}
+                className="tap-target inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] font-semibold text-slate-600 transition-colors hover:bg-white hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8]"
+              >
+                {pipHidden ? (
+                  <VideoOff className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Video className="h-4 w-4" aria-hidden="true" />
+                )}
+                {pipHidden ? "Camera off" : "Camera on"}
+              </button>
+            )}
+          </div>
 
             {livekitMode ? (
               /* Realtime: one continuous conversation. There is no Done button and no per-question
@@ -1586,50 +2041,86 @@ export default function InterviewRoom() {
               </form>
             )}
           </div>
-        </Card>
+        </div>
 
-        <Card padding="none" className="flex flex-col lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)]">
-          {/* The state lives in the HEADER, not only at the end of the log: the log scrolls, and a
-              "thinking" line that has scrolled out of view is the same as no line at all. Same
-              vocabulary as the tile chip (StatusChip), so the two can never disagree. */}
-          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
-            <h2 className="text-sm font-semibold text-slate-700">Transcript</h2>
-            {agentState !== "idle" && <StatusChip agentState={agentState} />}
+        {/* The way out. The trigger lives in the call controls above — where a person looks for it
+            on a call — but the confirmation still stands between the button and actually ending: a
+            candidate who wants to leave should not have to hunt, and should not be made to feel
+            they are doing something irregular. It is the same exit the spoken "I want to stop"
+            reaches; this one just needs no particular words, which matters most for exactly the
+            candidates least likely to find them. */}
+        {confirmingExit && (
+          <div className="shrink-0 rounded-2xl border border-[#E2E8F0] bg-white p-4 text-center">
+            <p className="text-sm font-medium text-slate-900">End this interview now?</p>
+            {/* Says what actually happens, without pressure in either direction. No "you won't be
+                able to return" scare copy and no attempt to talk them out of it — but no false
+                comfort either: it does end here, and that is stated plainly. */}
+            <p className="mx-auto mt-1 max-w-md text-xs text-slate-500">
+              Your answers so far are recorded and go to the hiring team with your application, and a person will review
+              them. This interview won&apos;t continue after you end it.
+            </p>
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <BarButton onClick={() => setConfirmingExit(false)}>Keep going</BarButton>
+              <BarButton tone="danger" onClick={endInterview}>
+                End interview
+              </BarButton>
+            </div>
           </div>
-          <div
-            ref={scrollRef}
-            role="log"
-            aria-live="polite"
-            aria-relevant="additions"
-            className="max-h-[52vh] flex-1 space-y-4 overflow-y-auto bg-slate-50 p-5 lg:max-h-none"
-          >
-          {/* In a spoken interview the candidate sees the QUESTIONS only. Watching your own
-              words appear as you say them turns a conversation into a dictation exercise —
-              people start editing themselves against the screen instead of talking. The full
-              verbatim transcript is not lost: it is on the session and appears in the AI report
-              the recruiter reads. Typed interviews are unchanged, because there the text IS how
-              the candidate answers. */}
+        )}
+      </div>
+
+      {/* ------------------------------------------------------- Right: the running transcript */}
+      <aside className="flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white lg:w-[23rem] lg:shrink-0">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#F1F5F9] px-4 py-3">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <MessageSquare className="h-4 w-4 text-emerald-600" aria-hidden="true" /> Live Transcript
+          </h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#F97316]" /> Live
+          </span>
+        </div>
+
+        <div
+          ref={scrollRef}
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4"
+        >
+          {/* In a spoken interview the candidate sees the QUESTIONS only. Watching your own words
+              appear as you say them turns a conversation into a dictation exercise — people start
+              editing themselves against the screen instead of talking. The full verbatim transcript
+              is not lost: it is on the session and appears in the AI report the recruiter reads.
+              Typed interviews are unchanged, because there the text IS how the candidate answers. */}
           {state.turns.map((t, i) =>
             (voiceMode || livekitMode) && (t.role === "candidate" || t.kind === "warmup_answer") ? null : (
-              <Bubble key={i} role={t.role} text={t.text} />
+              <Bubble
+                key={i}
+                role={t.role}
+                text={t.text}
+                name={t.role === "ai" ? interviewerName || "Interviewer" : candidateName || "You"}
+                time={clockTime(t.at)}
+                active={i === activeAiIndex && state.awaitingAnswer}
+                label={i === activeAiIndex && state.awaitingAnswer ? `${questionLabel}:` : null}
+              />
             )
           )}
 
-          {/* What the interviewer is saying, shown as well as spoken. In realtime mode these are
-              live captions from the agent's own transcript — a candidate who is deaf or hard of
-              hearing, or whose audio output has failed, must still receive the question. A short
-              LOG rather than one replaced line, so an acknowledgement or a "one moment" can never
-              wipe the open question off the screen (the hook also absorbs barge-in fragments). */}
-          {livekitMode && (lk.captions || []).map((text, i) => <Bubble key={`cap-${i}`} role="ai" text={text} />)}
+          {/* Live captions from the agent's own transcript in realtime mode. A short LOG rather
+              than one replaced line, so an acknowledgement or a "one moment" can never wipe the
+              open question off the screen (the hook also absorbs barge-in fragments). */}
+          {livekitMode &&
+            (lk.captions || []).map((text, i) => (
+              <Bubble key={`cap-${i}`} role="ai" text={text} name={interviewerName || "Interviewer"} />
+            ))}
 
-          {/* The realtime transcript's live tail — the typing indicator every chat has, in the one
-              conversation that most needs it: the candidate's own words are deliberately never
-              shown here (see above), so without this the panel simply stopped moving whenever the
-              interviewer paused, and there was no way to tell composing from a dead connection.
-              Aligned to the AI bubble's text column (`pl-11`) like every other status row here. */}
+          {/* The typing indicator every chat has, in the one conversation that most needs it: the
+              candidate's own words are deliberately never shown here (see above), so without this
+              the panel simply stopped moving whenever the interviewer paused, and there was no way
+              to tell composing from a dead connection. */}
           {livekitMode && lk.phase === "live" && (agentState === "thinking" || agentState === "listening") && (
             <div
-              className={`flex items-center gap-2 pl-11 text-sm font-medium ${
+              className={`flex items-center gap-2 pl-8 text-[13px] font-medium ${
                 agentState === "thinking" ? "text-slate-500" : "text-emerald-700"
               }`}
             >
@@ -1698,9 +2189,11 @@ export default function InterviewRoom() {
 
           {pending?.status === "sending" && (
             <>
-              {!voiceMode && <Bubble role="candidate" text={pending.text} muted />}
-              <div className="flex items-center gap-2 pl-11 text-sm text-slate-500">
-                <Loader2 className="h-4 w-4 animate-spin" /> Interviewer is thinking…
+              {!voiceMode && (
+                <Bubble role="candidate" text={pending.text} name={candidateName || "You"} muted />
+              )}
+              <div className="flex items-center gap-2 pl-8 text-[13px] text-slate-500">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Interviewer is thinking…
                 <ThinkingDots className="text-slate-400" />
               </div>
             </>
@@ -1713,24 +2206,15 @@ export default function InterviewRoom() {
               costs them nothing.
 
               Also shown when the voice connection dropped for good (`phase === "disconnected"`).
-              That state renders no status branch of its own — every branch below tests for
-              speaking/listening/processing/idle — so the room went blank apart from an error
-              telling the candidate they could "answer this question again", which was the one
-              thing the screen did not offer them: `stuck` never becomes true outside "idle", so
-              this banner and its retry button were unreachable from exactly the state that needed
-              them. No 20-second wait here — unlike a stall, a dead socket is already known. */}
+              No 20-second wait there — unlike a stall, a dead socket is already known. */}
           {(stuck || phase === "disconnected") && (
-            <div
-              className="ml-11 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
-              role="status"
-              aria-live="polite"
-            >
-              <p className="font-medium">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[13px] text-amber-900" role="status" aria-live="polite">
+              <p className="font-semibold">
                 {phase === "disconnected" ? "The voice connection dropped." : "This is taking longer than it should."}
               </p>
               <p className="mt-1 text-amber-800">
-                Your answers so far are saved. Try the microphone again, or switch to typing — typed
-                answers are assessed the same way.
+                Your answers so far are saved. Try the microphone again, or switch to typing — typed answers are assessed
+                the same way.
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
@@ -1742,7 +2226,7 @@ export default function InterviewRoom() {
                 </button>
                 <button
                   type="button"
-                  onClick={switchToTyping}
+                  onClick={goToTyping}
                   className="tap-target rounded-full border border-amber-300 px-3 py-1 font-semibold text-amber-900 hover:border-amber-500"
                 >
                   Switch to typing
@@ -1753,15 +2237,15 @@ export default function InterviewRoom() {
 
           {pending?.status === "failed" && (
             <div>
-              <Bubble role="candidate" text={pending.text} />
-              <div className="mt-1.5 flex items-center gap-3 pl-11 text-xs">
+              <Bubble role="candidate" text={pending.text} name={candidateName || "You"} />
+              <div className="mt-1.5 flex items-center justify-end gap-3 pr-8 text-xs">
                 <span className="font-semibold text-red-600">Not sent</span>
                 <button
                   type="button"
                   onClick={() => submitAnswer(pending.payload)}
                   className="tap-target flex items-center gap-1 rounded py-1 font-semibold text-[#7C3F10] hover:text-[#7C3F10] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7C3F10]/20"
                 >
-                  <RotateCcw className="h-3 w-3" /> Retry
+                  <RotateCcw className="h-3 w-3" aria-hidden="true" /> Retry
                 </button>
               </div>
             </div>
@@ -1769,46 +2253,102 @@ export default function InterviewRoom() {
 
           {pending?.status === "expired" && (
             <div>
-              <Bubble role="candidate" text={pending.text} />
-              <p className="mt-1.5 pl-11 text-xs font-semibold text-red-600">Not sent — this interview link has expired</p>
+              <Bubble role="candidate" text={pending.text} name={candidateName || "You"} />
+              <p className="mt-1.5 pr-8 text-right text-xs font-semibold text-red-600">
+                Not sent — this interview link has expired
+              </p>
             </div>
           )}
         </div>
-        </Card>
-      </div>
 
-      {/* The way out. The trigger now lives in the call controls on the stage above — where a
-          person looks for it on a call — but the confirmation is unchanged and still stands
-          between the button and actually ending: a candidate who wants to leave should not have to
-          hunt, and should not be made to feel they are doing something irregular. It is the same
-          exit the spoken "I want to stop" reaches; this one just needs no particular words, which
-          matters most for exactly the candidates least likely to find them. */}
-      {confirmingExit && (
-        <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
-          <p className="text-sm font-medium text-slate-900">End this interview now?</p>
-          {/* Says what actually happens, without pressure in either direction. No "you won't be
-              able to return" scare copy and no attempt to talk them out of it — but no false
-              comfort either: it does end here, and that is stated plainly. */}
-          <p className="mx-auto mt-1 max-w-md text-xs text-slate-500">
-            Your answers so far are recorded and go to the hiring team with your application, and a person will review
-            them. This interview won&apos;t continue after you end it.
-          </p>
-          <div className="mt-3 flex items-center justify-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setConfirmingExit(false)}>
-              Keep going
-            </Button>
-            <Button size="sm" onClick={endInterview}>
-              End interview
-            </Button>
+        {/* --- The composer. Live in a typed interview; the way into one otherwise. ---
+            In a spoken interview this field is read-only and a click on it is what switches the
+            candidate to typing. Deliberately click-to-switch rather than focus-to-switch: a stray
+            Tab must not be able to tear down an open microphone mid-answer. */}
+        <form
+          onSubmit={(e) => {
+            if (textMode) {
+              handleTextSubmit(e);
+              return;
+            }
+            e.preventDefault();
+            void goToTyping();
+          }}
+          className="shrink-0 border-t border-[#F1F5F9] p-3"
+        >
+          <div className="flex items-end gap-2">
+            <textarea
+              rows={1}
+              value={textMode ? answer : ""}
+              readOnly={!textMode}
+              onChange={textMode ? (e) => updateAnswer(e.target.value) : undefined}
+              onClick={textMode ? undefined : () => void goToTyping()}
+              onKeyDown={(e) => {
+                if (!textMode) {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    void goToTyping();
+                  }
+                  return;
+                }
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleTextSubmit(e);
+              }}
+              disabled={textMode && sending}
+              maxLength={MAX_ANSWER_CHARS}
+              aria-label="Your answer"
+              placeholder={textMode ? "Type your answer or note here…" : "Tap here to type your answer instead…"}
+              className="max-h-32 min-h-[42px] flex-1 resize-y rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 text-[13px] text-slate-900 placeholder:text-slate-400 focus:border-[#F97316] focus:ring-2 focus:ring-[#FEF3E8] focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={textMode && (sending || !answer.trim())}
+              aria-label={textMode ? "Send answer" : "Switch to typing"}
+              className="tap-target flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-[#F97316] text-white transition-colors hover:bg-[#EA6C0A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+            >
+              {textMode && sending ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
           </div>
-        </div>
-      )}
+
+          {textMode && (
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+              <span className="text-[11px] text-slate-400">Press Ctrl/⌘ + Enter to send</span>
+              {answer.length > MAX_ANSWER_CHARS - 500 && (
+                <span
+                  className={`num text-[11px] ${
+                    answer.length >= MAX_ANSWER_CHARS ? "font-semibold text-red-600" : "text-slate-500"
+                  }`}
+                >
+                  {answer.length} / {MAX_ANSWER_CHARS}
+                </span>
+              )}
+              {/* Parity with the spoken "I don't know". Without it, a typing candidate's only way
+                  to decline is to write "I don't know" into the answer box and have it scored as an
+                  answer — which is exactly the behaviour this exists to remove. Recorded as a
+                  decline, not as a zero. */}
+              {!state.currentIsWarmup && (
+                <button
+                  type="button"
+                  disabled={sending}
+                  onClick={() => submitAct({ act: "decline", text: "I don't know.", inputMode: "text" })}
+                  className="tap-target rounded py-1 text-[11px] font-medium text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FEF3E8] disabled:opacity-50"
+                >
+                  I don&apos;t know this one — skip it
+                </button>
+              )}
+            </div>
+          )}
+        </form>
+      </aside>
     </div>
     );
   }
 
   return (
-    <InterviewShell stage={live ? "live" : "setup"} wide={live}>
+    <InterviewShell stage={live ? "live" : "setup"} wide={live} fill={live} meta={headerMeta}>
       {body}
     </InterviewShell>
   );
