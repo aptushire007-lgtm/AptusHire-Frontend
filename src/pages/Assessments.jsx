@@ -2,6 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, ClipboardList, Clock3, RotateCcw, Search } from "lucide-react";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { clearAuth as clearAssessmentAuth, saveAuth as saveAssessmentAuth } from "../portal/assessmentAuth.js";
 import { Card, EmptyState, Skeleton } from "../components/ui/Card.jsx";
@@ -52,16 +53,16 @@ function AssessmentCard({ assessment, onOpen, opening }) {
 
 export default function Assessments() {
   const navigate = useNavigate();
-  const [assessments, setAssessments] = useState([]);
-  const [state, setState] = useState("loading");
+  const [assessments, setAssessments] = useState(() => peekDashboard()?.assessments || []);
+  const [state, setState] = useState(() => (peekDashboard() ? "ready" : "loading"));
   const [error, setError] = useState("");
   const [openingId, setOpeningId] = useState(null);
   const [query, setQuery] = useState("");
 
   function load() {
-    setState("loading");
+    if (!peekDashboard()) setState("loading");
     setError("");
-    api.get("/candidate-dashboard", { headers: accountAuthHeader() }).then((response) => {
+    fetchDashboard().then((response) => {
       const sessions = response.data.assessments || [];
       setAssessments(sessions);
       setState("ready");

@@ -2,6 +2,7 @@
 import { ArrowLeft, CircleAlert, Lightbulb, Loader2, Target } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { Card } from "../components/ui/Card.jsx";
 import Button from "../components/ui/Button.jsx";
@@ -37,7 +38,7 @@ export default function ImprovementPlan() {
     let cancelled = false;
     async function load() {
       try {
-        const dashboardResponse = await api.get("/candidate-dashboard", { headers: accountAuthHeader() });
+        const dashboardResponse = await fetchDashboard();
         if (cancelled) return;
         const nextApplication = (dashboardResponse.data.appliedJobs || []).find((item) => String(item._id) === String(id));
         if (!nextApplication) throw new Error("We could not find this application.");

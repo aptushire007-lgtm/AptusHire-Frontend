@@ -18,6 +18,7 @@ import {
   UserRound, Video,
 } from "lucide-react";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader, clearAccountAuth } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
 import { getSocket } from "../lib/socket.js";
@@ -136,7 +137,7 @@ function QuickActionCard({ icon, title, description, to, dot }) {
 export default function CandidateDashboard() {
   const navigate = useNavigate();
   const { user } = useAccountAuth();
-  const [data,      setData]      = useState(null);
+  const [data,      setData]      = useState(() => peekDashboard());
   const [error,     setError]     = useState("");
   const [exporting, setExporting] = useState(false);
   const [greeting,  setGreeting]  = useState(() => indianGreeting());
@@ -145,7 +146,7 @@ export default function CandidateDashboard() {
   const load = useCallback(async () => {
     setError("");
     try {
-      const res = await api.get("/candidate-dashboard", { headers: accountAuthHeader() });
+      const res = await fetchDashboard();
       setData(res.data);
     } catch (err) {
       if (err.response?.status === 401) {

@@ -2,6 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, CalendarDays, CircleAlert, Clock3, PlayCircle, RotateCcw, Video } from "lucide-react";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { saveAuth, clearAuth } from "../portal/portalAuth.js";
 import { Card, EmptyState, Skeleton } from "../components/ui/Card.jsx";
@@ -30,16 +31,16 @@ function InterviewCard({ interview, company, upcoming, opening, onOpen }) {
 
 export default function Interviews() {
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
-  const [state, setState] = useState("loading");
+  const [data, setData] = useState(() => peekDashboard());
+  const [state, setState] = useState(() => (peekDashboard() ? "ready" : "loading"));
   const [error, setError] = useState("");
   const [openingId, setOpeningId] = useState(null);
 
   async function load() {
-    setState("loading");
+    if (!peekDashboard()) setState("loading");
     setError("");
     try {
-      const response = await api.get("/candidate-dashboard", { headers: accountAuthHeader() });
+      const response = await fetchDashboard();
       setData(response.data);
       setState("ready");
     } catch (err) {

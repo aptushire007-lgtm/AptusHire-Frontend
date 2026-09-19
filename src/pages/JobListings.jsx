@@ -15,6 +15,7 @@ import {
   Eye, Upload, Info, Clock3, AlertCircle,
 } from "lucide-react";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
 import { Card, EmptyState, Skeleton } from "../components/ui/Card.jsx";
@@ -964,7 +965,7 @@ export default function JobListings() {
     Promise.all([
       api.get("/jobs/published"),
       isAuthenticated
-        ? api.get("/candidate-dashboard", { headers: accountAuthHeader() }).catch(() => null)
+        ? fetchDashboard().catch(() => null)
         : Promise.resolve(null),
     ])
       .then(([jobsRes, dashRes]) => {

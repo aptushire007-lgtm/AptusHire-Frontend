@@ -253,7 +253,7 @@ function SidebarBrand({ collapsed, onNavigate }) {
       <BrandLogo
         to="/welcome"
         variant="image"
-        size={52}
+        size={50}
         onClick={onNavigate}
       />
     </div>
@@ -431,7 +431,7 @@ function ShellInner({ children }) {
       <aside
         id={SIDEBAR_ID}
         className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-[#E2E8F0] bg-white transition-[width] duration-200 motion-reduce:transition-none lg:flex ${
-          collapsed ? "w-[4.5rem]" : "w-[calc(18rem+1cm)]"
+          collapsed ? "w-[4.5rem]" : "w-[17rem]"
         }`}
       >
         <SidebarBrand collapsed={collapsed} />
@@ -465,7 +465,7 @@ function ShellInner({ children }) {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute inset-y-0 left-0 flex w-[calc(18rem+1cm)] max-w-[85vw] flex-col border-r border-[#E2E8F0] bg-white shadow-lift"
+            className="absolute inset-y-0 left-0 flex w-[17rem] max-w-[85vw] flex-col border-r border-[#E2E8F0] bg-white shadow-lift"
           >
             <button
               ref={closeRef}

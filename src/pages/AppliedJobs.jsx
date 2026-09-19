@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Briefcase, Check, CircleAlert, Clock, MoreVertical, Search, X } from "lucide-react";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { Card, EmptyState, Skeleton } from "../components/ui/Card.jsx";
 import Button from "../components/ui/Button.jsx";
@@ -281,16 +282,16 @@ function ApplicationCard({ application, onView }) {
 }
 
 export default function AppliedJobs() {
-  const [applications, setApplications] = useState([]);
+  const [applications, setApplications] = useState(() => peekDashboard()?.appliedJobs || []);
   const [selected, setSelected] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
-  const [state, setState] = useState("loading");
+  const [state, setState] = useState(() => (peekDashboard() ? "ready" : "loading"));
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    api.get("/candidate-dashboard", { headers: accountAuthHeader() }).then((response) => {
+    fetchDashboard().then((response) => {
       setApplications(response.data.appliedJobs || []);
       setState("ready");
     }).catch((err) => {

@@ -1,10 +1,12 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import RequireAccount from "./auth/RequireAccount.jsx";
 // The shell owns the collapsible left rail, the header, the content column, and
 // the notification provider — see components/app/AppShell.jsx.
 import AppShell from "./components/app/AppShell.jsx";
 import { PHONE_PAIRING_ENABLED } from "./lib/features.js";
+import { useAccountAuth } from "./auth/useAccountAuth.js";
+import { fetchDashboard } from "./api/dashboardCache.js";
 
 // Every page used to be a static import, so one 1.25 MB chunk (356 kB gzipped)
 // had to arrive before anything rendered — on the app a nervous candidate opens
@@ -70,7 +72,35 @@ function RouteFallback() {
   );
 }
 
+// Once a candidate is signed in, quietly fetch the pages they navigate between
+// most (during browser idle time) plus the shared dashboard payload, so the
+// first click is instant instead of waiting on a chunk download and a heavy
+// API round trip. Same import specifiers as the lazy() calls above, so the
+// browser reuses these requests rather than repeating them.
+function usePrefetchCandidatePages() {
+  const { isAuthenticated } = useAccountAuth();
+  useEffect(() => {
+    if (!isAuthenticated) return undefined;
+    const run = () => {
+      fetchDashboard().catch(() => {});
+      import("./pages/SavedJobs.jsx");
+      import("./pages/AppliedJobs.jsx");
+      import("./pages/Assessments.jsx");
+      import("./pages/CandidateDashboard.jsx");
+      import("./pages/profile/ProfileLayout.jsx");
+      import("./pages/JobDetail.jsx");
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(run, { timeout: 3000 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const id = setTimeout(run, 1500);
+    return () => clearTimeout(id);
+  }, [isAuthenticated]);
+}
+
 export default function App() {
+  usePrefetchCandidatePages();
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>

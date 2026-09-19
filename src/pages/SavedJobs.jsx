@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Bookmark, Briefcase, Building2, Calendar, FileText, MapPin, Search, SlidersHorizontal, Sparkles, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { Badge, Card, EmptyState, IconTile, Skeleton } from "../components/ui/Card.jsx";
 import { Select } from "../components/ui/Field.jsx";
@@ -28,8 +29,12 @@ function formatSavedOn(value) {
 }
 
 export default function SavedJobs() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState(() => {
+    const unique = new Map();
+    for (const job of peekDashboard()?.savedJobs || []) if (job?._id) unique.set(String(job._id), job);
+    return [...unique.values()];
+  });
+  const [loading, setLoading] = useState(() => !peekDashboard());
   const [savingId, setSavingId] = useState(null);
   const [query, setQuery] = useState("");
   const [location, setLocation] = useState("");
@@ -40,8 +45,7 @@ export default function SavedJobs() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
-    api
-      .get("/candidate-dashboard", { headers: accountAuthHeader() })
+    fetchDashboard()
       .then(({ data }) => {
         const unique = new Map();
         for (const job of data.savedJobs || []) if (job?._id) unique.set(String(job._id), job);
