@@ -2067,8 +2067,6 @@ export default function InterviewRoom() {
             </div>
           </div>
         )}
-      </div>
-
       {/* ------------------------------------------------------- Right: the running transcript */}
       <aside className="flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white lg:w-[23rem] lg:shrink-0">
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#F1F5F9] px-4 py-3">
