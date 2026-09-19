@@ -11,13 +11,16 @@ import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import {
   MapPin, Search, X, Bookmark, Briefcase, DollarSign,
   ArrowRight, Clock, GraduationCap, SlidersHorizontal,
-  CheckCircle2, Zap, Globe, ChevronDown, MoreHorizontal,
+  CheckCircle2, Zap, Globe, ChevronDown, MoreHorizontal, FileText,
+  Eye, Upload, Info, Clock3, AlertCircle,
 } from "lucide-react";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
 import { Card, EmptyState, Skeleton } from "../components/ui/Card.jsx";
 import { PageHero, TokenList, MetaItem } from "../components/ui/Panels.jsx";
+import ApplyVersionModal from "../components/jobs/ApplyVersionModal.jsx";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Pure helpers (no state, no side-effects)
@@ -88,6 +91,26 @@ function salaryFilterValue(value) {
   return value.toLowerCase().includes("k") ? amount * 1000 : amount;
 }
 
+// Survives a mobile round trip to /jobs/:id and back (a full route change,
+// so this component unmounts) so the search/filter/tab state a candidate
+// had on the list isn't silently lost when they open a job and go back.
+const BROWSE_STATE_KEY = "jobListings:browseState:v1";
+function loadBrowseState() {
+  try {
+    const raw = sessionStorage.getItem(BROWSE_STATE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+function saveBrowseState(state) {
+  try {
+    sessionStorage.setItem(BROWSE_STATE_KEY, JSON.stringify(state));
+  } catch {
+    // best-effort only
+  }
+}
+
 /** Derive match strength from recommendation rank */
 function getMatchLabel(job, recommendedOrder) {
   const pos = recommendedOrder.indexOf(String(job._id));
@@ -96,6 +119,147 @@ function getMatchLabel(job, recommendedOrder) {
   if (pos < 5 || (score != null && score >= 80)) return "Strong match";
   if (pos < 15 || (score != null && score >= 60)) return "Good match";
   return "Match";
+}
+
+function AutoApplyModal({ isOpen, jobs, recommendedOrder, enabled, initialResumeId, initialIncludeGood, onClose, onEnabled, onDisabled }) {
+  const [view, setView] = useState("confirm");
+  const [includeGood, setIncludeGood] = useState(false);
+  const [rolesOpen, setRolesOpen] = useState(false);
+  const [resumes, setResumes] = useState([]);
+  const [selectedResume, setSelectedResume] = useState(null);
+  const [loadingResumes, setLoadingResumes] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const uploadRef = useRef(null);
+
+  const matches = useMemo(() => jobs
+    .filter((job) => recommendedOrder.includes(String(job._id)))
+    .sort((a, b) => recommendedOrder.indexOf(String(a._id)) - recommendedOrder.indexOf(String(b._id))), [jobs, recommendedOrder]);
+  const strongMatches = matches.filter((job) => getMatchLabel(job, recommendedOrder) === "Strong match");
+  const goodMatches = matches.filter((job) => getMatchLabel(job, recommendedOrder) === "Good match");
+  const visibleMatches = includeGood ? [...strongMatches, ...goodMatches] : strongMatches;
+  const defaultResume = resumes.find((resume) => resume.isDefault) || resumes[0] || null;
+  const activeResume = selectedResume || defaultResume;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setView("confirm");
+    setRolesOpen(false);
+    // Reflects the saved setting each time the modal reopens, not whatever was
+    // left over from a previous open — those are two different candidates'
+    // worth of state if the page has been sitting idle.
+    setIncludeGood(!!initialIncludeGood);
+    setLoadingResumes(true);
+    api.get("/candidate-dashboard/resumes", { headers: accountAuthHeader() })
+      .then((response) => {
+        const nextResumes = Array.isArray(response.data) ? response.data : response.data?.versions || [];
+        setResumes(nextResumes);
+        const savedChoice = initialResumeId
+          ? nextResumes.find((resume) => String(resume._id) === String(initialResumeId))
+          : null;
+        setSelectedResume(savedChoice || nextResumes.find((resume) => resume.isDefault) || nextResumes[0] || null);
+      })
+      .catch(() => setResumes([]))
+      .finally(() => setLoadingResumes(false));
+  }, [isOpen, initialResumeId, initialIncludeGood]);
+
+  if (!isOpen) return null;
+
+  async function uploadResume(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("resume", file);
+    try {
+      const response = await api.post("/candidate-dashboard/resumes/upload", formData, {
+        headers: { ...accountAuthHeader(), "Content-Type": "multipart/form-data" },
+      });
+      const uploaded = response.data?.resume || response.data;
+      setResumes((current) => [uploaded, ...current]);
+      setSelectedResume(uploaded);
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  function resumeLabel(resume) {
+    return resume?.label || resume?.fileName || resume?.originalName || "Saved resume";
+  }
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+      <div className={`relative w-full overflow-hidden rounded-[24px] border-[4px] border-white bg-white shadow-2xl ${view === "resume" ? "max-w-[685px]" : "max-w-[700px]"}`}>
+        <button type="button" onClick={onClose} aria-label="Close" className="absolute right-5 top-5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#202020] text-white"><X className="h-3.5 w-3.5" /></button>
+        {view === "resume" ? (
+          <div className="p-6 sm:p-7">
+            <h2 className="pr-8 text-[24px] font-medium text-[#0F172A]">Select a CV</h2>
+            <p className="mt-1 text-[16px] text-[#64748B]">Select the CV you want to use for this role.</p>
+            <p className="mt-6 text-[14px] font-semibold text-[#172334]">Your CVs {resumes.length}</p>
+            <div className="mt-2 space-y-2">{loadingResumes ? <p className="py-4 text-sm text-[#64748B]">Loading your CVs...</p> : resumes.map((resume) => (
+              <button key={resume._id} type="button" onClick={() => setSelectedResume(resume)} className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left ${String(activeResume?._id) === String(resume._id) ? "border-[#202020] bg-[#FAFAFA]" : "border-[#D5D9DE]"}`}>
+                <span className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${String(activeResume?._id) === String(resume._id) ? "border-[#202020]" : "border-[#64748B]"}`}><span className={`h-3 w-3 rounded-full ${String(activeResume?._id) === String(resume._id) ? "bg-[#202020]" : "bg-transparent"}`} /></span>
+                <FileText className="h-5 w-5 text-[#94A3B8]" /><span className="flex-1 text-[16px] font-semibold text-[#172334]">{resumeLabel(resume)}</span>
+                {resume.isDefault && <span className="rounded-full bg-[#202020] px-2 py-1 text-[11px] font-bold text-white">Default</span>}<Eye className="h-5 w-5 text-[#94A3B8]" />
+              </button>
+            ))}</div>
+            <button type="button" onClick={() => uploadRef.current?.click()} disabled={uploading} className="mt-3 flex h-[134px] w-full flex-col items-center justify-center rounded-xl border border-dashed border-[#CBD5E1] bg-[#FAFBFC] text-[#172334]"><Upload className="h-7 w-7" /><span className="mt-2 text-[17px] font-semibold">{uploading ? "Uploading..." : "Click to upload"}</span><span className="mt-1 text-[14px] italic text-[#64748B]">(PDF, Doc, Docx — up to 10MB)</span></button>
+            <input ref={uploadRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={uploadResume} />
+            <button type="button" onClick={() => setView("confirm")} disabled={!activeResume} className="mt-5 h-14 w-full rounded-full bg-[#202020] text-[17px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Use CV</button>
+          </div>
+        ) : (
+          <div className="px-7 pb-6 pt-8 text-center sm:px-8">
+            <h2 className="text-[54px] font-semibold leading-none text-[#101B3A]">{visibleMatches.length}</h2>
+            <p className="mt-2 text-[16px] font-bold uppercase tracking-wide text-[#16A36A]">{includeGood ? "Matches ready to apply" : "Strong matches ready"}</p>
+            <p className="mt-2 text-[16px] text-[#64748B]">{includeGood ? `We send up to 10 a day — all ${visibleMatches.length} in about ${Math.max(1, Math.ceil(visibleMatches.length / 10))} days` : "then up to 10 a day, sent hourly"} <Info className="mb-0.5 inline h-4 w-4" /></p>
+            <div className="mt-5 flex flex-wrap justify-center gap-2.5">
+              <button type="button" onClick={() => setView("resume")} className="inline-flex h-12 max-w-full items-center gap-2 rounded-full border border-[#E2E8F0] px-4 text-[15px] font-semibold text-[#172334] shadow-sm"><FileText className="h-5 w-5 text-[#94A3B8]" /><span className="max-w-[190px] truncate">{resumeLabel(activeResume) || "Select a CV"}</span><ChevronDown className="h-4 w-4 text-[#94A3B8]" /></button>
+              <button type="button" onClick={() => setIncludeGood((current) => !current)} aria-pressed={includeGood} className="inline-flex h-12 items-center gap-2 rounded-full border border-[#CBD5E1] px-4 text-[15px] font-semibold text-[#172334] shadow-sm"><span className={`flex h-5 w-5 items-center justify-center rounded-md border ${includeGood ? "border-[#101B3A] bg-[#101B3A] text-white" : "border-[#CBD5E1]"}`}>{includeGood && <CheckCircle2 className="h-4 w-4" />}</span>Also include Good matches</button>
+              <button type="button" onClick={() => setRolesOpen((current) => !current)} className="inline-flex h-12 items-center gap-2 rounded-full border border-[#E2E8F0] px-4 text-[15px] font-semibold text-[#172334] shadow-sm">{visibleMatches.length} roles <ChevronDown className={`h-4 w-4 text-[#94A3B8] transition-transform ${rolesOpen ? "rotate-180" : ""}`} /></button>
+            </div>
+            {rolesOpen && <div className="mt-3 max-h-[170px] overflow-y-auto rounded-xl border border-[#E2E8F0] bg-white p-2 text-left shadow-inner">{visibleMatches.map((job) => <div key={job._id} className="flex items-center gap-2 px-2 py-2 text-[14px]"><span className="min-w-0 flex-1 truncate font-semibold text-[#172334]">{job.title} <span className="font-normal text-[#64748B]">{job.company?.name}</span></span><span className="text-[#16A36A]">{job.matchScore || job.ats?.overallScore || Math.max(70, 100 - recommendedOrder.indexOf(String(job._id)) * 3)}%</span></div>)}</div>}
+            <div className="mt-5 rounded-2xl border border-[#DDE1E7] bg-[#F5F6F8] p-4 text-left"><div className="flex gap-3"><Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#2583FF]" /><div><p className="text-[15px] font-semibold text-[#172334]">Checks for new matches hourly</p><p className="mt-1 text-[14px] leading-5 text-[#64748B]">We look for new matching jobs every hour and apply for you automatically.</p></div></div><div className="mt-4 flex gap-3"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#2583FF]" /><div><p className="text-[15px] font-semibold text-[#172334]">Some roles ask you a few questions</p><p className="mt-1 text-[14px] leading-5 text-[#64748B]">We still apply for you — those go out shortly, and your tracker shows which ones need your answers to be complete.</p></div></div></div>
+            <div className="mt-5 grid grid-cols-2 gap-2.5">
+              <button type="button" onClick={onClose} className="h-12 rounded-full border border-[#DDE1E7] bg-[#F5F6F8] text-[16px] font-medium text-[#172334]">Cancel</button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    await onEnabled({ resume: activeResume, includeGood });
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={!activeResume || saving}
+                className="h-12 rounded-full bg-[#202020] text-[16px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? "Saving..." : enabled ? "Update auto-apply" : "Turn on & apply"}
+              </button>
+            </div>
+            {enabled && (
+              <button
+                type="button"
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    await onDisabled();
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+                className="mt-3 h-11 w-full rounded-full border border-[#FCA5A5] text-[15px] font-semibold text-[#B91C1C] hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Turn off auto-apply
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -182,12 +346,15 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
         onClick={(e) => { e.stopPropagation(); onToggleSave(job); }}
         disabled={saving}
         aria-label={saved ? "Unsave" : "Save"}
-        className={`absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] transition-colors hover:bg-white hover:text-[#7C3F10] focus-visible:outline-none ${
-          saved ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+        aria-pressed={saved}
+        className={`tap-target absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 text-[#94A3B8] opacity-100 transition-colors hover:bg-white hover:text-[#F97316] focus-visible:outline-none ${
+          // Always visible on mobile (there's no hover to reveal it there);
+          // desktop keeps the original hover/focus reveal when not saved.
+          saved ? "" : "md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
         }`}
       >
         <Bookmark
-          className={`h-5 w-5 ${saved ? "fill-[#F97316] text-[#F97316]" : ""}`}
+          className={`h-5 w-5 ${saved ? "fill-[#EAB308] text-[#EAB308]" : ""}`}
           aria-hidden
         />
       </button>
@@ -225,7 +392,7 @@ function ListCard({ job, active, onClick, saved, onToggleSave, saving, matchLabe
 // ─────────────────────────────────────────────────────────────────────────────
 // RIGHT PANEL — job detail
 // ─────────────────────────────────────────────────────────────────────────────
-function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
+function JobDetailPanel({ job, navigate, onDismiss, dismissing, onApply }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
 
@@ -254,17 +421,16 @@ function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
   const jobType   = job.jobType || job.employmentType;
   const workplace = job.workplaceType || job.workPlace;
   const seniority = job.seniorityLevel || job.experienceLevel;
-  const applyTo   = `/jobs/${job.slug || job._id}/apply`;
   const website   = job.company?.website;
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* ── Scrollable body ── */}
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="p-6 pb-2">
+        <div className="p-7 pb-3 lg:p-8 lg:pb-4">
           {/* Title + 3-dot */}
           <div className="relative flex items-start justify-between gap-3">
-            <h1 className="text-[26px] font-bold leading-snug text-[#0F172A]">
+            <h1 className="text-[28px] font-bold leading-snug text-[#0F172A] lg:text-[30px]">
               {job.title}
             </h1>
             <button
@@ -293,10 +459,10 @@ function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
           </div>
 
           {/* Company info */}
-          <div className="mt-4 flex items-center gap-3">
-            <CompanyLogo company={job.company} size={52} />
+          <div className="mt-5 flex items-center gap-4">
+            <CompanyLogo company={job.company} size={56} />
             <div className="min-w-0">
-              <p className="text-[17px] font-semibold text-[#0F172A]">
+              <p className="text-[18px] font-semibold text-[#0F172A]">
                 {job.company?.name}
               </p>
               <div className="mt-1.5 flex flex-wrap items-center gap-3">
@@ -334,7 +500,7 @@ function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
 
           {/* Description */}
           {job.description && (
-            <div className="mt-5 text-[15px] leading-8 text-[#3D4A45] whitespace-pre-line">
+            <div className="mt-6 max-w-[1100px] text-[16px] leading-8 text-[#3D4A45] whitespace-pre-line">
               {job.description}
             </div>
           )}
@@ -342,8 +508,8 @@ function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
           {/* Requirements */}
           {job.requirements && (
             <div className="mt-6">
-              <h2 className="text-[17px] font-bold text-[#0F172A]">Requirements</h2>
-              <div className="mt-2.5 text-[15px] leading-8 text-[#3D4A45] whitespace-pre-line">
+              <h2 className="text-[18px] font-bold text-[#0F172A]">Requirements</h2>
+              <div className="mt-3 text-[16px] leading-8 text-[#3D4A45] whitespace-pre-line">
                 {job.requirements}
               </div>
             </div>
@@ -352,7 +518,7 @@ function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
           {/* Required Skills */}
           {job.requiredSkills?.length > 0 && (
             <div className="mt-6">
-              <h2 className="text-[17px] font-bold text-[#0F172A]">Required Skills</h2>
+              <h2 className="text-[18px] font-bold text-[#0F172A]">Required Skills</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {job.requiredSkills.map((skill) => (
                   <span
@@ -376,7 +542,7 @@ function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
             ].map(({ label, value }) => (
               <div key={label}>
                 <p className="text-[13px] font-medium text-[#94A3B8]">{label}</p>
-                <p className="mt-1.5 inline-flex rounded-lg bg-[#EFF6FF] px-3 py-1.5 text-[15px] font-semibold text-[#2563EB]">
+                <p className="mt-1.5 inline-flex rounded-lg bg-[#EFF6FF] px-3 py-1.5 text-[16px] font-semibold text-[#2563EB]">
                   {value || "—"}
                 </p>
               </div>
@@ -389,12 +555,12 @@ function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
       </div>
 
       {/* ── Sticky Apply Now ── */}
-      <div className="shrink-0 border-t border-[#F0F2F4] bg-white px-6 py-4">
+      <div className="shrink-0 border-t border-[#F0F2F4] bg-white px-7 py-5 lg:px-8">
         {job.alreadyApplied ? (
           <button
             type="button"
             onClick={() => navigate("/applied-jobs")}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#DBEAFE] text-[14px] font-semibold text-[#2563EB] transition-opacity hover:opacity-80"
+            className="flex h-13 w-full items-center justify-center gap-2 rounded-full bg-[#DBEAFE] text-[15px] font-semibold text-[#2563EB] transition-opacity hover:opacity-80"
           >
             <CheckCircle2 className="h-4 w-4" aria-hidden />
             Applied
@@ -402,8 +568,8 @@ function JobDetailPanel({ job, navigate, onDismiss, dismissing }) {
         ) : (
           <button
             type="button"
-            onClick={() => navigate(applyTo)}
-            className="flex h-12 w-full items-center justify-center rounded-full bg-[#0F172A] text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
+            onClick={() => onApply(job)}
+            className="flex h-13 w-full items-center justify-center rounded-full bg-[#0F172A] text-[15px] font-semibold text-white transition-opacity hover:opacity-90"
           >
             Apply Now
           </button>
@@ -697,6 +863,10 @@ export default function JobListings() {
   const recommendationsOnly = searchParams.get("recommended") === "1";
   const { isAuthenticated } = useAccountAuth();
 
+  // Restored once per mount — lets search/filters/tab survive a mobile
+  // navigation to /jobs/:id and back (see BROWSE_STATE_KEY above).
+  const restoredBrowseState = useMemo(() => loadBrowseState(), []);
+
   // ── Data state (all API calls preserved) ──
   const [jobs,             setJobs]             = useState([]);
   const [savedIds,         setSavedIds]         = useState(new Set());
@@ -706,25 +876,96 @@ export default function JobListings() {
   const [recommendedOrder, setRecommendedOrder] = useState([]);
 
   // ── UI state ──
-  const initialQuery = searchParams.get("q") || "";
+  const initialQuery = searchParams.get("q") || restoredBrowseState?.query || "";
   const [searchInput, setSearchInput] = useState(initialQuery);
   const [query,       setQuery]       = useState(initialQuery);
-  const [filters,     setFilters]     = useState({
+  const [filters,     setFilters]     = useState(() => ({
     location: "", matchFilter: "", minSalary: "Any",
     experience: "", skills: "", company: "", department: "",
     workArrangement: "", employmentType: "",
+    ...(restoredBrowseState?.filters || {}),
+  }));
+  // "top" = recommended matches only, "all" = every published job — same
+  // page, same list/search/filter/detail plumbing, just a different subset.
+  // An explicit ?view= (the Recommended / All Jobs nav links both set one)
+  // always wins; a bare /?recommended=1 (a redirect, a login bounce-back)
+  // always opens on the recommended Top matches view.
+  const [viewMode, setViewMode] = useState(() => {
+    const explicitView = searchParams.get("view");
+    if (explicitView === "all" || explicitView === "top") return explicitView;
+    return "top";
   });
   const [showFilters,  setShowFilters]  = useState(false);
   const [showSearch,   setShowSearch]   = useState(() => Boolean(initialQuery));
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [dismissingId, setDismissingId] = useState(null);
+  const [applyJob, setApplyJob] = useState(null);
+  const [autoApplyOpen, setAutoApplyOpen] = useState(false);
+  // Server-backed (candidate-dashboard/auto-apply), not local UI state — without
+  // this it read back as OFF on every navigation/refresh no matter what was
+  // chosen last, since there was nowhere else it could have been remembered.
+  const [autoApply, setAutoApply] = useState({ enabled: false, resumeVersionId: null, includeGoodMatches: false });
+
+  useEffect(() => {
+    let cancelled = false;
+    api.get("/candidate-dashboard/auto-apply", { headers: accountAuthHeader() })
+      .then((response) => {
+        if (cancelled || !response.data) return;
+        setAutoApply({
+          enabled: !!response.data.enabled,
+          resumeVersionId: response.data.resumeVersionId || null,
+          includeGoodMatches: !!response.data.includeGoodMatches,
+        });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  // The split-panel's right-hand detail pane is desktop-only (hidden below
+  // md); below that breakpoint, selecting a job needs to navigate to the
+  // full job detail route instead of just setting state nothing shows.
+  const [isDesktopSplit, setIsDesktopSplit] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktopSplit(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // This page goes edge-to-edge (see the -my-6 wrapper below) so its
+  // h-[calc(100vh-…)] has to know AppShell's actual on-screen chrome
+  // itself: the sticky top header (68px on desktop, but taller on mobile —
+  // it grows a second full-width search row below md) and, below lg, a
+  // fixed bottom tab bar (its own height varies with the safe-area inset
+  // on notched phones). A hardcoded pixel guess for either drifts out of
+  // sync the moment either header changes, so measure the real elements
+  // instead — offsetHeight is naturally 0 for the tab bar once its own
+  // lg:hidden kicks in, so this needs no separate visibility check.
+  const [chromeHeight, setChromeHeight] = useState(68);
+  useEffect(() => {
+    function measure() {
+      const header = document.querySelector("header.sticky")?.offsetHeight ?? 68;
+      const bottomBar = document.querySelector('nav[aria-label="Primary"]')?.offsetHeight ?? 0;
+      setChromeHeight(header + bottomBar);
+    }
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  useEffect(() => {
+    saveBrowseState({ query, filters, viewMode });
+  }, [query, filters, viewMode]);
 
   // ── Fetch jobs + dashboard (API calls unchanged) ──
   useEffect(() => {
     Promise.all([
       api.get("/jobs/published"),
       isAuthenticated
-        ? api.get("/candidate-dashboard", { headers: accountAuthHeader() }).catch(() => null)
+        ? fetchDashboard().catch(() => null)
         : Promise.resolve(null),
     ])
       .then(([jobsRes, dashRes]) => {
@@ -743,8 +984,9 @@ export default function JobListings() {
   const filteredJobs = useMemo(() => {
     let list = [...jobs];
 
-    // Split-panel view always shows recommended jobs ("All jobs" navigates to the full browse page).
-    if (recommendationsOnly) {
+    // Split-panel view shows recommended-only jobs on the "Top matches" tab;
+    // the in-page "All jobs" tab (viewMode) shows every published job instead.
+    if (recommendationsOnly && viewMode !== "all") {
       list = list.filter((j) => recommendedOrder.includes(String(j._id)));
     }
 
@@ -811,7 +1053,7 @@ export default function JobListings() {
     }
 
     return list;
-  }, [jobs, recommendedOrder, filters, query]);
+  }, [jobs, recommendedOrder, filters, query, recommendationsOnly, viewMode]);
 
   // Keep the selection valid as the list changes (filters, search).
   useEffect(() => {
@@ -850,6 +1092,13 @@ export default function JobListings() {
     return jobs.filter((j) => new Date(j.createdAt || 0).getTime() > cutoff).length;
   }, [jobs]);
 
+  // So the Filters button still shows something is active once the panel is closed.
+  const activeFilterCount = useMemo(() => {
+    const { location, matchFilter, minSalary, experience, skills, company, department, workArrangement, employmentType } = filters;
+    return [location, matchFilter, experience, skills, company, department, workArrangement, employmentType]
+      .filter(Boolean).length + (minSalary && minSalary !== "Any" ? 1 : 0);
+  }, [filters]);
+
   // ── Save / unsave (API call unchanged) ──
   async function toggleSave(job) {
     if (!isAuthenticated) {
@@ -874,6 +1123,19 @@ export default function JobListings() {
     } finally {
       setSavingId(null);
     }
+  }
+
+  // Selecting a job from the list: on desktop the right-hand detail pane is
+  // visible, so just update state; on mobile that pane is hidden entirely,
+  // so open the real job detail route instead (same page other links use).
+  function handleSelectJob(job) {
+    const id = String(job._id);
+    if (isDesktopSplit) {
+      setSelectedJobId(id);
+      return;
+    }
+    setSelectedJobId(id);
+    navigate(`/jobs/${job.slug || job._id}`);
   }
 
   async function dismissRecommended(job) {
@@ -929,15 +1191,24 @@ export default function JobListings() {
   return (
     /*
       Escape the AppShell's px-5 py-6 padding so we can go edge-to-edge.
-      h-[calc(100vh-68px)] matches the sticky header height (68px).
+      Height is 100vh minus the real, measured AppShell chrome (chromeHeight
+      — see above): the sticky top header plus, below lg, the fixed bottom
+      tab bar. A padding-bottom on the scrollable list wouldn't fix this —
+      the list's own box was extending past the visible viewport, not just
+      its content overflowing past a correctly-sized box.
     */
-    <div className="-mx-5 -my-6 flex h-[calc(100vh-68px)] flex-col overflow-hidden sm:-mx-8 sm:-my-8">
+    <div
+      className="-mx-5 -my-6 flex flex-col overflow-hidden sm:-mx-8 sm:-my-8"
+      style={{ height: `calc(100vh - ${chromeHeight}px)` }}
+    >
 
       {/* ── Page header ───────────────────────────────────────── */}
       <div className="shrink-0 border-b border-[#EAEEF0] bg-white px-5 pb-4 pt-5 sm:px-6">
         {/* Title + count badges */}
         <div className="flex flex-wrap items-baseline gap-2.5">
-          <h1 className="text-[30px] font-semibold text-[#0F172A]">Recommended Jobs</h1>
+          <h1 className="text-[30px] font-semibold text-[#0F172A]">
+            {viewMode === "all" ? "All Jobs" : "Recommended Jobs"}
+          </h1>
           {!loading && (
             <>
               <span className="rounded-full bg-[#EFF6FF] px-2.5 py-0.5 text-[13px] font-semibold text-[#2563EB]">
@@ -952,8 +1223,9 @@ export default function JobListings() {
           )}
         </div>
         <p className="mt-1 text-[16px] leading-6 text-[#64748B]">
-          Job opportunities matched to your profile. The door is open — apply with your CV.
-          New matches arrive every hour.
+          {viewMode === "all"
+            ? "Every open role, searchable and filterable right here — apply with your CV."
+            : "Job opportunities matched to your profile. The door is open — apply with your CV. New matches arrive every hour."}
         </p>
 
         {/* Auto-apply banner */}
@@ -973,9 +1245,10 @@ export default function JobListings() {
           </div>
           <button
             type="button"
+            onClick={() => setAutoApplyOpen(true)}
             className="shrink-0 rounded-full bg-[#0F172A] px-4 py-2 text-[13px] font-semibold text-white hover:opacity-90"
           >
-            Turn it on
+            {autoApply.enabled ? "Auto-apply on" : "Turn it on"}
           </button>
         </div>
       </div>
@@ -986,22 +1259,36 @@ export default function JobListings() {
         {/* ── LEFT: job list ──────────────────────────────────── */}
         <div
           className={`relative flex shrink-0 flex-col border-r border-[#EAEEF0] bg-white ${
-            selectedJobId ? "w-full md:w-[360px] lg:w-[400px]" : "w-full"
+            selectedJobId ? "w-full md:w-[340px] lg:w-[360px]" : "w-full"
           }`}
         >
           {/* Filter / tab bar */}
           <div className="shrink-0 border-b border-[#EAEEF0] px-3 py-2.5">
             <div className="flex items-center gap-2">
-              {/* Tab segmented control */}
-              <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-full bg-[#F1F5F9] p-0.5 scrollbar-none">
-                <span className="flex shrink-0 items-center justify-center rounded-full bg-white px-3 py-1 text-[14px] font-semibold whitespace-nowrap text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)] sm:px-3.5 sm:text-[15px]">
-                  Top matches{topMatches.length > 0 ? ` (${topMatches.length})` : ""}
-                </span>
+              {/* Tab segmented control — switches the same list/search/filter/detail
+                  view between recommended matches and every published job.
+                  (The standalone /jobs board still exists and still works;
+                  this just gives the in-app portal its own All Jobs view too.) */}
+              <div className="grid min-w-0 flex-1 grid-cols-2 gap-1 rounded-full bg-[#F1F5F9] p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("top")}
+                  aria-pressed={viewMode === "top"}
+                  className={`flex min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-[14px] font-semibold transition-colors sm:px-3.5 sm:text-[15px] ${
+                    viewMode === "top"
+                      ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
+                      : "text-[#64748B] hover:text-[#0F172A]"
+                  }`}
+                >
+                  Top matches
+                </button>
                 <a
                   href="/jobs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex shrink-0 items-center justify-center rounded-full px-3 py-1 text-[14px] font-semibold whitespace-nowrap text-[#64748B] transition-colors hover:text-[#0F172A] sm:px-3.5 sm:text-[15px]"
+                  className={`flex min-w-0 items-center justify-center rounded-full px-2 py-1 text-center text-[14px] font-semibold transition-colors sm:px-3.5 sm:text-[15px] ${
+                    "text-[#64748B] hover:text-[#0F172A]"
+                  }`}
                 >
                   All jobs
                 </a>
@@ -1021,18 +1308,25 @@ export default function JobListings() {
                 <Search className="h-[18px] w-[18px]" aria-hidden />
               </button>
 
-              {/* Filters button */}
+              {/* Filters button — badge shows an active filter is applied even
+                  when the panel itself is closed. */}
               <button
                 type="button"
                 onClick={() => setShowFilters((v) => !v)}
+                aria-expanded={showFilters}
                 className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[14px] font-semibold whitespace-nowrap transition-colors ${
-                  showFilters
+                  showFilters || activeFilterCount > 0
                     ? "border-[#F97316] bg-[#FEF3E8] text-[#F97316]"
                     : "border-[#E2E8F0] text-[#64748B] hover:border-[#7C3F10] hover:text-[#7C3F10]"
                 }`}
               >
                 <SlidersHorizontal className="h-[18px] w-[18px]" aria-hidden />
                 Filters
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F97316] px-1 text-[10px] font-bold text-white">
+                    {activeFilterCount}
+                  </span>
+                )}
               </button>
             </div>
 
@@ -1100,7 +1394,7 @@ export default function JobListings() {
                     key={job._id}
                     job={job}
                     active={String(job._id) === selectedJobId}
-                    onClick={() => setSelectedJobId(String(job._id))}
+                    onClick={() => handleSelectJob(job)}
                     saved={savedIds.has(String(job._id))}
                     onToggleSave={toggleSave}
                     saving={savingId === String(job._id)}
@@ -1113,7 +1407,7 @@ export default function JobListings() {
                 <>
                   {topMatches.length > 0 && (
                     <p className="bg-[#F4F6F9] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
-                      More jobs you might like
+                      {viewMode === "all" ? "All other jobs" : "More jobs you might like"}
                     </p>
                   )}
                   {moreJobs.map((job) => (
@@ -1121,7 +1415,7 @@ export default function JobListings() {
                       key={job._id}
                       job={job}
                       active={String(job._id) === selectedJobId}
-                      onClick={() => setSelectedJobId(String(job._id))}
+                      onClick={() => handleSelectJob(job)}
                       saved={savedIds.has(String(job._id))}
                       onToggleSave={toggleSave}
                       saving={savingId === String(job._id)}
@@ -1152,9 +1446,50 @@ export default function JobListings() {
             navigate={navigate}
             onDismiss={dismissRecommended}
             dismissing={dismissingId === selectedJobId}
+            onApply={setApplyJob}
           />
         </div>
       </div>
+      <ApplyVersionModal
+        job={applyJob}
+        isOpen={Boolean(applyJob)}
+        onClose={() => setApplyJob(null)}
+      />
+      <AutoApplyModal
+        isOpen={autoApplyOpen}
+        jobs={jobs}
+        recommendedOrder={recommendedOrder}
+        enabled={autoApply.enabled}
+        initialResumeId={autoApply.resumeVersionId}
+        initialIncludeGood={autoApply.includeGoodMatches}
+        onClose={() => setAutoApplyOpen(false)}
+        onEnabled={async ({ resume, includeGood }) => {
+          const response = await api.put(
+            "/candidate-dashboard/auto-apply",
+            { enabled: true, resumeVersionId: resume?._id, includeGoodMatches: includeGood },
+            { headers: accountAuthHeader() }
+          );
+          setAutoApply({
+            enabled: !!response.data.enabled,
+            resumeVersionId: response.data.resumeVersionId || null,
+            includeGoodMatches: !!response.data.includeGoodMatches,
+          });
+          setAutoApplyOpen(false);
+        }}
+        onDisabled={async () => {
+          const response = await api.put(
+            "/candidate-dashboard/auto-apply",
+            { enabled: false },
+            { headers: accountAuthHeader() }
+          );
+          setAutoApply({
+            enabled: !!response.data.enabled,
+            resumeVersionId: response.data.resumeVersionId || null,
+            includeGoodMatches: !!response.data.includeGoodMatches,
+          });
+          setAutoApplyOpen(false);
+        }}
+      />
     </div>
   );
 }
@@ -1217,7 +1552,7 @@ function LegacyJobCard({ job, saved, onToggleSave, saving }) {
             className={`tap-target inline-flex h-9 w-9 items-center justify-center rounded-control border transition-colors ${
               saved
                 ? "border-brand-300 bg-[#FEF3E8] text-[#F97316]"
-                : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#7C3F10]"
+                : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#FEF3E8] hover:text-[#F97316]"
             }`}
           >
             {saved ? (

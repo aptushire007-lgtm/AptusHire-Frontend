@@ -9,9 +9,10 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Search, MapPin, ChevronDown, X, Bookmark,
   CheckCircle2, Globe, MoreHorizontal, Briefcase,
-  Clock, Building2, Star,
+  Clock, Building2, Star, ArrowLeft,
 } from "lucide-react";
 import api from "../api/client.js";
+import { fetchDashboard, peekDashboard } from "../api/dashboardCache.js";
 import { accountAuthHeader, getAccountAuth } from "../auth/accountAuth.js";
 import { useAccountAuth } from "../auth/useAccountAuth.js";
 import { Skeleton } from "../components/ui/Card.jsx";
@@ -109,6 +110,43 @@ const PAGE_CSS = `
 .fmjobs .fm-prose ul li { margin-bottom: 6px; font-size: 14px; line-height: 1.65; color: ${FM.textBody}; font-weight: 400; }
 .fmjobs .fm-prose p { font-size: 14px; line-height: 1.65; color: ${FM.textBody}; font-weight: 400; margin-bottom: 10px; }
 .fmjobs .fm-prose h3 { font-size: 18px; font-weight: 600; margin: 20px 0 8px; color: ${FM.textPrimary}; }
+
+/* list + detail split — properties here (not inline) so the mobile media
+   query below can actually override them; inline styles always beat
+   stylesheet rules regardless of media query. */
+.fmjobs .fm-split { display: flex; height: calc(100vh - 380px); min-height: 360px; max-height: 640px; }
+.fmjobs .fm-split-list { width: 36%; min-width: 320px; max-width: 400px; height: 100%; }
+.fmjobs .fm-split-detail { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; }
+.fmjobs .fm-back-to-list { display: none; }
+.fmjobs .fm-meta-grid { grid-template-columns: repeat(2, 1fr); }
+.fmjobs .fm-navbar-row { display: flex; padding: 0 24px; gap: 16px; }
+.fmjobs .fm-nav-links { display: flex; }
+.fmjobs .fm-candidates-chip { display: inline-flex; }
+
+/* mobile: full-width nav collapse, stacked search, list/detail as two
+   screens (list, or detail with a back button) instead of a fixed split */
+@media (max-width: 768px) {
+  .fmjobs .fm-nav-links { display: none; }
+  .fmjobs .fm-candidates-chip { display: none; }
+  .fmjobs .fm-matches-label { display: none; }
+  .fmjobs .fm-navbar-row { padding: 0 16px; gap: 10px; }
+
+  .fmjobs .fm-split { flex-direction: column; height: auto; min-height: 0; max-height: none; }
+  .fmjobs .fm-split-list, .fmjobs .fm-split-detail { width: 100%; max-width: none; min-width: 0; height: auto; }
+  .fmjobs .fm-split.fm-has-selection .fm-split-list { display: none; }
+  .fmjobs .fm-split:not(.fm-has-selection) .fm-split-detail { display: none; }
+  .fmjobs .fm-split.fm-has-selection .fm-back-to-list { display: flex; }
+}
+
+@media (max-width: 640px) {
+  .fmjobs .fm-search-box { flex-direction: column; align-items: stretch; }
+  .fmjobs .fm-search-divider { display: none; }
+  .fmjobs .fm-search-btn { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .fmjobs .fm-meta-grid { grid-template-columns: 1fr; }
+}
 `;
 
 /* ─────────────────────────────────────────────────────────────
@@ -270,7 +308,7 @@ function FMTopNav({ user, isAuthenticated }) {
 
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 50, background: "#fff", borderBottom: `1px solid ${FM.border}`, height: 64 }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", gap: 16 }}>
+      <div className="fm-navbar-row" style={{ maxWidth: 1200, margin: "0 auto", height: "100%", alignItems: "center", justifyContent: "space-between" }}>
         {/* Left — logo + candidates dropdown */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {/* Real AptusHire brand logo */}
@@ -280,15 +318,16 @@ function FMTopNav({ user, isAuthenticated }) {
           {/* Candidates chip */}
           <button
             type="button"
-            style={{ display: "inline-flex", alignItems: "center", gap: 4, height: 34, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}
+            className="fm-candidates-chip"
+            style={{ alignItems: "center", gap: 4, height: 34, border: `1px solid ${FM.border}`, borderRadius: 8, background: "#fff", padding: "0 10px", cursor: "pointer" }}
           >
             <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>Candidates</span>
             <ChevronDown size={13} color={FM.textSecondary} />
           </button>
         </div>
 
-        {/* Center nav links */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
+        {/* Center nav links — hidden on mobile, "Jobs" is redundant with the page you're already on */}
+        <nav className="fm-nav-links" style={{ alignItems: "center", gap: 28 }}>
           <Link to="/welcome" style={{ textDecoration: "none" }}>
             <span className="fm-text-13" style={{ color: FM.textPrimary, fontWeight: 500 }}>What you get</span>
           </Link>
@@ -343,7 +382,7 @@ function FMTopNav({ user, isAuthenticated }) {
 
           {/* Your matches pill */}
           <Link to="/?recommended=1" target="_blank" rel="noreferrer" className="fm-matches-btn">
-            <span className="fm-text-13">Your matches</span>
+            <span className="fm-text-13 fm-matches-label">Your matches</span>
             <span className="fm-matches-chip">
               <IconArrowRight color="#fff" />
             </span>
@@ -448,9 +487,9 @@ function JobListCard({ job, active, onClick, saved, onToggleSave, saving }) {
                 onClick={(e) => { e.stopPropagation(); onToggleSave(job); }}
                 disabled={saving}
                 aria-label={saved ? "Unsave" : "Save"}
-                style={{ background: "none", border: "none", cursor: "pointer", color: saved ? FM.orange : FM.border, padding: 0, lineHeight: 1 }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: saved ? FM.yellowDark : FM.border, padding: 0, lineHeight: 1 }}
               >
-                <Bookmark size={15} fill={saved ? FM.orange : "none"} color={saved ? FM.orange : FM.textMuted} />
+                <Bookmark size={15} fill={saved ? FM.yellowDark : "none"} color={saved ? FM.yellowDark : FM.textMuted} />
               </button>
             </div>
           </div>
@@ -497,7 +536,7 @@ function JobListCard({ job, active, onClick, saved, onToggleSave, saving }) {
 /* ─────────────────────────────────────────────────────────────
    Right panel — job detail
    ───────────────────────────────────────────────────────────── */
-function JobDetail({ job, navigate }) {
+function JobDetail({ job, navigate, onBack }) {
   if (!job) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12, padding: 48, textAlign: "center" }}>
@@ -518,6 +557,17 @@ function JobDetail({ job, navigate }) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Scrollable body */}
       <div style={{ flex: 1, overflowY: "auto", padding: "28px 28px 0" }}>
+        {/* Back to list — mobile only, shown via .fm-back-to-list media rule */}
+        <button
+          type="button"
+          onClick={onBack}
+          className="fm-back-to-list"
+          style={{ alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 16, color: FM.textSecondary }}
+        >
+          <ArrowLeft size={16} />
+          <span className="fm-text-13" style={{ fontWeight: 500 }}>Back to list</span>
+        </button>
+
         {/* Title + more */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
           <h1 className="fm-text-22" style={{ fontWeight: 600, color: FM.textPrimary, flex: 1 }}>
@@ -570,7 +620,7 @@ function JobDetail({ job, navigate }) {
         )}
 
         {/* Meta row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px 24px", marginTop: 24, borderTop: `1px solid ${FM.borderLight}`, paddingTop: 20 }}>
+        <div className="fm-meta-grid" style={{ display: "grid", gap: "12px 24px", marginTop: 24, borderTop: `1px solid ${FM.borderLight}`, paddingTop: 20 }}>
           {[
             { label: "Salary",          value: salary },
             { label: "Workplace type",  value: workplace },
@@ -660,12 +710,12 @@ function BottomEngines() {
           to="/?recommended=1"
           target="_blank"
           rel="noreferrer"
-          style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 0", borderBottom: `1px solid ${FM.borderLight}`, textDecoration: "none" }}
+          style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 14, padding: "16px 0", borderBottom: `1px solid ${FM.borderLight}`, textDecoration: "none" }}
         >
           <div style={{ width: 36, height: 36, borderRadius: 999, background: FM.orangeLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <IconEye />
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 180 }}>
             <p className="fm-text-14" style={{ fontWeight: 600, color: FM.textPrimary }}>Let companies find you</p>
             <p className="fm-text-13" style={{ color: FM.textSecondary, marginTop: 3 }}>
               Join the private talent pool — companies reach out when a job matches. Nothing public.
@@ -679,12 +729,12 @@ function BottomEngines() {
           to="/?recommended=1"
           target="_blank"
           rel="noreferrer"
-          style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 0 0", textDecoration: "none" }}
+          style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 14, padding: "16px 0 0", textDecoration: "none" }}
         >
           <div style={{ width: 36, height: 36, borderRadius: 999, background: FM.orangeLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <IconSend />
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 180 }}>
             <p className="fm-text-14" style={{ fontWeight: 600, color: FM.textPrimary }}>Want us to email companies for you?</p>
             <p className="fm-text-13" style={{ color: FM.textSecondary, marginTop: 3 }}>
               We send AI-personalized emails to hiring managers from your inbox — you read every email first.
@@ -724,12 +774,31 @@ export default function AllJobs() {
   const [selectedId, setSelectedId] = useState(null);
   const [showAll,    setShowAll]    = useState(false);
 
+  // Below 769px (matches the CSS "@media (max-width: 768px)" split/detail
+  // toggle) selecting a job HIDES the list entirely — there's no persistent
+  // pane to auto-populate there, only a full-screen detail a candidate must
+  // deliberately navigate to. Auto-selecting on that layout was trapping
+  // mobile visitors: "Back to list" cleared selectedId, but the auto-select
+  // effect below (no dependency array — it runs after every render) then
+  // immediately re-selected the first job again, so the job list itself
+  // was never actually visible/reachable on a phone.
+  const [isDesktopSplit, setIsDesktopSplit] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 769px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 769px)");
+    const update = () => setIsDesktopSplit(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   /* ── Fetch ── */
   useEffect(() => {
     Promise.all([
       api.get("/jobs/published"),
       isAuthenticated
-        ? api.get("/candidate-dashboard", { headers: accountAuthHeader() }).catch(() => null)
+        ? fetchDashboard().catch(() => null)
         : Promise.resolve(null),
     ])
       .then(([jobsRes, dashRes]) => {
@@ -743,10 +812,10 @@ export default function AllJobs() {
       .finally(() => setLoading(false));
   }, [isAuthenticated]); // eslint-disable-line
 
-  /* ── Auto-select first ── */
+  /* ── Auto-select first (desktop split-pane only — see isDesktopSplit) ── */
   const listRef = useRef(null);
   useEffect(() => {
-    if (!loading && filteredJobs.length > 0 && !selectedId) {
+    if (isDesktopSplit && !loading && filteredJobs.length > 0 && !selectedId) {
       setSelectedId(String(filteredJobs[0]._id));
     }
   }); // runs every render until set
@@ -956,23 +1025,22 @@ export default function AllJobs() {
         {/* ── SPLIT LAYOUT — sized to fill the first viewport (nav+hero+search+filters
              above it are ~380px on desktop), so the board fits one screen like the
              reference; the page still scrolls further down to the engines section. ── */}
-        <div style={{
-          display: "flex", maxWidth: 1200, margin: "0 auto 16px", width: "100%",
-          height: "calc(100vh - 380px)", minHeight: 360, maxHeight: 640,
-          background: "#fff", border: `1px solid ${FM.border}`, borderRadius: 14, overflow: "hidden",
-          boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
-        }}>
+        <div
+          className={`fm-split${selectedId ? " fm-has-selection" : ""}`}
+          style={{
+            maxWidth: 1200, margin: "0 auto 16px", width: "100%",
+            background: "#fff", border: `1px solid ${FM.border}`, borderRadius: 14, overflow: "hidden",
+            boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
+          }}
+        >
 
           {/* Left list panel */}
           <div
             ref={listRef}
+            className="fm-split-list"
             style={{
-              width: "36%",
-              minWidth: 320,
-              maxWidth: 400,
               borderRight: `1px solid ${FM.border}`,
               overflowY: "auto",
-              height: "100%",
               background: "#fff",
               flexShrink: 0,
             }}
@@ -1020,19 +1088,15 @@ export default function AllJobs() {
             )}
           </div>
 
-          {/* Right detail panel — desktop only */}
+          {/* Right detail panel (desktop: always visible; mobile: shown in place of the list once a job is selected) */}
           <div
+            className="fm-split-detail"
             style={{
-              flex: 1,
-              minWidth: 0,
               overflowY: "auto",
-              height: "100%",
               background: "#fff",
-              display: "flex",
-              flexDirection: "column",
             }}
           >
-            <JobDetail job={selectedJob} navigate={navigate} />
+            <JobDetail job={selectedJob} navigate={navigate} onBack={() => setSelectedId(null)} />
           </div>
         </div>
 

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, BriefcaseBusiness, CalendarDays, CheckCircle2, Clock3, GraduationCap, MapPin } from "lucide-react";
 import api from "../api/client.js";
 import { accountAuthHeader } from "../auth/accountAuth.js";
 import { Card, Skeleton } from "../components/ui/Card.jsx";
 import Button from "../components/ui/Button.jsx";
+import ApplyVersionModal from "../components/jobs/ApplyVersionModal.jsx";
+import { useAccountAuth } from "../auth/useAccountAuth.js";
 
 function companyInitials(name) {
   return String(name || "Company").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
@@ -53,9 +55,12 @@ function TextBlock({ children }) {
 
 export default function JobDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAccountAuth();
   const [job, setJob] = useState(null);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const [applyOpen, setApplyOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,10 +115,10 @@ export default function JobDetail() {
       </Button>
     ) : (
       <Button
-        as={Link}
-        to={applyTo}
+        type="button"
+        onClick={() => (isAuthenticated ? setApplyOpen(true) : navigate(applyTo))}
         size={size}
-        className={`!bg-[#F5B51B] !text-[#172334] hover:!bg-[#E5A514] focus-visible:!ring-[#F5B51B]/25 ${className}`}
+        className={`bg-[#F5B51B]! text-[#172334]! hover:bg-[#E5A514]! focus-visible:ring-[#F5B51B]/25! ${className}`}
       >
         Apply Now <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Button>
@@ -198,6 +203,12 @@ export default function JobDetail() {
           {applyCta({ className: "w-full px-8 text-[14px] sm:w-auto" })}
         </div>
       </Card>
+      <ApplyVersionModal
+        job={job}
+        isOpen={applyOpen}
+        onClose={() => setApplyOpen(false)}
+        onSuccess={() => setApplyOpen(false)}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ const cardTones = {
   "filled-gold":  { border: "border-transparent",        surface: "bg-[#F97316] text-white" },
   "filled-ember": { border: "border-transparent",        surface: "bg-[#F97316] text-white" },
   navy:           { border: "border-transparent",        surface: "bg-[#1B2A3B] text-white" },
+  yellow:         { border: "border-[#FDE68A]",           surface: "bg-[#FEFCE8]" },
 };
 
 const OWN_SURFACE  = /(^|\s)(bg-|surface-|fill-)/;
@@ -32,6 +33,7 @@ export function toneText(tone) {
   if (tone === "navy")         return { strong: "text-white",       soft: "text-white/70", tile: "on-fill" };
   if (tone === "ember")        return { strong: "text-[#0F172A]",   soft: "text-[#64748B]", tile: "brand" };
   if (tone === "brand")        return { strong: "text-[#0F172A]",   soft: "text-[#64748B]", tile: "brand" };
+  if (tone === "yellow")       return { strong: "text-[#0F172A]",   soft: "text-[#64748B]", tile: "yellow" };
   return                              { strong: "text-[#0F172A]",   soft: "text-[#64748B]", tile: "brand" };
 }
 
@@ -77,6 +79,7 @@ const tileTones = {
   pending:       "bg-[#FEF3C7] text-[#D97706]",
   negative:      "bg-[#FEE2E2] text-[#DC2626]",
   navy:          "bg-[#1B2A3B] text-white",
+  yellow:        "bg-[#FEF9C3] text-[#CA8A04]",
   "on-fill":     "bg-white/20 text-white",
   "on-fill-ink": "bg-slate-950/10 text-slate-900",
 };
@@ -204,11 +207,16 @@ export function Skeleton({ className = "" }) {
 }
 
 // ── EmptyState ────────────────────────────────────────────────────────────────
-export function EmptyState({ icon: Icon, title, description, action }) {
+const emptyStateIconTones = {
+  brand:  "bg-[#FEF3E8] text-[#F97316]",
+  yellow: "bg-[#FEF9C3] text-[#CA8A04]",
+};
+
+export function EmptyState({ icon: Icon, title, description, action, tone = "brand" }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-card border border-dashed border-[#E2E8F0] bg-white px-6 py-14 text-center">
       {Icon && (
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FEF3E8] text-[#F97316]">
+        <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${emptyStateIconTones[tone] ?? emptyStateIconTones.brand}`}>
           <Icon className="h-6 w-6" aria-hidden="true" />
         </div>
       )}

@@ -396,6 +396,88 @@ const CSS = `
 
 /* ── scrollbar none ── */
 .fmc ::-webkit-scrollbar{display:none;}
+
+/* ── mobile menu (hidden by default, shown under the nav breakpoint) ── */
+.fmc-burger{
+  display:none;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:10px;border:none;flex-shrink:0;
+  background:transparent;color:${BK};cursor:pointer;
+}
+.fmc-burger:hover{background:rgba(0,0,0,.06);}
+.fmc-mobile-menu{
+  display:flex;flex-direction:column;gap:2px;
+  border-top:1px solid rgba(0,0,0,.08);background:#fff;padding:8px 20px 20px;
+}
+.fmc-mobile-link{
+  display:flex;align-items:center;gap:6px;width:100%;
+  padding:13px 2px;font-size:15px;font-weight:500;color:${BK};
+  text-decoration:none;background:transparent;border:none;
+  text-align:left;cursor:pointer;
+}
+.fmc-mobile-cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:10px;height:48px;border-radius:999px;padding:0 8px 0 22px;
+  background:${BK};color:#fff;text-decoration:none;font-weight:600;font-size:14px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — this page shipped desktop-only; everything below
+   brings it to phone/tablet widths without touching desktop.
+═══════════════════════════════════════════════════════════════ */
+
+/* nav collapses to a hamburger — logo + chip + 3 links + CTA text
+   need ~750px+ to sit on one line without overlapping */
+@media (max-width:900px){
+  .fmc-cands,.fmc-nav,.fmc-cta-pill{display:none;}
+  .fmc-burger{display:inline-flex;}
+}
+
+/* hero: stack to one column, drop the decorative laptop mockup */
+@media (max-width:860px){
+  .fmc-hero{padding:56px 20px 64px;}
+  .fmc-hero-grid{grid-template-columns:1fr;gap:32px;}
+  .fmc-laptop{display:none;}
+}
+
+/* tablet: 3-col grids become 2-col */
+@media (max-width:900px){
+  .fmc-feat-grid{grid-template-columns:repeat(2,1fr);}
+  .fmc-jobs-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* phone: everything collapses to a single column, type scales down */
+@media (max-width:640px){
+  .fmc .s60{font-size:32px!important;}
+  .fmc .s54{font-size:28px!important;}
+  .fmc .s42{font-size:26px!important;}
+  .fmc .s40{font-size:24px!important;}
+  .fmc .s36{font-size:22px!important;}
+  .fmc .s30{font-size:20px!important;}
+
+  .fmc-hdr-inner{padding:0 16px;}
+
+  .fmc-feat-grid{grid-template-columns:1fr;}
+  .fmc-jobs-grid{grid-template-columns:1fr;}
+
+  .fmc-feat{padding:64px 20px;}
+  .fmc-feat-card,.fmc-feat-card-body{min-height:260px;}
+
+  .fmc-jobs{padding:56px 20px;}
+  .fmc-how{padding:48px 20px 72px;}
+  .fmc-faq{padding:48px 20px 64px;}
+  .fmc-walk-content{padding:56px 20px;}
+  .fmc-closing-inner{padding:48px 20px 88px;}
+
+  .fmc-step{gap:20px;}
+  .fmc-step-num{width:46px;font-size:34px;}
+
+  .fmc-footer-grid{grid-template-columns:1fr 1fr;gap:32px 20px;}
+  .fmc-footer-bottom{flex-direction:column;align-items:flex-start;gap:12px;}
+}
+
+@media (max-width:420px){
+  .fmc-footer-grid{grid-template-columns:1fr;}
+}
 `;
 
 /* ── tiny SVG helpers ── */
@@ -424,6 +506,21 @@ const Plus = ({ size = 22 }) => (
     <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
+const Burger = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </svg>
+);
+const CloseX = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+    <line x1="5" y1="5" x2="19" y2="19" />
+    <line x1="19" y1="5" x2="5" y2="19" />
+  </svg>
+);
 /* ── initials helper ── */
 function ini(name) {
   return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
@@ -433,6 +530,15 @@ function ini(name) {
    NAVBAR
 ═══════════════════════════════════════════════════════════════ */
 function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function onKeyDown(e) { if (e.key === "Escape") setMobileOpen(false); }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
   return (
     <header className="fmc-hdr">
       <div className="fmc-hdr-inner">
@@ -466,8 +572,32 @@ function Navbar() {
               <ArrowDiag size={14} color="#fff" />
             </span>
           </Link>
+
+          {/* Mobile menu toggle */}
+          <button
+            type="button"
+            className="fmc-burger"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <CloseX /> : <Burger />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {mobileOpen && (
+        <div className="fmc-mobile-menu">
+          <button type="button" className="fmc-mobile-link">What you get <Chevron size={12} color={WM} /></button>
+          <Link to="/jobs" className="fmc-mobile-link" onClick={() => setMobileOpen(false)}>Jobs</Link>
+          <a href="#how" className="fmc-mobile-link" onClick={() => setMobileOpen(false)}>How it works</a>
+          <Link to="/register" className="fmc-mobile-cta" onClick={() => setMobileOpen(false)}>
+            Let the job find me
+            <span className="chip"><ArrowDiag size={13} color="#fff" /></span>
+          </Link>
+        </div>
+      )}
     </header>
   );
 }
@@ -523,11 +653,11 @@ function Hero({ jobCount }) {
                 <div style={{ background: "#f5f6f8", padding: "0 0 8px" }}>
                   {/* portal header */}
                   <div style={{ background: "#fff", borderBottom: "1px solid #e8e8ed", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#E85A1A" }}>AptusHire</span>
+                    <img src="/logo.png" alt="AptusHire" style={{ height: 20, width: "auto" }} />
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 10, color: "#64748B" }}>🔔</span>
-                      <span style={{ fontSize: 10, color: "#64748B", border: "1px solid #e0e0e0", borderRadius: 4, padding: "1px 6px" }}>🇺🇸 English</span>
-                      <span style={{ width: 24, height: 24, borderRadius: "50%", background: "#FEF3E8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#F97316" }}>U</span>
+                      <span style={{ fontSize: 10, color: "#64748B", border: "1px solid #e0e0e0", borderRadius: 4, padding: "1px 6px" }}>Search</span>
+                      <span style={{ width: 24, height: 24, borderRadius: "50%", background: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#172334" }}>DU</span>
                     </div>
                   </div>
                   {/* sidebar + content */}
@@ -535,15 +665,15 @@ function Hero({ jobCount }) {
                     {/* sidebar */}
                     <div style={{ width: 130, background: "#fff", borderRight: "1px solid #e8e8ed", padding: "12px 0", flexShrink: 0 }}>
                       <div style={{ padding: "6px 12px", fontSize: 10, color: "#64748B" }}>Welcome!</div>
-                      {["Private Introduction", "Proactive Outreach", "Recommended_ 33", "CV Evaluation", "Job Preferences", "Applied Jobs", "Past Assessments"].map((item, i) => (
+                      {["Dashboard", "Recommended", "Saved Jobs", "Applied Jobs", "Assessment"].map((item, i) => (
                         <div key={i} style={{
-                          padding: "6px 12px", fontSize: 10, color: i === 2 ? "#E85A1A" : "#64748B",
-                          background: i === 2 ? "rgba(232,90,26,.06)" : "transparent",
+                          padding: "6px 12px", fontSize: 10, color: i === 1 ? "#172334" : "#64748B",
+                          background: i === 1 ? "#F1F5F9" : "transparent",
                           display: "flex", alignItems: "center", gap: 6
                         }}>
-                          <span style={{ width: 12, height: 12, borderRadius: 3, background: i === 2 ? "#FEF3E8" : "#f0f0f0", flexShrink: 0 }} />
+                          <span style={{ width: 12, height: 12, borderRadius: 3, background: i === 1 ? "#DBEAFE" : "#f0f0f0", flexShrink: 0 }} />
                           {item}
-                          {i === 2 && <span style={{ marginLeft: "auto", fontSize: 9, background: "#FEF3E8", color: "#F97316", padding: "1px 4px", borderRadius: 999 }}>+2 New</span>}
+                          {i === 1 && <span style={{ marginLeft: "auto", fontSize: 9, background: "#DBEAFE", color: "#2563EB", padding: "1px 4px", borderRadius: 999 }}>3</span>}
                         </div>
                       ))}
                     </div>
@@ -552,8 +682,8 @@ function Hero({ jobCount }) {
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                         <div>
                           <span style={{ fontSize: 13, fontWeight: 700 }}>Recommended Jobs</span>
-                          <span style={{ fontSize: 10, color: "#F97316", marginLeft: 6, background: "#FEF3E8", padding: "1px 6px", borderRadius: 999 }}>33 Jobs</span>
-                          <span style={{ fontSize: 10, color: "#64748B", marginLeft: 4 }}>+4 New</span>
+                          <span style={{ fontSize: 10, color: "#2563EB", marginLeft: 6, background: "#EFF6FF", padding: "1px 6px", borderRadius: 999 }}>3 Jobs</span>
+                          <span style={{ fontSize: 10, color: "#16A34A", marginLeft: 4 }}>+1 New</span>
                         </div>
                         <span style={{ fontSize: 10, color: "#64748B", border: "1px solid #e0e0e0", borderRadius: 4, padding: "2px 8px" }}>Search</span>
                       </div>
@@ -563,23 +693,23 @@ function Hero({ jobCount }) {
                         {/* left job item */}
                         <div style={{ flex: 1, border: "1px solid #e0e0e0", borderRadius: 8, padding: "8px", fontSize: 10 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <div style={{ width: 20, height: 20, borderRadius: 4, background: "#FEF3E8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#F97316", flexShrink: 0 }}>M</div>
+                            <div style={{ width: 20, height: 20, borderRadius: 4, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#2563EB", flexShrink: 0 }}>DC</div>
                             <div>
-                              <div style={{ fontWeight: 600 }}>Senior Backend Engineer</div>
+                              <div style={{ fontWeight: 600 }}>marketing</div>
                               <div style={{ color: "#64748B" }}>New</div>
-                              <div style={{ color: "#64748B" }}>Meridian Logistics</div>
+                              <div style={{ color: "#64748B" }}>Demo Company</div>
                             </div>
                           </div>
-                          <div style={{ marginTop: 4, color: "#64748B" }}>Ho Chi Minh · $1,500–$2,500</div>
-                          <span style={{ fontSize: 9, background: "#FEF3E8", color: "#F97316", padding: "2px 6px", borderRadius: 999, marginTop: 4, display: "inline-block" }}>Strong match</span>
+                          <div style={{ marginTop: 4, color: "#64748B" }}>Remote / Hybrid</div>
+                          <span style={{ fontSize: 9, background: "#DCFCE7", color: "#166534", padding: "2px 6px", borderRadius: 999, marginTop: 4, display: "inline-block" }}>Strong match</span>
                         </div>
                         {/* right detail */}
                         <div style={{ flex: 1.2, border: "1px solid #e0e0e0", borderRadius: 8, padding: "8px", fontSize: 10 }}>
-                          <div style={{ fontWeight: 700, marginBottom: 4 }}>Senior Backend Engineer</div>
+                          <div style={{ fontWeight: 700, marginBottom: 4 }}>marketing</div>
                           <div style={{ display: "flex", gap: 12 }}>
-                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Salary</div><div style={{ fontWeight: 600 }}>$1,500–2,500</div></div>
-                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Workplace Type</div><div style={{ fontWeight: 600 }}>Hybrid</div></div>
-                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Employment type</div><div style={{ fontWeight: 600 }}>Full-time</div></div>
+                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Location</div><div style={{ fontWeight: 600 }}>Remote</div></div>
+                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Workplace</div><div style={{ fontWeight: 600 }}>Hybrid</div></div>
+                            <div><div style={{ color: "#94A3B8", fontSize: 9 }}>Type</div><div style={{ fontWeight: 600 }}>Full-time</div></div>
                           </div>
                         </div>
                       </div>
@@ -793,7 +923,7 @@ function WalkSection() {
 
           {/* content */}
           <div key={active} className="fmc-reveal" style={{ marginTop: 32 }}>
-            <h3 style={{ fontSize: 38, fontWeight: 400, color: "#fff", maxWidth: 640, margin: "0 auto", letterSpacing: "-0.04em", lineHeight: 1.08 }}>
+            <h3 style={{ fontSize: "clamp(26px,6vw,38px)", fontWeight: 400, color: "#fff", maxWidth: 640, margin: "0 auto", letterSpacing: "-0.04em", lineHeight: 1.08 }}>
               {item.title}
             </h3>
             <p className="s14" style={{ marginTop: 12, maxWidth: 560, margin: "12px auto 0", color: "rgba(255,255,255,.70)", lineHeight: 1.65 }}>
